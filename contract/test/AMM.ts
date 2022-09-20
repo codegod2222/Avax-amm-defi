@@ -114,6 +114,54 @@ describe("AMM", function () {
     });
   });
 
+  describe("Withdraw", function () {
+    it("provide twice", async function () {
+      const { amm, precision, owner, otherAccount } = await loadFixture(
+        deployContract
+      );
+
+      const ownerFundsToken1 = 1000;
+      const ownerFundsToken2 = 1000;
+      await amm.faucet(ownerFundsToken1, ownerFundsToken2);
+      const ownerProvidedToken1 = 100;
+      const ownerProvidedToken2 = 10;
+      await amm.provide(ownerProvidedToken1, ownerProvidedToken2);
+
+      const otherFundsToken1 = 1000;
+      const otherFundsToken2 = 1000;
+      await amm
+        .connect(otherAccount)
+        .faucet(otherFundsToken1, otherFundsToken2);
+      const otherProvidedToken1 = 50;
+      const otherProvidedToken2 = await amm.getEquivalentToken2Estimate(
+        otherProvidedToken1
+      );
+      await amm
+        .connect(otherAccount)
+        .provide(otherProvidedToken1, otherProvidedToken2);
+
+      let otherHoldings = await amm.connect(otherAccount).getMyHoldings();
+
+      await amm.connect(otherAccount).withdraw(otherHoldings.myShare);
+
+      const ownerHoldings = await amm.getMyHoldings();
+      expect(ownerHoldings[0]).to.equal(ownerFundsToken1 - ownerProvidedToken1);
+      expect(ownerHoldings[1]).to.equal(ownerFundsToken2 - ownerProvidedToken2);
+      expect(ownerHoldings[2]).to.equal(precision.mul(100));
+
+      otherHoldings = await amm.connect(otherAccount).getMyHoldings();
+      expect(otherHoldings[0]).to.equal(otherFundsToken1);
+      expect(otherHoldings[1]).to.equal(otherFundsToken2);
+      expect(otherHoldings[2]).to.equal(0);
+
+      const details = await amm.getPoolDetails();
+
+      expect(details[0]).to.equal(ownerProvidedToken1);
+      expect(details[1]).to.equal(ownerProvidedToken2);
+      expect(details[2]).to.equal(precision.mul(100));
+    });
+  });
+
   //   describe("Change limits", function () {
   //     it("Should revert with the right error if called by other account", async function () {
   //       const { amm, otherAccount } = await loadFixture(deployContract);
