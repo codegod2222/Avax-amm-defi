@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
+import "hardhat/console.sol";
+
 contract AMM {
     uint256 totalShares; // Stores the total amount of share issued for the pool
     uint256 totalToken1; // Stores the amount of Token1 locked in the pool
     uint256 totalToken2; // Stores the amount of Token2 locked in the pool
     uint256 K; // Algorithmic constant used to determine price
 
-    uint256 constant PRECISION = 1_000_000; // Precision of 6 digits
+    uint256 public constant PRECISION = 1_000_000; // Precision of 6 digits
 
     mapping(address => uint256) shares; // Stores the share holding of each provider
 
@@ -109,6 +111,7 @@ contract AMM {
         }
 
         require(share > 0, "Asset value less than threshold for contribution!");
+
         token1Balance[msg.sender] -= _amountToken1;
         token2Balance[msg.sender] -= _amountToken2;
 

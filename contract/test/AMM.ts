@@ -1,5 +1,4 @@
 import hre, { ethers } from "hardhat";
-import { Overrides } from "ethers";
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
@@ -11,18 +10,57 @@ describe("AMM", function () {
     const AMM = await hre.ethers.getContractFactory("AMM");
     const amm = await AMM.deploy();
 
-    await amm.faucet(1000, 1000);
+    const precision = await amm.PRECISION();
 
-    return { amm, owner, otherAccount };
+    return { amm, precision, owner, otherAccount };
   }
 
   describe("Deployment", function () {
-    it("Should set the right number of pending message limits", async function () {
+    it("Should set the right number of holdings", async function () {
       const { amm } = await loadFixture(deployContract);
+
+      await amm.faucet(1000, 1000);
 
       const holdings = await amm.getMyHoldings();
 
       expect(holdings.amountToken1).to.equal(1000);
+      expect(holdings.amountToken2).to.equal(1000);
+      expect(holdings.myShare).to.equal(0);
+    });
+
+    // it("Should set the right number of holdings", async function () {
+    //   const { amm } = await loadFixture(deployContract);
+
+    //   await amm.faucet(1000, 1000);
+
+    //   expect(await amm.provide(100, 10)).to.equal(100000000);
+    // });
+  });
+
+  describe("Provide", function () {
+    it("Should set the right number of holdings", async function () {
+      const { amm, precision } = await loadFixture(deployContract);
+
+      const fundsToken1 = 1000;
+      const fundsToken2 = 1000;
+
+      await amm.faucet(fundsToken1, fundsToken2);
+
+      const providedToken1 = 100;
+      const providedToken2 = 10;
+      await amm.provide(providedToken1, providedToken2);
+
+      const holdings = await amm.getMyHoldings();
+
+      expect(holdings[0]).to.equal(fundsToken1 - providedToken1);
+      expect(holdings[1]).to.equal(fundsToken2 - providedToken2);
+      expect(holdings[2]).to.equal(precision.mul(100));
+
+      const details = await amm.getPoolDetails();
+
+      expect(details[0]).to.equal(providedToken1);
+      expect(details[1]).to.equal(providedToken2);
+      expect(details[2]).to.equal(precision.mul(100));
     });
   });
 
