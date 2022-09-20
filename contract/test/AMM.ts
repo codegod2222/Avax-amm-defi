@@ -141,4 +141,67 @@ describe("AMM", function () {
       expect(details[2]).to.equal(precision.mul(100));
     });
   });
+
+  describe("Swap", function () {
+    it("Should set the right number of funds", async function () {
+      const { amm, precision, owner, otherAccount } = await loadFixture(
+        deployContract
+      );
+
+      // ownerのfaucet -> 流動性提供
+      const ownerFundsToken1 = 1000;
+      const ownerFundsToken2 = 1000;
+      await amm.faucet(ownerFundsToken1, ownerFundsToken2);
+      const ownerProvidedToken1 = 100;
+      const ownerProvidedToken2 = 10;
+      await amm.provide(ownerProvidedToken1, ownerProvidedToken2);
+
+      // otherのfaucet -> 流動性提供
+      const otherFundsToken1 = 1000;
+      const otherFundsToken2 = 1000;
+      await amm
+        .connect(otherAccount)
+        .faucet(otherFundsToken1, otherFundsToken2);
+      const otherProvidedToken1 = 50;
+      const otherProvidedToken2 = await amm.getEquivalentToken2Estimate(
+        otherProvidedToken1
+      );
+      await amm
+        .connect(otherAccount)
+        .provide(otherProvidedToken1, otherProvidedToken2);
+
+      // pool 150:15, token2を10swap
+      expect(await amm.getSwapToken2Estimate(10)).to.equal(60);
+      expect(await amm.getSwapToken2EstimateGivenToken1(60)).to.equal(10);
+      await amm.swapToken2(10);
+
+      // ownerの各値の確認
+      const ownerHoldings = await amm.getMyHoldings();
+      expect(ownerHoldings[0]).to.equal(
+        ownerFundsToken1 - ownerProvidedToken1 + 60
+      );
+      expect(ownerHoldings[1]).to.equal(
+        ownerFundsToken2 - ownerProvidedToken2 - 10
+      );
+      expect(ownerHoldings[2]).to.equal(precision.mul(100));
+
+      // otherの各値の確認
+      const otherHoldings = await amm.connect(otherAccount).getMyHoldings();
+      expect(otherHoldings[0]).to.equal(otherFundsToken1 - otherProvidedToken1);
+      expect(otherHoldings[1]).to.equal(
+        otherFundsToken2 - otherProvidedToken2.toNumber()
+      );
+      expect(otherHoldings[2]).to.equal(precision.mul(50));
+
+      // コントラクトの各値の確認
+      const details = await amm.getPoolDetails();
+      expect(details[0]).to.equal(
+        ownerProvidedToken1 + otherProvidedToken1 - 60
+      );
+      expect(details[1]).to.equal(
+        ownerProvidedToken2 + otherProvidedToken2.toNumber() + 10
+      );
+      expect(details[2]).to.equal(precision.mul(150));
+    });
+  });
 });
