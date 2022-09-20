@@ -28,6 +28,7 @@ describe("AMM", function () {
       expect(holdings.myShare).to.equal(0);
     });
 
+    // なぜかうまくいかない
     // it("Should set the right number of holdings", async function () {
     //   const { amm } = await loadFixture(deployContract);
 
@@ -38,7 +39,7 @@ describe("AMM", function () {
   });
 
   describe("Provide", function () {
-    it("Should set the right number of holdings", async function () {
+    it("Should set the right number of funds", async function () {
       const { amm, precision } = await loadFixture(deployContract);
 
       const fundsToken1 = 1000;
@@ -61,6 +62,55 @@ describe("AMM", function () {
       expect(details[0]).to.equal(providedToken1);
       expect(details[1]).to.equal(providedToken2);
       expect(details[2]).to.equal(precision.mul(100));
+
+      expect(await amm.getEquivalentToken1Estimate(5)).to.equal(50);
+      expect(await amm.getEquivalentToken2Estimate(50)).to.equal(5);
+    });
+
+    it("provide twice", async function () {
+      const { amm, precision, owner, otherAccount } = await loadFixture(
+        deployContract
+      );
+
+      const ownerFundsToken1 = 1000;
+      const ownerFundsToken2 = 1000;
+      await amm.faucet(ownerFundsToken1, ownerFundsToken2);
+      const ownerProvidedToken1 = 100;
+      const ownerProvidedToken2 = 10;
+      await amm.provide(ownerProvidedToken1, ownerProvidedToken2);
+
+      const otherFundsToken1 = 1000;
+      const otherFundsToken2 = 1000;
+      await amm
+        .connect(otherAccount)
+        .faucet(otherFundsToken1, otherFundsToken2);
+      const otherProvidedToken1 = 50;
+      const otherProvidedToken2 = await amm.getEquivalentToken2Estimate(
+        otherProvidedToken1
+      );
+      await amm
+        .connect(otherAccount)
+        .provide(otherProvidedToken1, otherProvidedToken2);
+
+      const ownerHoldings = await amm.getMyHoldings();
+      expect(ownerHoldings[0]).to.equal(ownerFundsToken1 - ownerProvidedToken1);
+      expect(ownerHoldings[1]).to.equal(ownerFundsToken2 - ownerProvidedToken2);
+      expect(ownerHoldings[2]).to.equal(precision.mul(100));
+
+      const otherHoldings = await amm.connect(otherAccount).getMyHoldings();
+      expect(otherHoldings[0]).to.equal(otherFundsToken1 - otherProvidedToken1);
+      expect(otherHoldings[1]).to.equal(
+        otherFundsToken2 - otherProvidedToken2.toNumber()
+      );
+      expect(otherHoldings[2]).to.equal(precision.mul(50));
+
+      const details = await amm.getPoolDetails();
+
+      expect(details[0]).to.equal(ownerProvidedToken1 + otherProvidedToken1);
+      expect(details[1]).to.equal(
+        ownerProvidedToken2 + otherProvidedToken2.toNumber()
+      );
+      expect(details[2]).to.equal(precision.mul(150));
     });
   });
 
