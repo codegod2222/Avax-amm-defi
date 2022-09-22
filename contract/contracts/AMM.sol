@@ -6,8 +6,8 @@ import "hardhat/console.sol";
 
 contract AMM {
     uint256 K; // 価格を決める定数
-    address addressToken1; // ペアのうち1つのトークンのアドレス
-    address addressToken2; // ペアのうちもう1つのトークンのアドレス
+    IERC20 token1; // ペアのうち1つのトークンのコントラクト
+    IERC20 token2; // ペアのうちもう1つのトークンのコントラクト
     uint256 totalShares; // 全てのシェア(割合の分母, 株式みたいなもの)
     mapping(address => uint256) shares; // 各ユーザのシェア
     uint256 totalToken1; // プールにロックされたトークン1の量
@@ -16,8 +16,8 @@ contract AMM {
     uint256 public constant PRECISION = 1_000_000; // 計算中の精度に使用する定数(= 6桁)
 
     constructor(address _token1, address _token2) payable {
-        addressToken1 = _token1;
-        addressToken2 = _token2;
+        token1 = IERC20(_token1);
+        token2 = IERC20(_token2);
     }
 
     // Ensures that the _qty is non-zero and the user has enough balance
@@ -76,14 +76,8 @@ contract AMM {
     // Returns the amount of share issued for locking given assets
     function provide(uint256 _amountToken1, uint256 _amountToken2)
         external
-        validAmountCheck(
-            IERC20(addressToken1).balanceOf(msg.sender),
-            _amountToken1
-        )
-        validAmountCheck(
-            IERC20(addressToken2).balanceOf(msg.sender),
-            _amountToken2
-        )
+        validAmountCheck(token1.balanceOf(msg.sender), _amountToken1)
+        validAmountCheck(token2.balanceOf(msg.sender), _amountToken2)
         returns (uint256 share)
     {
         if (totalShares == 0) {
@@ -101,16 +95,8 @@ contract AMM {
 
         require(share > 0, "Asset value less than threshold for contribution!");
 
-        IERC20(addressToken1).transferFrom(
-            msg.sender,
-            address(this),
-            _amountToken1
-        );
-        IERC20(addressToken2).transferFrom(
-            msg.sender,
-            address(this),
-            _amountToken2
-        );
+        token1.transferFrom(msg.sender, address(this), _amountToken1);
+        token2.transferFrom(msg.sender, address(this), _amountToken2);
 
         totalToken1 += _amountToken1;
         totalToken2 += _amountToken2;
@@ -148,8 +134,8 @@ contract AMM {
         totalToken2 -= amountToken2;
         K = totalToken1 * totalToken2;
 
-        IERC20(addressToken1).transfer(msg.sender, amountToken1);
-        IERC20(addressToken2).transfer(msg.sender, amountToken2);
+        token1.transfer(msg.sender, amountToken1);
+        token2.transfer(msg.sender, amountToken2);
     }
 
     // Returns the amount of Token2 that the user will get when swapping a given amount of Token1 for Token2
@@ -184,22 +170,15 @@ contract AMM {
     function swapToken1(uint256 _amountToken1)
         external
         activePool
-        validAmountCheck(
-            IERC20(addressToken1).balanceOf(msg.sender),
-            _amountToken1
-        )
+        validAmountCheck(token1.balanceOf(msg.sender), _amountToken1)
         returns (uint256 amountToken2)
     {
         amountToken2 = getSwapToken1Estimate(_amountToken1);
 
-        IERC20(addressToken1).transferFrom(
-            msg.sender,
-            address(this),
-            _amountToken1
-        );
+        token1.transferFrom(msg.sender, address(this), _amountToken1);
         totalToken1 += _amountToken1;
         totalToken2 -= amountToken2;
-        IERC20(addressToken2).transfer(msg.sender, amountToken2);
+        token2.transfer(msg.sender, amountToken2);
     }
 
     // Returns the amount of Token2 that the user will get when swapping a given amount of Token1 for Token2
@@ -234,21 +213,14 @@ contract AMM {
     function swapToken2(uint256 _amountToken2)
         external
         activePool
-        validAmountCheck(
-            IERC20(addressToken2).balanceOf(msg.sender),
-            _amountToken2
-        )
+        validAmountCheck(token2.balanceOf(msg.sender), _amountToken2)
         returns (uint256 amountToken1)
     {
         amountToken1 = getSwapToken2Estimate(_amountToken2);
 
-        IERC20(addressToken2).transferFrom(
-            msg.sender,
-            address(this),
-            _amountToken2
-        );
+        token2.transferFrom(msg.sender, address(this), _amountToken2);
         totalToken2 += _amountToken2;
         totalToken1 -= amountToken1;
-        IERC20(addressToken1).transfer(msg.sender, amountToken1);
+        token1.transfer(msg.sender, amountToken1);
     }
 }
