@@ -5,22 +5,15 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
 contract AMM {
-    uint256 totalShares; // Stores the total amount of share issued for the pool
-    uint256 totalToken1; // Stores the amount of Token1 locked in the pool
-    uint256 totalToken2; // Stores the amount of Token2 locked in the pool
-    uint256 K; // Algorithmic constant used to determine price
-    address addressToken1;
-    address addressToken2;
+    uint256 K; // 価格を決める定数
+    address addressToken1; // ペアのうち1つのトークンのアドレス
+    address addressToken2; // ペアのうちもう1つのトークンのアドレス
+    uint256 totalShares; // 全てのシェア(割合の分母, 株式みたいなもの)
+    mapping(address => uint256) shares; // 各ユーザのシェア
+    uint256 totalToken1; // プールにロックされたトークン1の量
+    uint256 totalToken2; // プールにロックされたトークン2の量
 
-    uint256 public constant PRECISION = 1_000_000; // Precision of 6 digits
-
-    mapping(address => uint256) shares; // Stores the share holding of each provider
-
-    // Stores the available balance of user outside of the AMM
-    // For simplicity purpose, We are maintaining our own internal
-    // balance mapping instead of dealing with ERC-20 tokens
-    // mapping(address => uint256) token1Balance;
-    // mapping(address => uint256) token2Balance;
+    uint256 public constant PRECISION = 1_000_000; // 計算中の精度に使用する定数(= 6桁)
 
     constructor() payable {}
 
@@ -38,49 +31,16 @@ contract AMM {
         _;
     }
 
-    // // Sends free token(s) to the invoker
-    // function faucet(uint256 _amountToken1, uint256 _amountToken2) external {
-    //     token1Balance[msg.sender] = token1Balance[msg.sender] + _amountToken1;
-    //     token2Balance[msg.sender] = token2Balance[msg.sender] + _amountToken2;
-    // }
-
     function setTokenPair(address t1, address t2) external {
         addressToken1 = t1;
         addressToken2 = t2;
     }
 
-    // // Returns the balance of the user
-    // function getMyHoldings()
-    //     external
-    //     view
-    //     returns (
-    //         uint256 amountToken1,
-    //         uint256 amountToken2,
-    //         uint256 myShare
-    //     )
-    // {
-    //     amountToken1 = token1Balance[msg.sender];
-    //     amountToken2 = token2Balance[msg.sender];
-    //     myShare = shares[msg.sender];
-    // }
-
     // Returns the balance of the user
+    // これ消す？
     function getMyShare() external view returns (uint256 myShare) {
         myShare = shares[msg.sender];
     }
-
-    // // Returns the total amount of tokens locked in the pool and the total shares issued corresponding to it
-    // function getPoolDetails()
-    //     external
-    //     view
-    //     returns (
-    //         uint256,
-    //         uint256,
-    //         uint256
-    //     )
-    // {
-    //     return (totalToken1, totalToken2, totalShares);
-    // }
 
     // Returns the total amount of tokens locked in the pool and the total shares issued corresponding to it
     function getPoolDetails()
@@ -92,11 +52,7 @@ contract AMM {
             uint256
         )
     {
-        return (
-            IERC20(addressToken1).balanceOf(address(this)),
-            IERC20(addressToken2).balanceOf(address(this)),
-            totalShares
-        );
+        return (totalToken1, totalToken2, totalShares);
     }
 
     // Returns amount of Token1 required when providing liquidity with _amountToken2 quantity of Token2
