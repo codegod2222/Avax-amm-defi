@@ -35,7 +35,6 @@ contract AMM {
     }
 
     // Returns the balance of the user
-    // これ消す？
     function getMyShare() external view returns (uint256 myShare) {
         myShare = shares[msg.sender];
     }
@@ -75,7 +74,6 @@ contract AMM {
 
     // Adding new liquidity in the pool
     // Returns the amount of share issued for locking given assets
-    // プールが存在するか確認する
     function provide(uint256 _amountToken1, uint256 _amountToken2)
         external
         validAmountCheck(
