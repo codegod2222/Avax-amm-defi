@@ -6,12 +6,11 @@ import "hardhat/console.sol";
 
 contract AMM {
     uint256 K; // 価格を決める定数
-    IERC20 token1; // ペアのうち1つのトークンのコントラクト
-    IERC20 token2; // ペアのうちもう1つのトークンのコントラクト
+    IERC20 token1; // ERC20を実装したコントラクト1
+    IERC20 token2; // ERC20を実装したコントラクト2
     uint256 totalShares; // 全てのシェア(割合の分母, 株式みたいなもの)
     mapping(address => uint256) shares; // 各ユーザのシェア
-    uint256 totalToken1; // プールにロックされたトークン1の量
-    uint256 totalToken2; // プールにロックされたトークン2の量
+    mapping(IERC20 => uint256) totalAmount; // プールにロックされた各トークンの量
 
     uint256 public constant PRECISION = 1_000_000; // 計算中の精度に使用する定数(= 6桁)
 
@@ -33,6 +32,14 @@ contract AMM {
         _;
     }
 
+    modifier validToken(IERC20 _token) {
+        require(
+            _token == token1 || _token == token2,
+            "Token is not in the pool"
+        );
+        _;
+    }
+
     // Returns the balance of the user
     function getMyShare() external view returns (uint256 myShare) {
         myShare = shares[msg.sender];
@@ -48,27 +55,30 @@ contract AMM {
             uint256
         )
     {
-        return (totalToken1, totalToken2, totalShares);
+        return (totalAmount[token1], totalAmount[token2], totalShares);
     }
 
-    // Returns amount of Token1 required when providing liquidity with _amountToken2 quantity of Token2
-    function getEquivalentToken1Estimate(uint256 _amountToken2)
-        public
+    function pairToken(IERC20 token)
+        private
         view
-        activePool
-        returns (uint256 reqToken1)
+        validToken(token)
+        returns (IERC20)
     {
-        reqToken1 = (totalToken1 * _amountToken2) / totalToken2;
+        if (token == token1) {
+            return token2;
+        }
+        return token1;
     }
 
-    // Returns amount of Token2 required when providing liquidity with _amountToken1 quantity of Token1
-    function getEquivalentToken2Estimate(uint256 _amountToken1)
+    function getEquivalentToken(IERC20 _srcToken, uint256 _amount)
         public
         view
-        activePool
-        returns (uint256 reqToken2)
+        validToken(_srcToken)
+        returns (uint256)
     {
-        reqToken2 = (totalToken2 * _amountToken1) / totalToken1;
+        IERC20 dstToken = pairToken(_srcToken);
+
+        return (totalAmount[dstToken] * _amount) / totalAmount[_srcToken];
     }
 
     // Adding new liquidity in the pool
@@ -83,8 +93,10 @@ contract AMM {
             // Genesis liquidity is issued 100 Shares
             share = 100 * PRECISION;
         } else {
-            uint256 share1 = (totalShares * _amountToken1) / totalToken1;
-            uint256 share2 = (totalShares * _amountToken2) / totalToken2;
+            uint256 share1 = (totalShares * _amountToken1) /
+                totalAmount[token1];
+            uint256 share2 = (totalShares * _amountToken2) /
+                totalAmount[token2];
             require(
                 share1 == share2,
                 "Equivalent value of tokens not provided..."
@@ -97,9 +109,9 @@ contract AMM {
         token1.transferFrom(msg.sender, address(this), _amountToken1);
         token2.transferFrom(msg.sender, address(this), _amountToken2);
 
-        totalToken1 += _amountToken1;
-        totalToken2 += _amountToken2;
-        K = totalToken1 * totalToken2;
+        totalAmount[token1] += _amountToken1;
+        totalAmount[token2] += _amountToken2;
+        K = totalAmount[token1] * totalAmount[token2];
 
         totalShares += share;
         shares[msg.sender] += share;
@@ -113,8 +125,8 @@ contract AMM {
         returns (uint256 amountToken1, uint256 amountToken2)
     {
         require(_share <= totalShares, "Share should be less than totalShare");
-        amountToken1 = (_share * totalToken1) / totalShares;
-        amountToken2 = (_share * totalToken2) / totalShares;
+        amountToken1 = (_share * totalAmount[token1]) / totalShares;
+        amountToken2 = (_share * totalAmount[token2]) / totalShares;
     }
 
     // Removes liquidity from the pool and releases corresponding Token1 & Token2 to the withdrawer
@@ -129,9 +141,9 @@ contract AMM {
         shares[msg.sender] -= _share;
         totalShares -= _share;
 
-        totalToken1 -= amountToken1;
-        totalToken2 -= amountToken2;
-        K = totalToken1 * totalToken2;
+        totalAmount[token1] -= amountToken1;
+        totalAmount[token2] -= amountToken2;
+        K = totalAmount[token1] * totalAmount[token2];
 
         token1.transfer(msg.sender, amountToken1);
         token2.transfer(msg.sender, amountToken2);
@@ -144,12 +156,12 @@ contract AMM {
         activePool
         returns (uint256 amountToken2)
     {
-        uint256 token1After = totalToken1 + _amountToken1;
+        uint256 token1After = totalAmount[token1] + _amountToken1;
         uint256 token2After = K / (token1After);
-        amountToken2 = totalToken2 - token2After;
+        amountToken2 = totalAmount[token2] - token2After;
 
         // To ensure that Token2's pool is not completely depleted leading to inf:0 ratio
-        if (amountToken2 == totalToken2) amountToken2--;
+        if (amountToken2 == totalAmount[token2]) amountToken2--;
     }
 
     // Returns the amount of Token1 that the user should swap to get _amountToken2 in return
@@ -159,10 +171,13 @@ contract AMM {
         activePool
         returns (uint256 amountToken1)
     {
-        require(_amountToken2 < totalToken2, "Insufficient pool balance");
-        uint256 token2After = totalToken2 - _amountToken2;
+        require(
+            _amountToken2 < totalAmount[token2],
+            "Insufficient pool balance"
+        );
+        uint256 token2After = totalAmount[token2] - _amountToken2;
         uint256 token1After = K / token2After;
-        amountToken1 = token1After - totalToken1;
+        amountToken1 = token1After - totalAmount[token1];
     }
 
     // Swaps given amount of Token1 to Token2 using algorithmic price determination
@@ -175,8 +190,8 @@ contract AMM {
         amountToken2 = getSwapToken1Estimate(_amountToken1);
 
         token1.transferFrom(msg.sender, address(this), _amountToken1);
-        totalToken1 += _amountToken1;
-        totalToken2 -= amountToken2;
+        totalAmount[token1] += _amountToken1;
+        totalAmount[token2] -= amountToken2;
         token2.transfer(msg.sender, amountToken2);
     }
 
@@ -187,12 +202,12 @@ contract AMM {
         activePool
         returns (uint256 amountToken1)
     {
-        uint256 token2After = totalToken2 + _amountToken2;
+        uint256 token2After = totalAmount[token2] + _amountToken2;
         uint256 token1After = K / token2After;
-        amountToken1 = totalToken1 - token1After;
+        amountToken1 = totalAmount[token1] - token1After;
 
         // To ensure that Token1's pool is not completely depleted leading to inf:0 ratio
-        if (amountToken1 == totalToken1) amountToken1--;
+        if (amountToken1 == totalAmount[token1]) amountToken1--;
     }
 
     // Returns the amount of Token2 that the user should swap to get _amountToken1 in return
@@ -202,10 +217,13 @@ contract AMM {
         activePool
         returns (uint256 amountToken2)
     {
-        require(_amountToken1 < totalToken1, "Insufficient pool balance");
-        uint256 token1After = totalToken1 - _amountToken1;
+        require(
+            _amountToken1 < totalAmount[token1],
+            "Insufficient pool balance"
+        );
+        uint256 token1After = totalAmount[token1] - _amountToken1;
         uint256 token2After = K / token1After;
-        amountToken2 = token2After - totalToken2;
+        amountToken2 = token2After - totalAmount[token2];
     }
 
     // Swaps given amount of Token2 to Token1 using algorithmic price determination
@@ -218,8 +236,8 @@ contract AMM {
         amountToken1 = getSwapToken2Estimate(_amountToken2);
 
         token2.transferFrom(msg.sender, address(this), _amountToken2);
-        totalToken2 += _amountToken2;
-        totalToken1 -= amountToken1;
+        totalAmount[token2] += _amountToken2;
+        totalAmount[token1] -= amountToken1;
         token1.transfer(msg.sender, amountToken1);
     }
 }

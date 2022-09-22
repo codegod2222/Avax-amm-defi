@@ -77,7 +77,8 @@ describe("AMM", function () {
 
       // otherの流動性提供
       const otherProvidedToken1 = 50;
-      const otherProvidedToken2 = await amm.getEquivalentToken2Estimate(
+      const otherProvidedToken2 = await amm.getEquivalentToken(
+        usdc.address,
         otherProvidedToken1
       );
       await usdc
@@ -118,7 +119,8 @@ describe("AMM", function () {
 
       // otherの流動性提供
       const otherProvidedToken1 = 50;
-      const otherProvidedToken2 = await amm.getEquivalentToken2Estimate(
+      const otherProvidedToken2 = await amm.getEquivalentToken(
+        usdc.address,
         otherProvidedToken1
       );
       await usdc
@@ -161,7 +163,8 @@ describe("AMM", function () {
 
       // otherの流動性提供
       const otherProvidedToken1 = 50;
-      const otherProvidedToken2 = await amm.getEquivalentToken2Estimate(
+      const otherProvidedToken2 = await amm.getEquivalentToken(
+        usdc.address,
         otherProvidedToken1
       );
       await usdc
