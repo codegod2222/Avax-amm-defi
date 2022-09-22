@@ -4,9 +4,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
-//TODO: 1と2が使われているところ, xとy使う
 //TODO: modifierの見直し, ちゃんと使えているかなど
-//TODO: tokenxとsrcの使い分けしっかり
 contract AMM {
     uint256 K; // 価格を決める定数
     IERC20 tokenX; // ERC20を実装したコントラクト1
@@ -17,9 +15,9 @@ contract AMM {
 
     uint256 public constant PRECISION = 1_000_000; // 計算中の精度に使用する定数(= 6桁)
 
-    constructor(IERC20 _token1, IERC20 _token2) payable {
-        tokenX = _token1;
-        tokenY = _token2;
+    constructor(IERC20 _tokenX, IERC20 _tokenY) payable {
+        tokenX = _tokenX;
+        tokenY = _tokenY;
     }
 
     // Ensures that the _qty is non-zero and the user has enough balance
@@ -86,38 +84,46 @@ contract AMM {
 
     // Adding new liquidity in the pool
     // Returns the amount of share issued for locking given assets
-    function provide(uint256 _amountToken1, uint256 _amountToken2)
+    function provide(
+        IERC20 _tokenX,
+        uint256 _amountX,
+        IERC20 _tokenY,
+        uint256 _amountY
+    )
         external
-        validAmountCheck(tokenX.balanceOf(msg.sender), _amountToken1)
-        validAmountCheck(tokenY.balanceOf(msg.sender), _amountToken2)
-        returns (uint256 share)
+        validToken(_tokenX)
+        validToken(_tokenY)
+        validAmountCheck(_tokenX.balanceOf(msg.sender), _amountX)
+        validAmountCheck(_tokenY.balanceOf(msg.sender), _amountY)
+        returns (uint256)
     {
+        uint256 share;
         if (totalShares == 0) {
-            // Genesis liquidity is issued 100 Shares
+            // 初期は100
             share = 100 * PRECISION;
         } else {
-            uint256 share1 = (totalShares * _amountToken1) /
-                totalAmount[tokenX];
-            uint256 share2 = (totalShares * _amountToken2) /
-                totalAmount[tokenY];
+            uint256 shareX = (totalShares * _amountX) / totalAmount[_tokenX];
+            uint256 shareY = (totalShares * _amountY) / totalAmount[_tokenY];
             require(
-                share1 == share2,
+                shareX == shareY,
                 "Equivalent value of tokens not provided..."
             );
-            share = share1;
+            share = shareX;
         }
 
         require(share > 0, "Asset value less than threshold for contribution!");
 
-        tokenX.transferFrom(msg.sender, address(this), _amountToken1);
-        tokenY.transferFrom(msg.sender, address(this), _amountToken2);
+        _tokenX.transferFrom(msg.sender, address(this), _amountX);
+        _tokenY.transferFrom(msg.sender, address(this), _amountY);
 
-        totalAmount[tokenX] += _amountToken1;
-        totalAmount[tokenY] += _amountToken2;
-        K = totalAmount[tokenX] * totalAmount[tokenY];
+        totalAmount[_tokenX] += _amountX;
+        totalAmount[_tokenY] += _amountY;
+        K = totalAmount[_tokenX] * totalAmount[_tokenY];
 
         totalShares += share;
         shares[msg.sender] += share;
+
+        return share;
     }
 
     // Returns the estimate of Token1 & Token2 that will be released on burning given _share
@@ -125,11 +131,12 @@ contract AMM {
         public
         view
         activePool
-        returns (uint256 amountToken1, uint256 amountToken2)
+        returns (uint256, uint256)
     {
         require(_share <= totalShares, "Share should be less than totalShare");
-        amountToken1 = (_share * totalAmount[tokenX]) / totalShares;
-        amountToken2 = (_share * totalAmount[tokenY]) / totalShares;
+        uint256 amountTokenX = (_share * totalAmount[tokenX]) / totalShares;
+        uint256 amountTokenY = (_share * totalAmount[tokenY]) / totalShares;
+        return (amountTokenX, amountTokenY);
     }
 
     // Removes liquidity from the pool and releases corresponding Token1 & Token2 to the withdrawer
@@ -137,19 +144,21 @@ contract AMM {
         external
         activePool
         validAmountCheck(shares[msg.sender], _share)
-        returns (uint256 amountToken1, uint256 amountToken2)
+        returns (uint256, uint256)
     {
-        (amountToken1, amountToken2) = withdrawEstimate(_share);
+        (uint256 amountTokenX, uint256 amountTokenY) = withdrawEstimate(_share);
 
         shares[msg.sender] -= _share;
         totalShares -= _share;
 
-        totalAmount[tokenX] -= amountToken1;
-        totalAmount[tokenY] -= amountToken2;
+        totalAmount[tokenX] -= amountTokenX;
+        totalAmount[tokenY] -= amountTokenY;
         K = totalAmount[tokenX] * totalAmount[tokenY];
 
-        tokenX.transfer(msg.sender, amountToken1);
-        tokenY.transfer(msg.sender, amountToken2);
+        tokenX.transfer(msg.sender, amountTokenX);
+        tokenY.transfer(msg.sender, amountTokenY);
+
+        return (amountTokenX, amountTokenY);
     }
 
     // swap元のトークン量からswap先のトークン量を算出
@@ -170,7 +179,7 @@ contract AMM {
         return amountDst;
     }
 
-    // Returns the amount of Token1 that the user should swap to get _amountToken2 in return
+    // swap先のトークン量からswap元のトークン量を算出
     function swapEstimateFromDstToken(IERC20 _dstToken, uint256 _amountDst)
         public
         view
@@ -188,7 +197,6 @@ contract AMM {
         return totalAmountSrcAfter - totalAmount[srcToken];
     }
 
-    // Swaps given amount of Token1 to Token2 using algorithmic price determination
     function swap(
         IERC20 _srcToken,
         IERC20 _dstToken,
@@ -196,7 +204,7 @@ contract AMM {
     )
         external
         activePool
-        validAmountCheck(_srcToken.balanceOf(msg.sender), _amountSrc)
+        validAmountCheck(totalAmount[_srcToken], _amountSrc)
         returns (uint256)
     {
         uint256 amountDst = swapEstimateFromSrcToken(_srcToken, _amountSrc);

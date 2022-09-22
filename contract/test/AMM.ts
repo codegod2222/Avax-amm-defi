@@ -73,7 +73,12 @@ describe("AMM", function () {
       const ownerProvidedToken2 = 10;
       await usdc.approve(amm.address, ownerProvidedToken1);
       await joe.approve(amm.address, ownerProvidedToken2);
-      await amm.provide(ownerProvidedToken1, ownerProvidedToken2);
+      await amm.provide(
+        usdc.address,
+        ownerProvidedToken1,
+        joe.address,
+        ownerProvidedToken2
+      );
 
       // otherの流動性提供
       const otherProvidedToken1 = 50;
@@ -87,7 +92,12 @@ describe("AMM", function () {
       await joe.connect(otherAccount).approve(amm.address, otherProvidedToken2);
       await amm
         .connect(otherAccount)
-        .provide(otherProvidedToken1, otherProvidedToken2);
+        .provide(
+          usdc.address,
+          otherProvidedToken1,
+          joe.address,
+          otherProvidedToken2
+        );
 
       // シェアの確認
       expect(await amm.myShare()).to.equal(precision.mul(100));
@@ -115,7 +125,12 @@ describe("AMM", function () {
       const ownerProvidedToken2 = 10;
       await usdc.approve(amm.address, ownerProvidedToken1);
       await joe.approve(amm.address, ownerProvidedToken2);
-      await amm.provide(ownerProvidedToken1, ownerProvidedToken2);
+      await amm.provide(
+        usdc.address,
+        ownerProvidedToken1,
+        joe.address,
+        ownerProvidedToken2
+      );
 
       // otherの流動性提供
       const otherProvidedToken1 = 50;
@@ -129,7 +144,12 @@ describe("AMM", function () {
       await joe.connect(otherAccount).approve(amm.address, otherProvidedToken2);
       await amm
         .connect(otherAccount)
-        .provide(otherProvidedToken1, otherProvidedToken2);
+        .provide(
+          usdc.address,
+          otherProvidedToken1,
+          joe.address,
+          otherProvidedToken2
+        );
 
       // otherのシェア分の引き出し
       let share = await amm.connect(otherAccount).myShare();
@@ -159,7 +179,12 @@ describe("AMM", function () {
       const ownerProvidedToken2 = 10;
       await usdc.approve(amm.address, ownerProvidedToken1);
       await joe.approve(amm.address, ownerProvidedToken2);
-      await amm.provide(ownerProvidedToken1, ownerProvidedToken2);
+      await amm.provide(
+        usdc.address,
+        ownerProvidedToken1,
+        joe.address,
+        ownerProvidedToken2
+      );
 
       // otherの流動性提供
       const otherProvidedToken1 = 50;
@@ -173,7 +198,12 @@ describe("AMM", function () {
       await joe.connect(otherAccount).approve(amm.address, otherProvidedToken2);
       await amm
         .connect(otherAccount)
-        .provide(otherProvidedToken1, otherProvidedToken2);
+        .provide(
+          usdc.address,
+          otherProvidedToken1,
+          joe.address,
+          otherProvidedToken2
+        );
 
       // pool 150:15
       // token2を10swapする場合の取得できるtoken1の量(60)の確認
@@ -223,7 +253,12 @@ describe("AMM", function () {
       const ownerProvidedToken2 = 10;
       await usdc.approve(amm.address, ownerProvidedToken1);
       await joe.approve(amm.address, ownerProvidedToken2);
-      await amm.provide(ownerProvidedToken1, ownerProvidedToken2);
+      await amm.provide(
+        usdc.address,
+        ownerProvidedToken1,
+        joe.address,
+        ownerProvidedToken2
+      );
 
       // otherの流動性提供
       const otherProvidedToken1 = 50;
@@ -237,7 +272,12 @@ describe("AMM", function () {
       await joe.connect(otherAccount).approve(amm.address, otherProvidedToken2);
       await amm
         .connect(otherAccount)
-        .provide(otherProvidedToken1, otherProvidedToken2);
+        .provide(
+          usdc.address,
+          otherProvidedToken1,
+          joe.address,
+          otherProvidedToken2
+        );
 
       console.log(
         "1 -> 2のswap: 2から1を算出",
@@ -245,7 +285,7 @@ describe("AMM", function () {
       );
       console.log(
         "2 -> 1のswap: 2から1を算出",
-        await amm.swapEstimateFromSrcToken(usdc.address, 10)
+        await amm.swapEstimateFromSrcToken(joe.address, 10)
       );
     });
   });
