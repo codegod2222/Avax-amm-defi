@@ -27,7 +27,7 @@ contract AMM {
         _;
     }
 
-    // Restricts withdraw, swap feature till liquidity is added to the pool
+    // プールに流動性があることを確認
     modifier activePool() {
         require(totalShares > 0, "Zero Liquidity");
         _;
@@ -41,12 +41,10 @@ contract AMM {
         _;
     }
 
-    // Returns the balance of the user
     function myShare() external view returns (uint256) {
         return shares[msg.sender];
     }
 
-    // Returns the total amount of tokens locked in the pool and the total shares issued corresponding to it
     function poolDetails()
         external
         view
@@ -82,8 +80,7 @@ contract AMM {
         return (totalAmount[dstToken] * _amount) / totalAmount[_srcToken];
     }
 
-    // Adding new liquidity in the pool
-    // Returns the amount of share issued for locking given assets
+    // プールに流動性を提供します。
     function provide(
         IERC20 _tokenX,
         uint256 _amountX,
@@ -126,7 +123,7 @@ contract AMM {
         return share;
     }
 
-    // Returns the estimate of Token1 & Token2 that will be released on burning given _share
+    // ユーザのシェアから引き出せるトークンの量を算出します。
     function withdrawEstimate(uint256 _share)
         public
         view
@@ -139,7 +136,6 @@ contract AMM {
         return (amountTokenX, amountTokenY);
     }
 
-    // Removes liquidity from the pool and releases corresponding Token1 & Token2 to the withdrawer
     function withdraw(uint256 _share)
         external
         activePool
