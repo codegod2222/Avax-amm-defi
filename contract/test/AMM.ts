@@ -49,7 +49,7 @@ describe("AMM", function () {
       expect(await joe.balanceOf(otherAccount.address)).to.equal(
         amountOtherAccount
       );
-      expect(await amm.myShare()).to.equal(0);
+      expect(await amm.shares(owner.address)).to.equal(0);
     });
   });
 
@@ -64,9 +64,8 @@ describe("AMM", function () {
     // });
 
     it("Should set the right number of funds", async function () {
-      const { amm, usdc, joe, precision, otherAccount } = await loadFixture(
-        deployContract
-      );
+      const { amm, usdc, joe, precision, owner, otherAccount } =
+        await loadFixture(deployContract);
 
       // ownerの流動性提供
       const ownerProvidedToken1 = 100;
@@ -100,18 +99,19 @@ describe("AMM", function () {
         );
 
       // シェアの確認
-      expect(await amm.myShare()).to.equal(precision.mul(100));
-      expect(await amm.connect(otherAccount).myShare()).to.equal(
+      expect(await amm.shares(owner.address)).to.equal(precision.mul(100));
+      expect(await amm.shares(otherAccount.address)).to.equal(
         precision.mul(50)
       );
 
       // コントラクトの各値の確認
-      const details = await amm.poolDetails();
-      expect(details[0]).to.equal(ownerProvidedToken1 + otherProvidedToken1);
-      expect(details[1]).to.equal(
+      expect(await amm.totalAmount(usdc.address)).to.equal(
+        ownerProvidedToken1 + otherProvidedToken1
+      );
+      expect(await amm.totalAmount(joe.address)).to.equal(
         ownerProvidedToken2 + otherProvidedToken2.toNumber()
       );
-      expect(details[2]).to.equal(precision.mul(150));
+      expect(await amm.totalShares()).to.equal(precision.mul(150));
     });
   });
 
@@ -152,20 +152,17 @@ describe("AMM", function () {
         );
 
       // otherのシェア分の引き出し
-      let share = await amm.connect(otherAccount).myShare();
+      let share = await amm.shares(otherAccount.address);
       await amm.connect(otherAccount).withdraw(share);
 
       // シェアの確認
-      expect(await amm.myShare()).to.equal(precision.mul(100));
-      expect(await amm.connect(otherAccount).myShare()).to.equal(
-        precision.mul(0)
-      );
+      expect(await amm.shares(owner.address)).to.equal(precision.mul(100));
+      expect(await amm.shares(otherAccount.address)).to.equal(precision.mul(0));
 
       // コントラクトの各値の確認
-      const details = await amm.poolDetails();
-      expect(details[0]).to.equal(ownerProvidedToken1);
-      expect(details[1]).to.equal(ownerProvidedToken2);
-      expect(details[2]).to.equal(precision.mul(100));
+      expect(await amm.totalAmount(usdc.address)).to.equal(ownerProvidedToken1);
+      expect(await amm.totalAmount(joe.address)).to.equal(ownerProvidedToken2);
+      expect(await amm.totalShares()).to.equal(precision.mul(100));
     });
   });
 
@@ -232,14 +229,13 @@ describe("AMM", function () {
       );
 
       // コントラクトの各値の確認
-      const details = await amm.poolDetails();
-      expect(details[0]).to.equal(
+      expect(await amm.totalAmount(usdc.address)).to.equal(
         ownerProvidedToken1 + otherProvidedToken1 - amountReceiveUsdc
       );
-      expect(details[1]).to.equal(
+      expect(await amm.totalAmount(joe.address)).to.equal(
         ownerProvidedToken2 + otherProvidedToken2.toNumber() + amountSwapJoe
       );
-      expect(details[2]).to.equal(precision.mul(150));
+      expect(await amm.totalShares()).to.equal(precision.mul(150));
     });
   });
 
