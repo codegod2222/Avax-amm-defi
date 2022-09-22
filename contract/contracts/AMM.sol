@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
 contract AMM {
@@ -8,6 +9,8 @@ contract AMM {
     uint256 totalToken1; // Stores the amount of Token1 locked in the pool
     uint256 totalToken2; // Stores the amount of Token2 locked in the pool
     uint256 K; // Algorithmic constant used to determine price
+    address addressToken1;
+    address addressToken2;
 
     uint256 public constant PRECISION = 1_000_000; // Precision of 6 digits
 
@@ -16,16 +19,16 @@ contract AMM {
     // Stores the available balance of user outside of the AMM
     // For simplicity purpose, We are maintaining our own internal
     // balance mapping instead of dealing with ERC-20 tokens
-    mapping(address => uint256) token1Balance;
-    mapping(address => uint256) token2Balance;
+    // mapping(address => uint256) token1Balance;
+    // mapping(address => uint256) token2Balance;
+
+    constructor() payable {}
 
     // Ensures that the _qty is non-zero and the user has enough balance
-    modifier validAmountCheck(
-        mapping(address => uint256) storage _balance,
-        uint256 _qty
-    ) {
+    modifier validAmountCheck(uint256 _total, uint256 _qty) {
+        // ここ引数をインターフェースにできないのか？
         require(_qty > 0, "Amount cannot be zero!");
-        require(_qty <= _balance[msg.sender], "Insufficient amount");
+        require(_qty <= _total, "Insufficient amount");
         _;
     }
 
@@ -35,26 +38,49 @@ contract AMM {
         _;
     }
 
-    // Sends free token(s) to the invoker
-    function faucet(uint256 _amountToken1, uint256 _amountToken2) external {
-        token1Balance[msg.sender] = token1Balance[msg.sender] + _amountToken1;
-        token2Balance[msg.sender] = token2Balance[msg.sender] + _amountToken2;
+    // // Sends free token(s) to the invoker
+    // function faucet(uint256 _amountToken1, uint256 _amountToken2) external {
+    //     token1Balance[msg.sender] = token1Balance[msg.sender] + _amountToken1;
+    //     token2Balance[msg.sender] = token2Balance[msg.sender] + _amountToken2;
+    // }
+
+    function setTokenPair(address t1, address t2) external {
+        addressToken1 = t1;
+        addressToken2 = t2;
     }
 
+    // // Returns the balance of the user
+    // function getMyHoldings()
+    //     external
+    //     view
+    //     returns (
+    //         uint256 amountToken1,
+    //         uint256 amountToken2,
+    //         uint256 myShare
+    //     )
+    // {
+    //     amountToken1 = token1Balance[msg.sender];
+    //     amountToken2 = token2Balance[msg.sender];
+    //     myShare = shares[msg.sender];
+    // }
+
     // Returns the balance of the user
-    function getMyHoldings()
-        external
-        view
-        returns (
-            uint256 amountToken1,
-            uint256 amountToken2,
-            uint256 myShare
-        )
-    {
-        amountToken1 = token1Balance[msg.sender];
-        amountToken2 = token2Balance[msg.sender];
+    function getMyShare() external view returns (uint256 myShare) {
         myShare = shares[msg.sender];
     }
+
+    // // Returns the total amount of tokens locked in the pool and the total shares issued corresponding to it
+    // function getPoolDetails()
+    //     external
+    //     view
+    //     returns (
+    //         uint256,
+    //         uint256,
+    //         uint256
+    //     )
+    // {
+    //     return (totalToken1, totalToken2, totalShares);
+    // }
 
     // Returns the total amount of tokens locked in the pool and the total shares issued corresponding to it
     function getPoolDetails()
@@ -66,7 +92,11 @@ contract AMM {
             uint256
         )
     {
-        return (totalToken1, totalToken2, totalShares);
+        return (
+            IERC20(addressToken1).balanceOf(address(this)),
+            IERC20(addressToken2).balanceOf(address(this)),
+            totalShares
+        );
     }
 
     // Returns amount of Token1 required when providing liquidity with _amountToken2 quantity of Token2
@@ -91,10 +121,17 @@ contract AMM {
 
     // Adding new liquidity in the pool
     // Returns the amount of share issued for locking given assets
+    // プールが存在するか確認する
     function provide(uint256 _amountToken1, uint256 _amountToken2)
         external
-        validAmountCheck(token1Balance, _amountToken1)
-        validAmountCheck(token2Balance, _amountToken2)
+        validAmountCheck(
+            IERC20(addressToken1).balanceOf(msg.sender),
+            _amountToken1
+        )
+        validAmountCheck(
+            IERC20(addressToken2).balanceOf(msg.sender),
+            _amountToken2
+        )
         returns (uint256 share)
     {
         if (totalShares == 0) {
@@ -112,8 +149,16 @@ contract AMM {
 
         require(share > 0, "Asset value less than threshold for contribution!");
 
-        token1Balance[msg.sender] -= _amountToken1;
-        token2Balance[msg.sender] -= _amountToken2;
+        IERC20(addressToken1).transferFrom(
+            msg.sender,
+            address(this),
+            _amountToken1
+        );
+        IERC20(addressToken2).transferFrom(
+            msg.sender,
+            address(this),
+            _amountToken2
+        );
 
         totalToken1 += _amountToken1;
         totalToken2 += _amountToken2;
@@ -139,7 +184,7 @@ contract AMM {
     function withdraw(uint256 _share)
         external
         activePool
-        validAmountCheck(shares, _share)
+        validAmountCheck(shares[msg.sender], _share)
         returns (uint256 amountToken1, uint256 amountToken2)
     {
         (amountToken1, amountToken2) = getWithdrawEstimate(_share);
@@ -151,8 +196,8 @@ contract AMM {
         totalToken2 -= amountToken2;
         K = totalToken1 * totalToken2;
 
-        token1Balance[msg.sender] += amountToken1;
-        token2Balance[msg.sender] += amountToken2;
+        IERC20(addressToken1).transfer(msg.sender, amountToken1);
+        IERC20(addressToken2).transfer(msg.sender, amountToken2);
     }
 
     // Returns the amount of Token2 that the user will get when swapping a given amount of Token1 for Token2
@@ -187,15 +232,22 @@ contract AMM {
     function swapToken1(uint256 _amountToken1)
         external
         activePool
-        validAmountCheck(token1Balance, _amountToken1)
+        validAmountCheck(
+            IERC20(addressToken1).balanceOf(msg.sender),
+            _amountToken1
+        )
         returns (uint256 amountToken2)
     {
         amountToken2 = getSwapToken1Estimate(_amountToken1);
 
-        token1Balance[msg.sender] -= _amountToken1;
+        IERC20(addressToken1).transferFrom(
+            msg.sender,
+            address(this),
+            _amountToken1
+        );
         totalToken1 += _amountToken1;
         totalToken2 -= amountToken2;
-        token2Balance[msg.sender] += amountToken2;
+        IERC20(addressToken2).transfer(msg.sender, amountToken2);
     }
 
     // Returns the amount of Token2 that the user will get when swapping a given amount of Token1 for Token2
@@ -230,14 +282,21 @@ contract AMM {
     function swapToken2(uint256 _amountToken2)
         external
         activePool
-        validAmountCheck(token2Balance, _amountToken2)
+        validAmountCheck(
+            IERC20(addressToken2).balanceOf(msg.sender),
+            _amountToken2
+        )
         returns (uint256 amountToken1)
     {
         amountToken1 = getSwapToken2Estimate(_amountToken2);
 
-        token2Balance[msg.sender] -= _amountToken2;
+        IERC20(addressToken2).transferFrom(
+            msg.sender,
+            address(this),
+            _amountToken2
+        );
         totalToken2 += _amountToken2;
         totalToken1 -= amountToken1;
-        token1Balance[msg.sender] += amountToken1;
+        IERC20(addressToken1).transfer(msg.sender, amountToken1);
     }
 }
