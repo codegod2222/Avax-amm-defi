@@ -15,7 +15,10 @@ contract AMM {
 
     uint256 public constant PRECISION = 1_000_000; // 計算中の精度に使用する定数(= 6桁)
 
-    constructor() payable {}
+    constructor(address _token1, address _token2) payable {
+        addressToken1 = _token1;
+        addressToken2 = _token2;
+    }
 
     // Ensures that the _qty is non-zero and the user has enough balance
     modifier validAmountCheck(uint256 _total, uint256 _qty) {
@@ -29,11 +32,6 @@ contract AMM {
     modifier activePool() {
         require(totalShares > 0, "Zero Liquidity");
         _;
-    }
-
-    function setTokenPair(address t1, address t2) external {
-        addressToken1 = t1;
-        addressToken2 = t2;
     }
 
     // Returns the balance of the user

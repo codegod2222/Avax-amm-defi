@@ -11,13 +11,6 @@ describe("AMM", function () {
 
     const funds = 100;
 
-    const AMM = await hre.ethers.getContractFactory("AMM");
-    const amm = await AMM.deploy({
-      value: funds,
-    } as Overrides);
-
-    const precision = await amm.PRECISION();
-
     const amountOtherAccount = 5000;
     const USDCToken = await hre.ethers.getContractFactory("USDCToken");
     const usdc = await USDCToken.deploy();
@@ -27,8 +20,12 @@ describe("AMM", function () {
     const joe = await JOEToken.deploy();
     await joe.faucet(otherAccount.address, amountOtherAccount);
 
-    // プールの登録
-    await amm.setTokenPair(usdc.address, joe.address);
+    const AMM = await hre.ethers.getContractFactory("AMM");
+    const amm = await AMM.deploy(usdc.address, joe.address, {
+      value: funds,
+    } as Overrides);
+
+    const precision = await amm.PRECISION();
 
     return {
       amm,
