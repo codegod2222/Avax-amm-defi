@@ -179,17 +179,17 @@ describe("AMM", function () {
       // token2を10swapする場合の取得できるtoken1の量(60)の確認
       const amountSwapJoe = 10;
       const amountReceiveUsdc = 60;
-      expect(await amm.getSwapToken2Estimate(amountSwapJoe)).to.equal(
-        amountReceiveUsdc
-      );
       expect(
-        await amm.getSwapToken2EstimateGivenToken1(amountReceiveUsdc)
+        await amm.swapEstimateFromSrcToken(joe.address, amountSwapJoe)
+      ).to.equal(amountReceiveUsdc);
+      expect(
+        await amm.swapEstimateFromDstToken(usdc.address, amountReceiveUsdc)
       ).to.equal(amountSwapJoe);
       //token2を10swap
       const amountBeforeSwapUsdc = await usdc.balanceOf(owner.address);
       const amountBeforeSwapJoe = await joe.balanceOf(owner.address);
       await joe.approve(amm.address, amountSwapJoe);
-      await amm.swapToken2(amountSwapJoe);
+      await amm.swap(joe.address, usdc.address, amountSwapJoe);
       const amountAfterSwapUsdc = await usdc.balanceOf(owner.address);
       const amountAfterSwapJoe = await joe.balanceOf(owner.address);
 
@@ -241,11 +241,11 @@ describe("AMM", function () {
 
       console.log(
         "1 -> 2のswap: 2から1を算出",
-        await amm.swapEstimateFromDstToken(10)
+        await amm.swapEstimateFromDstToken(joe.address, 10)
       );
       console.log(
         "2 -> 1のswap: 2から1を算出",
-        await amm.getSwapToken2Estimate(10)
+        await amm.swapEstimateFromSrcToken(usdc.address, 10)
       );
     });
   });

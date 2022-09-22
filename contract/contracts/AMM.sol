@@ -4,6 +4,9 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
+//TODO: 1と2が使われているところ, xとy使う
+//TODO: modifierの見直し, ちゃんと使えているかなど
+//TODO: tokenxとsrcの使い分けしっかり
 contract AMM {
     uint256 K; // 価格を決める定数
     IERC20 tokenX; // ERC20を実装したコントラクト1
@@ -149,95 +152,59 @@ contract AMM {
         tokenY.transfer(msg.sender, amountToken2);
     }
 
-    // Returns the amount of Token2 that the user will get when swapping a given amount of Token1 for Token2
-    function swapEstimateFromSrcToken(uint256 _amountToken1)
+    // swap元のトークン量からswap先のトークン量を算出
+    function swapEstimateFromSrcToken(IERC20 _srcToken, uint256 _amountSrc)
         public
         view
         activePool
-        returns (uint256 amountToken2)
+        returns (uint256)
     {
-        uint256 token1After = totalAmount[tokenX] + _amountToken1;
-        uint256 token2After = K / (token1After);
-        amountToken2 = totalAmount[tokenY] - token2After;
+        IERC20 dstToken = pairToken(_srcToken);
 
-        // To ensure that Token2's pool is not completely depleted leading to inf:0 ratio
-        if (amountToken2 == totalAmount[tokenY]) amountToken2--;
+        uint256 totalAmountSrcAfter = totalAmount[_srcToken] + _amountSrc;
+        uint256 totalAmountDstAfter = K / (totalAmountSrcAfter);
+        uint256 amountDst = totalAmount[dstToken] - totalAmountDstAfter;
+
+        // swapの結果, トークン量が0になるのを防ぐ
+        if (amountDst == totalAmount[dstToken]) amountDst--;
+        return amountDst;
     }
 
     // Returns the amount of Token1 that the user should swap to get _amountToken2 in return
-    function swapEstimateFromDstToken(uint256 _amountToken2)
+    function swapEstimateFromDstToken(IERC20 _dstToken, uint256 _amountDst)
         public
         view
         activePool
-        returns (uint256 amountToken1)
+        returns (uint256)
     {
         require(
-            _amountToken2 < totalAmount[tokenY],
+            _amountDst < totalAmount[_dstToken],
             "Insufficient pool balance"
         );
-        uint256 token2After = totalAmount[tokenY] - _amountToken2;
-        uint256 token1After = K / token2After;
-        amountToken1 = token1After - totalAmount[tokenX];
+        IERC20 srcToken = pairToken(_dstToken);
+
+        uint256 totalAmountDstAfter = totalAmount[_dstToken] - _amountDst;
+        uint256 totalAmountSrcAfter = K / totalAmountDstAfter;
+        return totalAmountSrcAfter - totalAmount[srcToken];
     }
 
     // Swaps given amount of Token1 to Token2 using algorithmic price determination
-    function swapToken1(uint256 _amountToken1)
+    function swap(
+        IERC20 _srcToken,
+        IERC20 _dstToken,
+        uint256 _amountSrc
+    )
         external
         activePool
-        validAmountCheck(tokenX.balanceOf(msg.sender), _amountToken1)
-        returns (uint256 amountToken2)
+        validAmountCheck(_srcToken.balanceOf(msg.sender), _amountSrc)
+        returns (uint256)
     {
-        amountToken2 = swapEstimateFromSrcToken(_amountToken1);
+        uint256 amountDst = swapEstimateFromSrcToken(_srcToken, _amountSrc);
 
-        tokenX.transferFrom(msg.sender, address(this), _amountToken1);
-        totalAmount[tokenX] += _amountToken1;
-        totalAmount[tokenY] -= amountToken2;
-        tokenY.transfer(msg.sender, amountToken2);
-    }
-
-    // Returns the amount of Token2 that the user will get when swapping a given amount of Token1 for Token2
-    function getSwapToken2Estimate(uint256 _amountToken2)
-        public
-        view
-        activePool
-        returns (uint256 amountToken1)
-    {
-        uint256 token2After = totalAmount[tokenY] + _amountToken2;
-        uint256 token1After = K / token2After;
-        amountToken1 = totalAmount[tokenX] - token1After;
-
-        // To ensure that Token1's pool is not completely depleted leading to inf:0 ratio
-        if (amountToken1 == totalAmount[tokenX]) amountToken1--;
-    }
-
-    // Returns the amount of Token2 that the user should swap to get _amountToken1 in return
-    function getSwapToken2EstimateGivenToken1(uint256 _amountToken1)
-        public
-        view
-        activePool
-        returns (uint256 amountToken2)
-    {
-        require(
-            _amountToken1 < totalAmount[tokenX],
-            "Insufficient pool balance"
-        );
-        uint256 token1After = totalAmount[tokenX] - _amountToken1;
-        uint256 token2After = K / token1After;
-        amountToken2 = token2After - totalAmount[tokenY];
-    }
-
-    // Swaps given amount of Token2 to Token1 using algorithmic price determination
-    function swapToken2(uint256 _amountToken2)
-        external
-        activePool
-        validAmountCheck(tokenY.balanceOf(msg.sender), _amountToken2)
-        returns (uint256 amountToken1)
-    {
-        amountToken1 = getSwapToken2Estimate(_amountToken2);
-
-        tokenY.transferFrom(msg.sender, address(this), _amountToken2);
-        totalAmount[tokenY] += _amountToken2;
-        totalAmount[tokenX] -= amountToken1;
-        tokenX.transfer(msg.sender, amountToken1);
+        _srcToken.transferFrom(msg.sender, address(this), _amountSrc);
+        totalAmount[_srcToken] += _amountSrc;
+        totalAmount[_dstToken] -= amountDst;
+        _dstToken.transfer(msg.sender, amountDst);
+        return amountDst;
     }
 }
