@@ -77,7 +77,7 @@ describe("AMM", function () {
 
       // otherの流動性提供
       const otherProvidedToken1 = 50;
-      const otherProvidedToken2 = await amm.getEquivalentToken(
+      const otherProvidedToken2 = await amm.equivalentToken(
         usdc.address,
         otherProvidedToken1
       );
@@ -96,7 +96,7 @@ describe("AMM", function () {
       );
 
       // コントラクトの各値の確認
-      const details = await amm.getPoolDetails();
+      const details = await amm.poolDetails();
       expect(details[0]).to.equal(ownerProvidedToken1 + otherProvidedToken1);
       expect(details[1]).to.equal(
         ownerProvidedToken2 + otherProvidedToken2.toNumber()
@@ -119,7 +119,7 @@ describe("AMM", function () {
 
       // otherの流動性提供
       const otherProvidedToken1 = 50;
-      const otherProvidedToken2 = await amm.getEquivalentToken(
+      const otherProvidedToken2 = await amm.equivalentToken(
         usdc.address,
         otherProvidedToken1
       );
@@ -142,7 +142,7 @@ describe("AMM", function () {
       );
 
       // コントラクトの各値の確認
-      const details = await amm.getPoolDetails();
+      const details = await amm.poolDetails();
       expect(details[0]).to.equal(ownerProvidedToken1);
       expect(details[1]).to.equal(ownerProvidedToken2);
       expect(details[2]).to.equal(precision.mul(100));
@@ -163,7 +163,7 @@ describe("AMM", function () {
 
       // otherの流動性提供
       const otherProvidedToken1 = 50;
-      const otherProvidedToken2 = await amm.getEquivalentToken(
+      const otherProvidedToken2 = await amm.equivalentToken(
         usdc.address,
         otherProvidedToken1
       );
@@ -202,7 +202,7 @@ describe("AMM", function () {
       );
 
       // コントラクトの各値の確認
-      const details = await amm.getPoolDetails();
+      const details = await amm.poolDetails();
       expect(details[0]).to.equal(
         ownerProvidedToken1 + otherProvidedToken1 - amountReceiveUsdc
       );

@@ -46,7 +46,7 @@ contract AMM {
     }
 
     // Returns the total amount of tokens locked in the pool and the total shares issued corresponding to it
-    function getPoolDetails()
+    function poolDetails()
         external
         view
         returns (
@@ -70,7 +70,7 @@ contract AMM {
         return token1;
     }
 
-    function getEquivalentToken(IERC20 _srcToken, uint256 _amount)
+    function equivalentToken(IERC20 _srcToken, uint256 _amount)
         public
         view
         validToken(_srcToken)
@@ -118,7 +118,7 @@ contract AMM {
     }
 
     // Returns the estimate of Token1 & Token2 that will be released on burning given _share
-    function getWithdrawEstimate(uint256 _share)
+    function withdrawEstimate(uint256 _share)
         public
         view
         activePool
@@ -136,7 +136,7 @@ contract AMM {
         validAmountCheck(shares[msg.sender], _share)
         returns (uint256 amountToken1, uint256 amountToken2)
     {
-        (amountToken1, amountToken2) = getWithdrawEstimate(_share);
+        (amountToken1, amountToken2) = withdrawEstimate(_share);
 
         shares[msg.sender] -= _share;
         totalShares -= _share;
