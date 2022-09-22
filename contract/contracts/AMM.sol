@@ -15,14 +15,13 @@ contract AMM {
 
     uint256 public constant PRECISION = 1_000_000; // 計算中の精度に使用する定数(= 6桁)
 
-    constructor(address _token1, address _token2) payable {
-        token1 = IERC20(_token1);
-        token2 = IERC20(_token2);
+    constructor(IERC20 _token1, IERC20 _token2) payable {
+        token1 = _token1;
+        token2 = _token2;
     }
 
     // Ensures that the _qty is non-zero and the user has enough balance
     modifier validAmountCheck(uint256 _total, uint256 _qty) {
-        // ここ引数をインターフェースにできないのか？
         require(_qty > 0, "Amount cannot be zero!");
         require(_qty <= _total, "Insufficient amount");
         _;
