@@ -212,4 +212,41 @@ describe("AMM", function () {
       expect(details[2]).to.equal(precision.mul(150));
     });
   });
+
+  describe("test", function () {
+    it("check behavior", async function () {
+      const { amm, usdc, joe, precision, owner, otherAccount } =
+        await loadFixture(deployContract);
+
+      // ownerの流動性提供
+      const ownerProvidedToken1 = 100;
+      const ownerProvidedToken2 = 10;
+      await usdc.approve(amm.address, ownerProvidedToken1);
+      await joe.approve(amm.address, ownerProvidedToken2);
+      await amm.provide(ownerProvidedToken1, ownerProvidedToken2);
+
+      // otherの流動性提供
+      const otherProvidedToken1 = 50;
+      const otherProvidedToken2 = await amm.equivalentToken(
+        usdc.address,
+        otherProvidedToken1
+      );
+      await usdc
+        .connect(otherAccount)
+        .approve(amm.address, otherProvidedToken1);
+      await joe.connect(otherAccount).approve(amm.address, otherProvidedToken2);
+      await amm
+        .connect(otherAccount)
+        .provide(otherProvidedToken1, otherProvidedToken2);
+
+      console.log(
+        "1 -> 2のswap: 2から1を算出",
+        await amm.getSwapToken1EstimateGivenToken2(10)
+      );
+      console.log(
+        "2 -> 1のswap: 2から1を算出",
+        await amm.getSwapToken2Estimate(10)
+      );
+    });
+  });
 });
