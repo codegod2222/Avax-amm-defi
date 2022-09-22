@@ -241,7 +241,7 @@ describe("AMM", function () {
 
       console.log(
         "1 -> 2のswap: 2から1を算出",
-        await amm.getSwapToken1EstimateGivenToken2(10)
+        await amm.swapEstimateFromDstToken(10)
       );
       console.log(
         "2 -> 1のswap: 2から1を算出",

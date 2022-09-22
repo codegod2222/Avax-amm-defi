@@ -150,7 +150,7 @@ contract AMM {
     }
 
     // Returns the amount of Token2 that the user will get when swapping a given amount of Token1 for Token2
-    function getSwapToken1Estimate(uint256 _amountToken1)
+    function swapEstimateFromSrcToken(uint256 _amountToken1)
         public
         view
         activePool
@@ -165,7 +165,7 @@ contract AMM {
     }
 
     // Returns the amount of Token1 that the user should swap to get _amountToken2 in return
-    function getSwapToken1EstimateGivenToken2(uint256 _amountToken2)
+    function swapEstimateFromDstToken(uint256 _amountToken2)
         public
         view
         activePool
@@ -187,7 +187,7 @@ contract AMM {
         validAmountCheck(tokenX.balanceOf(msg.sender), _amountToken1)
         returns (uint256 amountToken2)
     {
-        amountToken2 = getSwapToken1Estimate(_amountToken1);
+        amountToken2 = swapEstimateFromSrcToken(_amountToken1);
 
         tokenX.transferFrom(msg.sender, address(this), _amountToken1);
         totalAmount[tokenX] += _amountToken1;
