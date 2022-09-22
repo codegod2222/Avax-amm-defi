@@ -41,8 +41,8 @@ contract AMM {
     }
 
     // Returns the balance of the user
-    function getMyShare() external view returns (uint256 myShare) {
-        myShare = shares[msg.sender];
+    function myShare() external view returns (uint256) {
+        return shares[msg.sender];
     }
 
     // Returns the total amount of tokens locked in the pool and the total shares issued corresponding to it

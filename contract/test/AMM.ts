@@ -49,7 +49,7 @@ describe("AMM", function () {
       expect(await joe.balanceOf(otherAccount.address)).to.equal(
         amountOtherAccount
       );
-      expect(await amm.getMyShare()).to.equal(0);
+      expect(await amm.myShare()).to.equal(0);
     });
   });
 
@@ -90,8 +90,8 @@ describe("AMM", function () {
         .provide(otherProvidedToken1, otherProvidedToken2);
 
       // シェアの確認
-      expect(await amm.getMyShare()).to.equal(precision.mul(100));
-      expect(await amm.connect(otherAccount).getMyShare()).to.equal(
+      expect(await amm.myShare()).to.equal(precision.mul(100));
+      expect(await amm.connect(otherAccount).myShare()).to.equal(
         precision.mul(50)
       );
 
@@ -132,12 +132,12 @@ describe("AMM", function () {
         .provide(otherProvidedToken1, otherProvidedToken2);
 
       // otherのシェア分の引き出し
-      let share = await amm.connect(otherAccount).getMyShare();
+      let share = await amm.connect(otherAccount).myShare();
       await amm.connect(otherAccount).withdraw(share);
 
       // シェアの確認
-      expect(await amm.getMyShare()).to.equal(precision.mul(100));
-      expect(await amm.connect(otherAccount).getMyShare()).to.equal(
+      expect(await amm.myShare()).to.equal(precision.mul(100));
+      expect(await amm.connect(otherAccount).myShare()).to.equal(
         precision.mul(0)
       );
 
