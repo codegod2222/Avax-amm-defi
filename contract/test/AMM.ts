@@ -1,15 +1,14 @@
 import hre, { ethers } from "hardhat";
 import { expect } from "chai";
-import { Overrides } from "ethers";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
-// 各アクション後のトークン残高の変化確認
+// TODO: 各アクション後のトークン残高の変化確認, 例えばprovideの後とか
+// TODO: 最初の残高の確認(deploy時のやつ, amountOtherAccountとかの確認)はいらないかも
+// TODO: 変更途中のsetupContractを整理
 describe("AMM", function () {
   async function deployContract() {
     // 初めのアドレスはコントラクトのデプロイに使用されます。
     const [owner, otherAccount] = await ethers.getSigners();
-
-    const funds = 100;
 
     const amountOtherAccount = 5000;
     const USDCToken = await hre.ethers.getContractFactory("USDCToken");
@@ -21,9 +20,7 @@ describe("AMM", function () {
     await joe.faucet(otherAccount.address, amountOtherAccount);
 
     const AMM = await hre.ethers.getContractFactory("AMM");
-    const amm = await AMM.deploy(usdc.address, joe.address, {
-      value: funds,
-    } as Overrides);
+    const amm = await AMM.deploy(usdc.address, joe.address);
 
     const precision = await amm.PRECISION();
 
@@ -52,6 +49,58 @@ describe("AMM", function () {
       expect(await amm.shares(owner.address)).to.equal(0);
     });
   });
+
+  async function setupContract() {
+    // 初めのアドレスはコントラクトのデプロイに使用されます。
+    const {
+      amm,
+      usdc,
+      joe,
+      precision,
+      owner,
+      otherAccount,
+      amountOtherAccount,
+    } = await loadFixture(deployContract);
+
+    // ownerの流動性提供
+    const ownerProvidedToken1 = 100;
+    const ownerProvidedToken2 = 10;
+    await usdc.approve(amm.address, ownerProvidedToken1);
+    await joe.approve(amm.address, ownerProvidedToken2);
+    await amm.provide(
+      usdc.address,
+      ownerProvidedToken1,
+      joe.address,
+      ownerProvidedToken2
+    );
+
+    // otherの流動性提供
+    const otherProvidedToken1 = 50;
+    const otherProvidedToken2 = await amm.equivalentToken(
+      usdc.address,
+      otherProvidedToken1
+    );
+    await usdc.connect(otherAccount).approve(amm.address, otherProvidedToken1);
+    await joe.connect(otherAccount).approve(amm.address, otherProvidedToken2);
+    await amm
+      .connect(otherAccount)
+      .provide(
+        usdc.address,
+        otherProvidedToken1,
+        joe.address,
+        otherProvidedToken2
+      );
+
+    return {
+      amm,
+      usdc,
+      joe,
+      precision,
+      owner,
+      otherAccount,
+      amountOtherAccount,
+    };
+  }
 
   describe("Provide", function () {
     // なぜかうまくいかない

@@ -16,7 +16,7 @@ contract AMM {
     uint256 public constant PRECISION = 1_000_000; // 計算中の精度に使用する定数(= 6桁)
 
     // プールに使えるトークンを指定します。
-    constructor(IERC20 _tokenX, IERC20 _tokenY) payable {
+    constructor(IERC20 _tokenX, IERC20 _tokenY) {
         tokenX = _tokenX;
         tokenY = _tokenY;
     }
