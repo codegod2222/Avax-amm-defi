@@ -1,24 +1,28 @@
 import { ethers } from "hardhat";
-import { Overrides } from "ethers";
 
 async function deploy() {
   // コントラクトをデプロイするアカウントのアドレスを取得します。
   const [deployer] = await ethers.getSigners();
-  console.log("Deploying contract with the account:", deployer.address);
 
-  // コントラクトのインスタンスを作成します。
+  // USDCトークンのコントラクトをデプロイします。
+  const USDCToken = await ethers.getContractFactory("USDCToken");
+  const usdc = await USDCToken.deploy();
+  await usdc.deployed();
+
+  // JOEトークンのコントラクトをデプロイします。
+  const JOEToken = await ethers.getContractFactory("JOEToken");
+  const joe = await JOEToken.deploy();
+  await joe.deployed();
+
+  // AMMコントラクトをデプロイします。
   const AMM = await ethers.getContractFactory("AMM");
-
-  // The deployed instance of the contract
-  const amm = await AMM.deploy();
-
+  const amm = await AMM.deploy(usdc.address, joe.address);
   await amm.deployed();
 
-  console.log("Contract deployed at:", amm.address);
-  console.log(
-    "Contract's fund is:",
-    await amm.provider.getBalance(amm.address)
-  );
+  console.log("amm address:", amm.address);
+  console.log("usdc address:", usdc.address);
+  console.log("joe address:", joe.address);
+  console.log("Contracts deployed with the account:", deployer.address);
 }
 
 deploy()
