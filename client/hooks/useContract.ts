@@ -8,9 +8,10 @@ import { JOEToken as JoeType } from "../typechain-types";
 import { AMM as AmmType } from "../typechain-types";
 import { getEthereum } from "../utils/ethereum";
 
-const UsdcAddress = "0x3C25603dD3Af61597bb6c9D15B76F68d9926F385";
-const JoeAddress = "0xAc3bB21014CBf5a671AFB199B1D2B9a30116604F";
-const AmmAddress = "0xE8430Ce3f3A5d4A0E63f5C69e93574e8c9C12db0";
+//TODO: constantファイルに移動したほうがいいかも
+export const UsdcAddress = "0x3C25603dD3Af61597bb6c9D15B76F68d9926F385";
+export const JoeAddress = "0xAc3bB21014CBf5a671AFB199B1D2B9a30116604F";
+export const AmmAddress = "0xE8430Ce3f3A5d4A0E63f5C69e93574e8c9C12db0";
 
 // useContractの返すオブジェクトの型定義です。
 type ReturnUseContract = {

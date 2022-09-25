@@ -1,0 +1,42 @@
+.boxTemplate {
+    width: 75%;
+    height: auto;
+    display: flex;
+    margin: 50px auto;
+    padding: 0px 40px 20px 40px;
+    flex-direction: column;
+    border-radius: 19px;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid grey;
+}
+
+.boxBody {
+    display: flex;
+    justify-content: space-between;
+    color: white;
+}
+
+.leftHeader {
+    font-size: 14px;
+}
+
+.textField {
+    width: 70%;
+    height: 30px;
+    font-size: 22px;
+    background-color: #0e0e10;
+    color: white;
+    border: 0px;
+}
+.textField:focus-visible {
+    outline: none;
+}
+
+.rightContent {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font: 20px;
+    font-weight: 700;
+}

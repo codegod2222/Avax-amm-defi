@@ -4,6 +4,7 @@ import { USDCToken as UsdcType } from "../typechain-types";
 import { JOEToken as JoeType } from "../typechain-types";
 import { AMM as AmmType } from "../typechain-types";
 import styles from "./Container.module.css";
+import Swap from "./Swap";
 
 type Props = {
   usdcContract: UsdcType | undefined;
@@ -11,7 +12,8 @@ type Props = {
   ammContract: AmmType | undefined;
 };
 
-export default function ContainerComponent({
+//TODO: swapのところ, 同じcssで囲みたい
+export default function Container({
   usdcContract,
   joeContract,
   ammContract,
@@ -82,7 +84,13 @@ export default function ContainerComponent({
         </div>
       </div>
 
-      {activeTab === "Swap" && <div>{totalShares?.toString()}</div>}
+      {activeTab === "Swap" && (
+        <Swap
+          usdcContract={usdcContract}
+          joeContract={joeContract}
+          ammContract={ammContract}
+        />
+      )}
       {activeTab === "Provide" && <div>{totalShares?.toString()}</div>}
       {activeTab === "Withdraw" && <div>{totalShares?.toString()}</div>}
       {activeTab === "Faucet" && <div>{totalShares?.toString()}</div>}

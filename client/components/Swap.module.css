@@ -1,0 +1,41 @@
+.tabBody {
+    margin: 0px auto;
+    width: 460px;
+    padding-top: 5px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0px 0px 19px 19px;
+    background-color: #0e0e10;
+    border-top: 0px;
+}
+
+.bottomDiv {
+    margin: 10px auto;
+    width: 30%;
+    padding: 5px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 19px;
+}
+
+.btn {
+    background-color: #242525;
+    margin: 10px 30px;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    width: 100px;
+    height: 40px;
+    border-radius: 9px;
+    cursor: pointer;
+}
+
+.swapIcon {
+    width: 5%;
+    text-align: center;
+    display: flex;
+    margin: 40px auto;
+    color: #ff726e;
+}
