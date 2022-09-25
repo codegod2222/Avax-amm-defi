@@ -1,48 +1,36 @@
-import type { NextPage } from 'next'
-import { useState} from "react";
-import { BigNumber} from "ethers";
-import styles from '../styles/Home.module.css'
+import type { NextPage } from "next";
+import styles from "../styles/Home.module.css";
 import { useWallet } from "../hooks/useWallet";
-import { useContract } from '../hooks/useContract';
+import { useContract } from "../hooks/useContract";
+import Container from "../components/Container";
 
 const Home: NextPage = () => {
   const { currentAccount, connectWallet } = useWallet();
-  const {usdcContract, joeContract, ammContract} = useContract();
-
-  const [totalShares, setTotalShares] = useState<BigNumber>();
-
-  async function getTotalShares() {
-    if (!ammContract) return;
-    try {
-      const shares = await ammContract.totalShares();
-      setTotalShares(shares);
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  const { usdcContract, joeContract, ammContract } = useContract();
 
   return (
-    <div>
-      {currentAccount ? (
-        <div>
-          <div className={styles.wallet}>
-            <p className={styles.title}>wallet: </p>
-            <p>{currentAccount}</p>
+    <div className={styles.pageBody}>
+      <div className={styles.navBar}>
+        <div className={styles.appName}> AMM </div>
+        {currentAccount == undefined ? (
+          <div className={styles.connectBtn} onClick={connectWallet}>
+            {" "}
+            Connect to wallet{" "}
           </div>
-          <div>
-            <p>{totalShares?.toString()}</p>
-            <button onClick={getTotalShares}>
-          getTotalShares
-        </button>
+        ) : (
+          <div className={styles.connected}>
+            {" "}
+            {"Connected to " + currentAccount}{" "}
           </div>
-        </div>
-      ) : (
-        <button className="connectWalletButton" onClick={connectWallet}>
-          Connect Wallet
-        </button>
-      )}
+        )}
+      </div>
+      <Container
+        usdcContract={usdcContract}
+        joeContract={joeContract}
+        ammContract={ammContract}
+      />
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
