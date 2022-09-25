@@ -6,7 +6,6 @@
 
 .navBar {
   height: 80px;
-  background-color: #0e0e10;
   display: flex;
   justify-content: flex-start;
   align-items: center;
