@@ -11,6 +11,7 @@ type Props = {
   currentAccount: string | undefined;
 };
 
+//TODO: トークンのコントラクト情報を構造体にまとめて, さらに二つの配列にするか
 //TODO: 繰り返し処理はまとめるか？
 //TODO: 表示と中身の桁を確認する, 現状100とか打っても小さすぎる
 export default function Faucet({
