@@ -120,7 +120,7 @@ export default function Withdraw({
       <BoxTemplate
         leftHeader={"Amount:"}
         right=""
-        value={Number(amountOfShare)}
+        value={amountOfShare.toString()}
         onChange={(e) => onChangeAmountOfShare(e)}
       />
       {/* TODO usdcとjoeをハードコードしてるので注意 */}

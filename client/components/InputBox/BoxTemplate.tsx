@@ -3,12 +3,10 @@ import styles from "./BoxTemplate.module.css";
 
 const regValidNumber = /^[0-9]*[.]?[0-9]{0,6}$/;
 
-// TODO: Bignumber使う
-
 type Props = {
   leftHeader: string;
   right: string;
-  value: number;
+  value: string;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 };
 

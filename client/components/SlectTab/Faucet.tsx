@@ -57,7 +57,7 @@ export default function Faucet({
       <BoxTemplate
         leftHeader={"Amount of USDC"} // シンボルは定数使いたい
         right={"USDC"}
-        value={Number(amountOfUsdc)}
+        value={amountOfUsdc.toString()}
         onChange={(e) => onChangeAmountOfUsdc(e)}
       />
       <div className={styles.bottomDiv}>
@@ -73,7 +73,7 @@ export default function Faucet({
       <BoxTemplate
         leftHeader={"Amount of JOE"}
         right={"JOE"}
-        value={Number(amountOfJoe)}
+        value={amountOfJoe.toString()}
         onChange={(e) => onChangeAmountOfJoe(e)}
       />
       <div className={styles.bottomDiv}>

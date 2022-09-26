@@ -31,6 +31,7 @@ export default function Provide({
 
   const checkLiquidity = async () => {
     if (!ammContract) return;
+    if (!currentAccount) return; //TODO: currentAccountがないとコントラクトもundefinedにしたい
     try {
       const share = await ammContract.totalShares();
       if (share.toString() === "0") {
@@ -117,7 +118,7 @@ export default function Provide({
       <BoxTemplate
         leftHeader={"Amount of Usdc"}
         right=""
-        value={amountOfUsdc.toNumber()}
+        value={amountOfUsdc.toString()}
         onChange={(e) => onChangeAmountOfUsdc(e)}
       />
       <div className={styles.swapIcon}>
@@ -126,7 +127,7 @@ export default function Provide({
       <BoxTemplate
         leftHeader={"Amount of Joe"}
         right=""
-        value={amountOfJoe.toNumber()}
+        value={amountOfJoe.toString()}
         onChange={(e) => onChangeAmountOfKothi(e)}
       />
       <div className={styles.error}>{error}</div>

@@ -126,7 +126,7 @@ export default function Swap({
       <BoxTemplate
         leftHeader={"From"}
         right={tokenAddressSrc}
-        value={amountSrc.toNumber()}
+        value={amountSrc.toString()}
         onChange={(e) => onChangeSrc(BigNumber.from(e.target.value))}
       />
       <div className={styles.swapIcon} onClick={() => rev()}>
@@ -135,7 +135,7 @@ export default function Swap({
       <BoxTemplate
         leftHeader={"To"}
         right={tokenAddressDst}
-        value={amountDst.toNumber()}
+        value={amountDst.toString()}
         onChange={(e) => onChangeDst(BigNumber.from(e.target.value))}
       />
       <div className={styles.bottomDiv}>
