@@ -5,6 +5,7 @@ import { AMM as AmmType } from "../typechain-types";
 import styles from "./Container.module.css";
 import Swap from "./Swap";
 import Details from "./Details";
+import Faucet from "./Faucet";
 
 type Props = {
   usdcContract: UsdcType | undefined;
@@ -80,7 +81,13 @@ export default function Container({
       )}
       {activeTab === "Provide" && <div>Provide</div>}
       {activeTab === "Withdraw" && <div>Withdraw</div>}
-      {activeTab === "Faucet" && <div>Faucet</div>}
+      {activeTab === "Faucet" && (
+        <Faucet
+          usdcContract={usdcContract}
+          joeContract={joeContract}
+          currentAccount={currentAccount}
+        />
+      )}
       <Details
         usdcContract={usdcContract}
         joeContract={joeContract}

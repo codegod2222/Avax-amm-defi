@@ -19,7 +19,6 @@ type Props = {
   currentAccount: string | undefined;
 };
 
-// useEffectの使い方, サーバサイドレンダリングする？？
 export default function Details({
   usdcContract,
   joeContract,
@@ -30,6 +29,7 @@ export default function Details({
   const [userShare, setUserShare] = useState(BigNumber.from(0));
   const [totalShare, setTotalShare] = useState(BigNumber.from(0));
 
+  // 今ラグができる, サーバサイドレンダリングする？
   useEffect(() => {
     getTokenDetails(usdcContract, UsdcAddress);
     getTokenDetails(joeContract, JoeAddress);

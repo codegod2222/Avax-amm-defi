@@ -3,7 +3,7 @@ import { USDCToken as UsdcType } from "../typechain-types";
 import { JOEToken as JoeType } from "../typechain-types";
 import { AMM as AmmType } from "../typechain-types";
 import { MdSwapVert } from "react-icons/md";
-import styles from "./Swap.module.css";
+import styles from "./Select.module.css";
 import { UsdcAddress, JoeAddress } from "../hooks/useContract";
 import BoxTemplate from "./BoxTemplate";
 
