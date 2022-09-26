@@ -32,10 +32,19 @@
     cursor: pointer;
 }
 
+/* TODO これより下は個々のモジュール */
+
 .swapIcon {
     width: 5%;
     text-align: center;
     display: flex;
     margin: 40px auto;
     color: #ff726e;
+}
+
+.withdrawEstimate {
+    height: 30px;
+    width: 75%;
+    margin: 10px auto;
+    color: white;
 }
