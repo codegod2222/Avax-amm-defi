@@ -28,6 +28,7 @@ const Home: NextPage = () => {
         usdcContract={usdcContract}
         joeContract={joeContract}
         ammContract={ammContract}
+        currentAccount={currentAccount}
       />
     </div>
   );

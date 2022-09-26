@@ -13,7 +13,7 @@ type Props = {
   ammContract: AmmType | undefined;
 };
 
-//TODO: むやみにtoNumberにしていいのか
+//TODO: Bignumber使う
 export default function Swap({
   usdcContract,
   joeContract,
