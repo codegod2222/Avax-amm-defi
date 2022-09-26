@@ -13,7 +13,7 @@ type Props = {
   ammContract: AmmType | undefined;
 };
 
-//TODO: Bignumber使う
+//TODO: Bignumber使う, ここのprecisionはshare以外のはトークンの桁だと思う
 export default function Swap({
   usdcContract,
   joeContract,
