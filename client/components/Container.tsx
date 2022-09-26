@@ -7,6 +7,7 @@ import Swap from "./Swap";
 import Details from "./Details";
 import Faucet from "./Faucet";
 import Withdraw from "./Withdraw";
+import Provide from "./Provide";
 
 type Props = {
   usdcContract: UsdcType | undefined;
@@ -80,7 +81,14 @@ export default function Container({
           ammContract={ammContract}
         />
       )}
-      {activeTab === "Provide" && <div>Provide</div>}
+      {activeTab === "Provide" && (
+        <Provide
+          usdcContract={usdcContract}
+          joeContract={joeContract}
+          ammContract={ammContract}
+          currentAccount={currentAccount}
+        />
+      )}
       {activeTab === "Withdraw" && (
         <Withdraw
           usdcContract={usdcContract}

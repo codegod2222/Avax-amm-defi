@@ -48,3 +48,10 @@
     margin: 10px auto;
     color: white;
 }
+
+.error {
+    color: white;
+    display: flex;
+    justify-content: flex-start;
+    padding: 0px 20px;
+}
