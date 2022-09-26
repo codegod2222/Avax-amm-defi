@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { USDCToken as UsdcType } from "../typechain-types";
-import { JOEToken as JoeType } from "../typechain-types";
-import { AMM as AmmType } from "../typechain-types";
+import { USDCToken as UsdcType } from "../../typechain-types";
+import { JOEToken as JoeType } from "../../typechain-types";
+import { AMM as AmmType } from "../../typechain-types";
 import styles from "./Details.module.css";
-import { UsdcAddress, JoeAddress } from "../hooks/useContract";
+import { UsdcAddress, JoeAddress } from "../../hooks/useContract";
 import { BigNumber } from "ethers";
 
 type TokenDetails = {

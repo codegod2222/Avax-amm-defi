@@ -1,11 +1,11 @@
 import { ChangeEvent, useEffect, useState } from "react";
-import { USDCToken as UsdcType } from "../typechain-types";
-import { JOEToken as JoeType } from "../typechain-types";
-import { AMM as AmmType } from "../typechain-types";
-import { UsdcAddress, JoeAddress } from "../hooks/useContract";
+import { USDCToken as UsdcType } from "../../typechain-types";
+import { JOEToken as JoeType } from "../../typechain-types";
+import { AMM as AmmType } from "../../typechain-types";
+import { UsdcAddress, JoeAddress } from "../../hooks/useContract";
 import styles from "./Select.module.css";
 import { BigNumber } from "ethers";
-import BoxTemplate from "./BoxTemplate";
+import BoxTemplate from "../InputBox/BoxTemplate";
 import { MdAdd } from "react-icons/md";
 
 type Props = {

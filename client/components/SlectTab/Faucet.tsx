@@ -1,9 +1,9 @@
 import { ChangeEvent, useState } from "react";
-import { USDCToken as UsdcType } from "../typechain-types";
-import { JOEToken as JoeType } from "../typechain-types";
+import { USDCToken as UsdcType } from "../../typechain-types";
+import { JOEToken as JoeType } from "../../typechain-types";
 import styles from "./Select.module.css";
 import { BigNumber } from "ethers";
-import BoxTemplate from "./BoxTemplate";
+import BoxTemplate from "../InputBox/BoxTemplate";
 
 type Props = {
   usdcContract: UsdcType | undefined;

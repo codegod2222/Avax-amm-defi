@@ -1,11 +1,11 @@
 import { ChangeEvent, useEffect, useState } from "react";
-import { USDCToken as UsdcType } from "../typechain-types";
-import { JOEToken as JoeType } from "../typechain-types";
-import { AMM as AmmType } from "../typechain-types";
+import { USDCToken as UsdcType } from "../../typechain-types";
+import { JOEToken as JoeType } from "../../typechain-types";
+import { AMM as AmmType } from "../../typechain-types";
 import { MdSwapVert } from "react-icons/md";
 import styles from "./Select.module.css";
-import { UsdcAddress, JoeAddress } from "../hooks/useContract";
-import BoxTemplate from "./BoxTemplate";
+import { UsdcAddress, JoeAddress } from "../../hooks/useContract";
+import BoxTemplate from "../InputBox/BoxTemplate";
 
 type Props = {
   usdcContract: UsdcType | undefined;

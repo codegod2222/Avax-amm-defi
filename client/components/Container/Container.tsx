@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { USDCToken as UsdcType } from "../typechain-types";
-import { JOEToken as JoeType } from "../typechain-types";
-import { AMM as AmmType } from "../typechain-types";
+import { USDCToken as UsdcType } from "../../typechain-types";
+import { JOEToken as JoeType } from "../../typechain-types";
+import { AMM as AmmType } from "../../typechain-types";
 import styles from "./Container.module.css";
-import Swap from "./Swap";
-import Details from "./Details";
-import Faucet from "./Faucet";
-import Withdraw from "./Withdraw";
-import Provide from "./Provide";
+import Swap from "../SlectTab/Swap";
+import Details from "../Details/Details";
+import Faucet from "../SlectTab/Faucet";
+import Withdraw from "../SlectTab/Withdraw";
+import Provide from "../SlectTab/Provide";
 
 type Props = {
   usdcContract: UsdcType | undefined;

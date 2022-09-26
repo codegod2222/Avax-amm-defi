@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import styles from "../styles/Home.module.css";
 import { useWallet } from "../hooks/useWallet";
 import { useContract } from "../hooks/useContract";
-import Container from "../components/Container";
+import Container from "../components/Container/Container";
 
 const Home: NextPage = () => {
   const { currentAccount, connectWallet } = useWallet();
