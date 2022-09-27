@@ -12,7 +12,6 @@ export const UsdcAddress = "0x3C25603dD3Af61597bb6c9D15B76F68d9926F385";
 export const JoeAddress = "0xAc3bB21014CBf5a671AFB199B1D2B9a30116604F";
 export const AmmAddress = "0xE8430Ce3f3A5d4A0E63f5C69e93574e8c9C12db0";
 
-//TODO: トークンの型はfaucetもついたインターフェースにすると良いかも？
 export type TokenInfo = {
   symbol: string;
   address: string;
@@ -76,9 +75,11 @@ export const useContract = (): ReturnUseContract => {
   useEffect(() => {
     getContract(UsdcAddress, UsdcArtifact.abi, (Contract: ethers.Contract) => {
       addTokenInfo(UsdcAddress, Contract as UsdcType);
+      setUsdcContract(Contract as UsdcType); //TODO 消す
     });
     getContract(JoeAddress, JoeArtifact.abi, (Contract: ethers.Contract) => {
-      addTokenInfo(UsdcAddress, Contract as JoeType);
+      addTokenInfo(JoeAddress, Contract as JoeType);
+      setJoeContract(Contract as JoeType); //TODO 消す
     });
     getContract(AmmAddress, AmmArtifact.abi, (Contract: ethers.Contract) => {
       setAmmContract(Contract as AmmType);
