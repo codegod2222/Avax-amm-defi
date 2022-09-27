@@ -45,6 +45,8 @@ export const useContract = (
     }
     // TODO ユーザにサインインを求める意味でも, この処理は各関数で行うことにする, ここではcurrentAccountは使わない
     // TODO 上記を実装した際に, ウォレットに非接続(コントラクトのオブジェクトはあるが呼び出しは失敗する状態)から接続に切り替え後に関数呼び出しが成功するか確認する
+    // TODO 以下URL参考にcurrentAccountの必要性をコメントで書いておく, 接続していないで関数を呼び出すとaccount#0がないと言われる
+    // https://docs.ethers.io/v5/api/providers/jsonrpc-provider/#JsonRpcProvider-getSigner
     if (!currentAccount) {
       console.log("currentAccount doesn't exist!");
       return;
@@ -52,7 +54,7 @@ export const useContract = (
     try {
       // @ts-ignore: ethereum as ethers.providers.ExternalProvider
       const provider = new ethers.providers.Web3Provider(ethereum);
-      const signer = provider.getSigner();
+      const signer = provider.getSigner(); // 簡易実装のため, 引数なし = 初めのアカウント(account#0)を使用する
       const Contract = new ethers.Contract(contractAddress, abi, signer);
       storeContract(Contract);
     } catch (error) {
