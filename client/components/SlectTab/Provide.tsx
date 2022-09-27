@@ -1,27 +1,24 @@
 import { ChangeEvent, useEffect, useState } from "react";
-import { USDCToken as UsdcType } from "../../typechain-types";
-import { JOEToken as JoeType } from "../../typechain-types";
 import { AMM as AmmType } from "../../typechain-types";
-import { UsdcAddress, JoeAddress } from "../../hooks/useContract";
+import { TokenInfo } from "../../hooks/useContract";
 import styles from "./Select.module.css";
-import { BigNumber } from "ethers";
+import { ethers } from "ethers";
 import BoxTemplate from "../InputBox/BoxTemplate";
 import { MdAdd } from "react-icons/md";
 
 type Props = {
-  usdcContract: UsdcType | undefined;
-  joeContract: JoeType | undefined;
+  tokens: TokenInfo[];
   ammContract: AmmType | undefined;
 };
 
-export default function Provide({
-  usdcContract,
-  joeContract,
-  ammContract,
-}: Props) {
-  const [amountOfUsdc, setAmountOfUsdc] = useState(BigNumber.from(0));
-  const [amountOfJoe, setAmountOfJoe] = useState(BigNumber.from(0));
+export default function Provide({ tokens, ammContract }: Props) {
+  const [amountOfTokens, setAmountOfTokens] = useState<string[]>([]);
   const [error, setError] = useState("");
+
+  enum TokenIndex {
+    First,
+    Second,
+  }
 
   useEffect(() => {
     checkLiquidity();
@@ -30,8 +27,8 @@ export default function Provide({
   const checkLiquidity = async () => {
     if (!ammContract) return;
     try {
-      const share = await ammContract.totalShares();
-      if (share.toString() === "0") {
+      const totalShares = await ammContract.totalShares();
+      if (totalShares.toString() === "0") {
         setError("Message: Empty pool. Set the initial conversion rate.");
       }
     } catch (error) {
@@ -39,69 +36,60 @@ export default function Provide({
     }
   };
 
-  // Gets estimates of a token to be provided in the pool given the amount of other token
-  const getProvideEstimate = async (
-    token: string,
-    setter: (_: BigNumber) => void,
-    value: string
-  ) => {
-    if (["", "."].includes(value)) return;
+  const updateAmountOfTokens = (tokenIndex: number, newAmount: string) => {
+    let copyArray = amountOfTokens;
+    copyArray[tokenIndex] = newAmount;
+    setAmountOfTokens(copyArray);
+  };
+
+  const getProvideEstimate = async (tokenIndex: number) => {
     if (!ammContract) return;
+    if (["", "."].includes(amountOfTokens[tokenIndex])) return;
     try {
-      const estimate = await ammContract.equivalentToken(
-        token,
-        BigNumber.from(value) //桁調整
+      const amountInWei = ethers.utils.parseEther(amountOfTokens[tokenIndex]);
+      const pairAmountInWei = await ammContract.equivalentToken(
+        tokens[tokenIndex].address,
+        amountInWei
       );
-      setter(estimate); //桁調整
+
+      const pairTokenIndex = (tokenIndex + 1) % tokens.length;
+      const pairAmountInEther = ethers.utils.formatEther(pairAmountInWei);
+      updateAmountOfTokens(pairTokenIndex, pairAmountInEther);
     } catch (error) {
       alert(error);
     }
   };
 
-  const onChangeAmountOfUsdc = (e: ChangeEvent<HTMLInputElement>) => {
-    setAmountOfUsdc(BigNumber.from(e.target.value));
-    getProvideEstimate(
-      UsdcAddress,
-      (val: BigNumber) => {
-        setAmountOfJoe(val);
-      },
-      amountOfUsdc.toString()
-    );
+  const onChangeAmount = (
+    tokenIndex: number,
+    e: ChangeEvent<HTMLInputElement>
+  ) => {
+    updateAmountOfTokens(tokenIndex, e.target.value);
+    getProvideEstimate(tokenIndex);
   };
 
-  const onChangeAmountOfKothi = (e: ChangeEvent<HTMLInputElement>) => {
-    setAmountOfJoe(BigNumber.from(e.target.value));
-    getProvideEstimate(
-      JoeAddress,
-      (val: BigNumber) => {
-        setAmountOfUsdc(val);
-      },
-      amountOfJoe.toString()
-    );
-  };
-
-  // Adds liquidity to the pool
   const provide = async () => {
+    if (!ammContract) {
+      alert("connect wallet");
+      return;
+    }
     if (
-      ["", "."].includes(amountOfUsdc.toString()) ||
-      ["", "."].includes(amountOfJoe.toString())
+      ["", "."].includes(amountOfTokens[TokenIndex.First]) ||
+      ["", "."].includes(amountOfTokens[TokenIndex.Second])
     ) {
       alert("Amount should be a valid number");
       return;
     }
-    if (!ammContract) return;
     try {
-      //TODO 桁調整
       const txn = await ammContract.provide(
-        UsdcAddress,
-        amountOfUsdc,
-        JoeAddress,
-        amountOfJoe
+        tokens[TokenIndex.First].address,
+        ethers.utils.parseEther(amountOfTokens[TokenIndex.First]),
+        tokens[TokenIndex.Second].address,
+        ethers.utils.parseEther(amountOfTokens[TokenIndex.Second])
       );
       await txn.wait();
-      setAmountOfUsdc(BigNumber.from(0));
-      setAmountOfJoe(BigNumber.from(0));
-      // await props.getHoldings();//TODO 更新処理
+      setAmountOfTokens([]);
+      // await props.getHoldings();//TODO ユーザ情報更新処理
       alert("Success");
       setError("");
     } catch (error) {
@@ -111,21 +99,32 @@ export default function Provide({
 
   return (
     <div className={styles.tabBody}>
-      {/* TODO: usdcとjoeをハードコードしてるので注意 */}
       <BoxTemplate
-        leftHeader={"Amount of Usdc"}
-        right=""
-        value={amountOfUsdc.toString()}
-        onChange={(e) => onChangeAmountOfUsdc(e)}
+        leftHeader={
+          "Amount of " +
+          (tokens[TokenIndex.First]
+            ? tokens[TokenIndex.First].symbol
+            : "some token")
+        }
+        right={tokens[TokenIndex.First] ? tokens[TokenIndex.First].symbol : ""}
+        value={amountOfTokens[TokenIndex.First]}
+        onChange={(e) => onChangeAmount(0, e)}
       />
       <div className={styles.swapIcon}>
         <MdAdd />
       </div>
       <BoxTemplate
-        leftHeader={"Amount of Joe"}
-        right=""
-        value={amountOfJoe.toString()}
-        onChange={(e) => onChangeAmountOfKothi(e)}
+        leftHeader={
+          "Amount of " +
+          (tokens[TokenIndex.Second]
+            ? tokens[TokenIndex.Second].symbol
+            : "some token")
+        }
+        right={
+          tokens[TokenIndex.Second] ? tokens[TokenIndex.Second].symbol : ""
+        }
+        value={amountOfTokens[TokenIndex.Second]}
+        onChange={(e) => onChangeAmount(1, e)}
       />
       <div className={styles.error}>{error}</div>
       <div className={styles.bottomDiv}>
