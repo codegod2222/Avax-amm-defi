@@ -43,6 +43,8 @@ export const useContract = (
       console.log("Ethereum object doesn't exist!");
       return;
     }
+    // TODO ユーザにサインインを求める意味でも, この処理は各関数で行うことにする, ここではcurrentAccountは使わない
+    // TODO 上記を実装した際に, ウォレットに非接続(コントラクトのオブジェクトはあるが呼び出しは失敗する状態)から接続に切り替え後に関数呼び出しが成功するか確認する
     if (!currentAccount) {
       console.log("currentAccount doesn't exist!");
       return;

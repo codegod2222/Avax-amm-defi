@@ -13,7 +13,7 @@ export const useWallet = (): ReturnUseWallet => {
   const connectWallet = async () => {
     try {
       if (!ethereum) {
-        alert("Get MetaMask!");
+        alert("Get Wallet!");
         return;
       }
       const accounts = await ethereum.request({
@@ -21,7 +21,7 @@ export const useWallet = (): ReturnUseWallet => {
       });
       if (!Array.isArray(accounts)) return;
       console.log("Connected: ", accounts[0]);
-      setCurrentAccount(accounts[0]);
+      setCurrentAccount(accounts[0]); //簡易実装のため, 配列の初めのアドレスを使用します。
     } catch (error) {
       console.log(error);
     }
@@ -30,7 +30,7 @@ export const useWallet = (): ReturnUseWallet => {
   const checkIfWalletIsConnected = async () => {
     try {
       if (!ethereum) {
-        console.log("Make sure you have MetaMask!");
+        console.log("Make sure you have Wallet!");
         return;
       } else {
         console.log("We have the ethereum object", ethereum);
@@ -51,7 +51,6 @@ export const useWallet = (): ReturnUseWallet => {
 
   useEffect(() => {
     checkIfWalletIsConnected();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {
