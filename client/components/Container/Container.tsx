@@ -78,11 +78,7 @@ export default function Container({
       </div>
 
       {activeTab === "Swap" && (
-        <Swap
-          usdcContract={usdcContract}
-          joeContract={joeContract}
-          ammContract={ammContract}
-        />
+        <Swap tokens={tokens} ammContract={ammContract} />
       )}
       {activeTab === "Provide" && (
         <Provide tokens={tokens} ammContract={ammContract} />
