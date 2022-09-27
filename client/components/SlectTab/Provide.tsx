@@ -5,6 +5,7 @@ import styles from "./Select.module.css";
 import { ethers } from "ethers";
 import BoxTemplate from "../InputBox/BoxTemplate";
 import { MdAdd } from "react-icons/md";
+import { validAmount } from "../../utils/validAmount";
 
 type Props = {
   tokens: TokenInfo[];
@@ -43,7 +44,7 @@ export default function Provide({ tokens, ammContract }: Props) {
 
   const getProvideEstimate = async (tokenIndex: number) => {
     if (!ammContract) return;
-    if (["", "."].includes(amountOfTokens[tokenIndex])) return;
+    if (!validAmount(amountOfTokens[tokenIndex])) return;
     try {
       const amountInWei = ethers.utils.parseEther(amountOfTokens[tokenIndex]);
       const pairAmountInWei = await ammContract.equivalentToken(
@@ -67,14 +68,14 @@ export default function Provide({ tokens, ammContract }: Props) {
     getProvideEstimate(tokenIndex);
   };
 
-  const provide = async () => {
+  const onClickProvide = async () => {
     if (!ammContract) {
       alert("connect wallet");
       return;
     }
     if (
-      ["", "."].includes(amountOfTokens[TokenIndex.First]) ||
-      ["", "."].includes(amountOfTokens[TokenIndex.Second])
+      !validAmount(amountOfTokens[TokenIndex.First]) ||
+      !validAmount(amountOfTokens[TokenIndex.Second])
     ) {
       alert("Amount should be a valid number");
       return;
@@ -127,7 +128,7 @@ export default function Provide({ tokens, ammContract }: Props) {
       />
       <div className={styles.error}>{error}</div>
       <div className={styles.bottomDiv}>
-        <div className={styles.btn} onClick={() => provide()}>
+        <div className={styles.btn} onClick={() => onClickProvide()}>
           Provide
         </div>
       </div>

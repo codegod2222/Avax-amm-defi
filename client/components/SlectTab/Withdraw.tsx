@@ -4,7 +4,8 @@ import { TokenInfo } from "../../hooks/useContract";
 import styles from "./Select.module.css";
 import { BigNumber } from "ethers";
 import BoxTemplate from "../InputBox/BoxTemplate";
-
+import { validAmount } from "../../utils/validAmount";
+//TODO: shareの精度問題
 type Props = {
   tokens: TokenInfo[];
   ammContract: AmmType | undefined;
@@ -63,18 +64,16 @@ export default function Withdraw({
     getEstimate();
   };
 
-  const withdrawShare = async () => {
-    if (!currentAccount) {
+  const onClickWithdraw = async () => {
+    if (!ammContract) {
       alert("connect wallet");
       return;
     }
-    if (!ammContract) return;
-    if (["", "."].includes(amountOfShare)) {
-      alert("Amount should be a valid number"); //TODO わかってない
+    if (!validAmount(amountOfShare)) {
+      alert("Amount should be a valid number");
       return;
     }
     if (maxShare < amountOfShare) {
-      //TODO 小数点を許可しないこと実装する
       alert("Amount should be less than your max share");
       return;
     }
@@ -112,7 +111,7 @@ export default function Withdraw({
         </div>
       )}
       <div className={styles.bottomDiv}>
-        <div className={styles.btn} onClick={() => withdrawShare()}>
+        <div className={styles.btn} onClick={() => onClickWithdraw()}>
           Withdraw
         </div>
       </div>

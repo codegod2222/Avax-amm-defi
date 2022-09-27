@@ -1,8 +1,6 @@
 import { ChangeEvent } from "react";
 import styles from "./BoxTemplate.module.css";
 
-const regValidNumber = /^[0-9]*[.]?[0-9]{0,6}$/; //TODO これをどこで使うのか検討
-
 type Props = {
   leftHeader: string;
   right: string;
@@ -16,11 +14,6 @@ export default function BoxTemplate({
   value,
   onChange,
 }: Props) {
-  const onInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.value === "" || regValidNumber.test(e.target.value)) {
-      onChange(e);
-    }
-  };
   return (
     <div className={styles.boxTemplate}>
       <div className={styles.boxBody}>
@@ -29,7 +22,7 @@ export default function BoxTemplate({
           <input
             className={styles.textField}
             value={value}
-            onChange={(e) => onInputChange(e)}
+            onChange={(e) => onChange(e)}
             placeholder={"Enter amount"}
           />
         </div>

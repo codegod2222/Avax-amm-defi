@@ -3,6 +3,7 @@ import { TokenInfo } from "../../hooks/useContract";
 import styles from "./Select.module.css";
 import BoxTemplate from "../InputBox/BoxTemplate";
 import { ethers } from "ethers";
+import { validAmount } from "../../utils/validAmount";
 
 type Props = {
   tokens: TokenInfo[];
@@ -27,7 +28,7 @@ export default function Faucet({ tokens, currentAccount }: Props) {
       alert("connect wallet");
       return;
     }
-    if (["", "."].includes(amountOfFunds)) {
+    if (!validAmount(amountOfFunds)) {
       alert("Amount should be a valid number"); //TODO: あんまわかってない
       return;
     }

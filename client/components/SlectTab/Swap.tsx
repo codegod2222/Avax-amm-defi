@@ -5,6 +5,7 @@ import styles from "./Select.module.css";
 import { TokenInfo } from "../../hooks/useContract";
 import BoxTemplate from "../InputBox/BoxTemplate";
 import { ethers } from "ethers";
+import { validAmount } from "../../utils/validAmount";
 
 type Props = {
   tokens: TokenInfo[];
@@ -32,7 +33,7 @@ export default function Swap({ tokens, ammContract }: Props) {
   const getSwapEstimateFromSrc = async (amount: string) => {
     if (!ammContract) return;
     if (tokens.length !== 2) return;
-    if (["", "."].includes(amount)) return; //TODO: ここあんまわかってない
+    if (!validAmount(amount)) return;
     try {
       const amountDstInWei = await ammContract.swapEstimateFromSrcToken(
         tokens[tokenIndexSrc].address,
@@ -49,7 +50,7 @@ export default function Swap({ tokens, ammContract }: Props) {
   const getSwapEstimateFromDst = async (amount: string) => {
     if (!ammContract) return;
     if (tokens.length !== 2) return;
-    if (["", "."].includes(amount)) return; //TODO: ここあんまわかってない
+    if (!validAmount(amount)) return;
     if (ammContract) {
       try {
         const amountSrcInWei = await ammContract.swapEstimateFromDstToken(
@@ -74,9 +75,8 @@ export default function Swap({ tokens, ammContract }: Props) {
     getSwapEstimateFromDst(amount);
   };
 
-  const swap = async () => {
-    if (["", "."].includes(amountSrc)) {
-      //TODO: ここあんまわかってない
+  const onClickSwap = async () => {
+    if (!validAmount(amountSrc)) {
       alert("Amount should be a valid number");
       return;
     }
@@ -118,7 +118,7 @@ export default function Swap({ tokens, ammContract }: Props) {
         onChange={(e) => onChangeDst(e.target.value)}
       />
       <div className={styles.bottomDiv}>
-        <div className={styles.btn} onClick={() => swap()}>
+        <div className={styles.btn} onClick={() => onClickSwap()}>
           Swap
         </div>
       </div>
