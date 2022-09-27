@@ -4,7 +4,6 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
-//TODO: 返り値とmodifierについて見直し, 必要かなど
 contract AMM {
     uint256 K; // 価格を決める定数
     IERC20 tokenX; // ERC20を実装したコントラクト1
@@ -13,7 +12,6 @@ contract AMM {
     mapping(address => uint256) public shares; // 各ユーザのシェア
     mapping(IERC20 => uint256) public totalAmount; // プールにロックされた各トークンの量
 
-    //TODO こいつは中身だけで使う, 外部にはこれを除いた形でやればいい
     uint256 public constant PRECISION = 1_000_000; // 計算中の精度に使用する定数(= 6桁)
 
     // プールに使えるトークンを指定します。
@@ -22,7 +20,7 @@ contract AMM {
         tokenY = _tokenY;
     }
 
-    // ユーザの関数呼び出しに使用するある量が0より大きいことを確認します。
+    // トークンの量が正しいことを確認します。
     modifier validAmount(uint256 _amount) {
         require(_amount > 0, "Amount cannot be zero!");
         _;
@@ -50,7 +48,7 @@ contract AMM {
         _;
     }
 
-    // 引数のトークンとペアのコントラクトを返します。
+    // 引数のトークンとペアのトークンのコントラクトを返します。
     function pairToken(IERC20 token)
         private
         view
@@ -164,7 +162,7 @@ contract AMM {
         uint256 totalAmountDstAfter = K / (totalAmountSrcAfter);
         uint256 amountDst = totalAmount[dstToken] - totalAmountDstAfter;
 
-        // swapの結果, トークン量が0になるのを防ぐ
+        // swapの結果, トークン量が0になるのを防ぎます。
         if (amountDst == totalAmount[dstToken]) amountDst--;
         return amountDst;
     }

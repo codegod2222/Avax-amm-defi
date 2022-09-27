@@ -25,7 +25,7 @@ export default function Swap({ tokens, ammContract }: Props) {
     setTokenIndexSrc(tokenIndexDst);
     setTokenIndexDst(srcCopy);
 
-    getSwapEstimateFromSrc(amountSrc); //TODO: ここあんまわかってない
+    getSwapEstimateFromSrc(amountSrc);
   };
 
   // スワップ元トークンに指定された量から, スワップ先トークンの受け取れる量を取得します。
