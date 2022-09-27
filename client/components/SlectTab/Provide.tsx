@@ -10,9 +10,14 @@ import { validAmount } from "../../utils/validAmount";
 type Props = {
   tokens: TokenInfo[];
   ammContract: AmmType | undefined;
+  currentAccount: string | undefined;
 };
 
-export default function Provide({ tokens, ammContract }: Props) {
+export default function Provide({
+  tokens,
+  ammContract,
+  currentAccount,
+}: Props) {
   enum TokenIndex {
     First,
     Second,
@@ -22,7 +27,7 @@ export default function Provide({ tokens, ammContract }: Props) {
 
   useEffect(() => {
     checkLiquidity();
-  }, []);
+  }, [ammContract]);
 
   const checkLiquidity = async () => {
     if (!ammContract) return;
@@ -43,7 +48,7 @@ export default function Provide({ tokens, ammContract }: Props) {
   };
 
   const getProvideEstimate = async (tokenIndex: number) => {
-    if (!ammContract) return;
+    if (!ammContract || tokens.length !== 2) return;
     if (!validAmount(amountOfTokens[tokenIndex])) return;
     try {
       const amountInWei = ethers.utils.parseEther(amountOfTokens[tokenIndex]);
@@ -69,10 +74,11 @@ export default function Provide({ tokens, ammContract }: Props) {
   };
 
   const onClickProvide = async () => {
-    if (!ammContract) {
+    if (!currentAccount) {
       alert("connect wallet");
       return;
     }
+    if (!ammContract || tokens.length !== 2) return;
     if (
       !validAmount(amountOfTokens[TokenIndex.First]) ||
       !validAmount(amountOfTokens[TokenIndex.Second])

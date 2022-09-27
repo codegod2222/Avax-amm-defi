@@ -28,6 +28,7 @@ export default function Faucet({ tokens, currentAccount }: Props) {
       alert("connect wallet");
       return;
     }
+    if (tokens.length !== 2) return;
     if (!validAmount(amountOfFunds)) {
       alert("Amount should be a valid number"); //TODO: あんまわかってない
       return;

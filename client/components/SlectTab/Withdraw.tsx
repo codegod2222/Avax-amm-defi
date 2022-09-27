@@ -25,11 +25,10 @@ export default function Withdraw({
 
   useEffect(() => {
     getMaxShare();
-  }, [ammContract]); //TODO ここの依存配列, 他もできないかもなので要注意
+  }, [ammContract]);
 
   const getMaxShare = async () => {
-    if (!ammContract) return;
-    if (!currentAccount) return;
+    if (!ammContract || !currentAccount) return;
     try {
       const share = await ammContract.shares(currentAccount);
       setMaxShare(share.toString());
@@ -65,10 +64,11 @@ export default function Withdraw({
   };
 
   const onClickWithdraw = async () => {
-    if (!ammContract) {
+    if (!currentAccount) {
       alert("connect wallet");
       return;
     }
+    if (!ammContract) return;
     if (!validAmount(amountOfShare)) {
       alert("Amount should be a valid number");
       return;

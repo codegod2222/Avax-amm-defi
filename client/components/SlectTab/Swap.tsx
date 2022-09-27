@@ -10,9 +10,10 @@ import { validAmount } from "../../utils/validAmount";
 type Props = {
   tokens: TokenInfo[];
   ammContract: AmmType | undefined;
+  currentAccount: string | undefined;
 };
 
-export default function Swap({ tokens, ammContract }: Props) {
+export default function Swap({ tokens, ammContract, currentAccount }: Props) {
   // スワップ元とスワップ先のトークンのインデックス番号を格納します。
   const [tokenIndexSrc, setTokenIndexSrc] = useState(0);
   const [tokenIndexDst, setTokenIndexDst] = useState(1);
@@ -31,8 +32,7 @@ export default function Swap({ tokens, ammContract }: Props) {
 
   // スワップ元トークンに指定された量から, スワップ先トークンの受け取れる量を取得します。
   const getSwapEstimateFromSrc = async (amount: string) => {
-    if (!ammContract) return;
-    if (tokens.length !== 2) return;
+    if (!ammContract || tokens.length !== 2) return;
     if (!validAmount(amount)) return;
     try {
       const amountDstInWei = await ammContract.swapEstimateFromSrcToken(
@@ -48,8 +48,7 @@ export default function Swap({ tokens, ammContract }: Props) {
 
   // スワップ先トークンに指定された量から, スワップ元トークンに必要な量を取得します。
   const getSwapEstimateFromDst = async (amount: string) => {
-    if (!ammContract) return;
-    if (tokens.length !== 2) return;
+    if (!ammContract || tokens.length !== 2) return;
     if (!validAmount(amount)) return;
     if (ammContract) {
       try {
@@ -76,12 +75,13 @@ export default function Swap({ tokens, ammContract }: Props) {
   };
 
   const onClickSwap = async () => {
-    if (!validAmount(amountSrc)) {
-      alert("Amount should be a valid number");
+    if (!currentAccount) {
+      alert("Connect to wallet");
       return;
     }
-    if (!ammContract || tokens.length !== 2) {
-      alert("Connect to wallet");
+    if (!ammContract || tokens.length !== 2) return;
+    if (!validAmount(amountSrc)) {
+      alert("Amount should be a valid number");
       return;
     }
     try {
