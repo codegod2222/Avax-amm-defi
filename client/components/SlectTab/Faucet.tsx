@@ -27,7 +27,7 @@ export default function Faucet({ tokens, currentAccount }: Props) {
       alert("connect wallet");
       return;
     }
-    if (["", "."].includes(amountOfFunds.toString())) {
+    if (["", "."].includes(amountOfFunds)) {
       alert("Amount should be a valid number"); //TODO: あんまわかってない
       return;
     }
@@ -61,7 +61,7 @@ export default function Faucet({ tokens, currentAccount }: Props) {
         right={
           tokens[currentTokenIndex] ? tokens[currentTokenIndex].symbol : ""
         }
-        value={amountOfFunds.toString()}
+        value={amountOfFunds}
         onChange={(e) => onChangeAmountOfFunds(e)}
       />
       <div className={styles.bottomDiv}>

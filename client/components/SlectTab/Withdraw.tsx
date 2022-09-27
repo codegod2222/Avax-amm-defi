@@ -54,7 +54,7 @@ export default function Withdraw({
   };
 
   const onClickMax = async () => {
-    setAmountOfShare(maxShare.toString());
+    setAmountOfShare(maxShare);
     getEstimate();
   };
 
@@ -73,7 +73,7 @@ export default function Withdraw({
       alert("Amount should be a valid number"); //TODO わかってない
       return;
     }
-    if (maxShare.toString() < amountOfShare) {
+    if (maxShare < amountOfShare) {
       //TODO 小数点を許可しないこと実装する
       alert("Amount should be less than your max share");
       return;
@@ -100,7 +100,7 @@ export default function Withdraw({
       <BoxTemplate
         leftHeader={"Amount of share:"}
         right=""
-        value={amountOfShare.toString()}
+        value={amountOfShare}
         onChange={(e) => onChangeAmountOfShare(e)}
       />
       {amountOfEstimate.length === 2 && (

@@ -75,7 +75,7 @@ export default function Swap({ tokens, ammContract }: Props) {
   };
 
   const swap = async () => {
-    if (["", "."].includes(amountSrc.toString())) {
+    if (["", "."].includes(amountSrc)) {
       //TODO: ここあんまわかってない
       alert("Amount should be a valid number");
       return;
