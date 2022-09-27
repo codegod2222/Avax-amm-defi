@@ -94,8 +94,7 @@ export default function Container({
         <Faucet tokens={tokens} currentAccount={currentAccount} />
       )}
       <Details
-        usdcContract={usdcContract}
-        joeContract={joeContract}
+        tokens={tokens}
         ammContract={ammContract}
         currentAccount={currentAccount}
       />

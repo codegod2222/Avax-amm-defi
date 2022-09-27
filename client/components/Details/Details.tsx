@@ -1,84 +1,72 @@
 import { useEffect, useState } from "react";
-import { USDCToken as UsdcType } from "../../typechain-types";
-import { JOEToken as JoeType } from "../../typechain-types";
 import { AMM as AmmType } from "../../typechain-types";
 import styles from "./Details.module.css";
-import { UsdcAddress, JoeAddress } from "../../hooks/useContract";
-import { BigNumber } from "ethers";
-
-type TokenDetails = {
-  symbol: string;
-  amountOfUser: BigNumber;
-  amountOfPool: BigNumber;
-};
+import { TokenInfo } from "../../hooks/useContract";
+import { ethers } from "ethers";
 
 type Props = {
-  usdcContract: UsdcType | undefined;
-  joeContract: JoeType | undefined;
+  tokens: TokenInfo[];
   ammContract: AmmType | undefined;
   currentAccount: string | undefined;
 };
 
 export default function Details({
-  usdcContract,
-  joeContract,
+  tokens,
   ammContract,
   currentAccount,
 }: Props) {
-  const [allTokenDetails, setAllTokenDetails] = useState<TokenDetails[]>([]);
-  const [userShare, setUserShare] = useState(BigNumber.from(0));
-  const [totalShare, setTotalShare] = useState(BigNumber.from(0));
+  const [amountOfTokensOfUser, setAmountOfTokensOfUser] = useState<string[]>(
+    []
+  );
+  const [amountOfTokensInPool, setAmountOfTokensInPool] = useState<string[]>(
+    []
+  );
+  const [userShare, setUserShare] = useState("");
+  const [totalShare, setTotalShare] = useState("");
 
   // 今ラグができる, サーバサイドレンダリングする？
   useEffect(() => {
-    getTokenDetails(usdcContract, UsdcAddress);
-    getTokenDetails(joeContract, JoeAddress);
+    getAmountOfTokensOfUser();
+    getAmountOfTokensInPool();
     getShares();
-  }, [usdcContract, joeContract, ammContract, currentAccount]);
+  }, [ammContract, tokens]);
 
-  async function getTokenDetails(
-    tokenContract: UsdcType | JoeType | undefined,
-    tokenAddress: string
-  ) {
-    if (!ammContract) return;
-    if (!tokenContract) return;
-    if (!currentAccount) return;
+  const getAmountOfTokensOfUser = async () => {
+    if (!ammContract || tokens.length !== 2 || !currentAccount) return;
     try {
-      const precision = await ammContract.PRECISION();
-      console.log("Fetching details----");
-
-      const symbol = await tokenContract.symbol();
-      const amountOfUser = (await tokenContract.balanceOf(currentAccount)).div(
-        precision
-      );
-      const amountOfPool = (await ammContract.totalAmount(tokenAddress)).div(
-        precision
-      );
-
-      setAllTokenDetails((prevState) => [
-        ...prevState,
-        {
-          symbol: symbol,
-          amountOfUser: amountOfUser,
-          amountOfPool: amountOfPool,
-        },
-      ]);
-    } catch (err) {
-      console.log("Couldn't Fetch details", err);
+      setAmountOfTokensOfUser([]);
+      tokens.map(async (token) => {
+        const amountInWei = await token.contract.balanceOf(currentAccount);
+        const amountInEther = ethers.utils.formatEther(amountInWei);
+        setAmountOfTokensOfUser((prevState) => [...prevState, amountInEther]);
+      });
+    } catch (error) {
+      console.log(error);
     }
-  }
+  };
+
+  const getAmountOfTokensInPool = async () => {
+    if (!ammContract || tokens.length !== 2 || !currentAccount) return;
+    try {
+      setAmountOfTokensInPool([]);
+      tokens.map(async (token) => {
+        const amountInWei = await ammContract.totalAmount(token.address);
+        const amountInEther = ethers.utils.formatEther(amountInWei);
+        setAmountOfTokensInPool((prevState) => [...prevState, amountInEther]);
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   async function getShares() {
-    if (!ammContract) return;
-    if (!currentAccount) return;
+    if (!ammContract || !currentAccount) return;
     try {
-      const precision = await ammContract.PRECISION();
+      let share = await ammContract.shares(currentAccount);
+      setUserShare(share.toString());
 
-      let share = (await ammContract.shares(currentAccount)).div(precision);
-      setUserShare(share);
-
-      share = (await ammContract.totalShares()).div(precision);
-      setTotalShare(share);
+      share = await ammContract.totalShares();
+      setTotalShare(share.toString());
     } catch (err) {
       console.log("Couldn't Fetch details", err);
     }
@@ -87,29 +75,25 @@ export default function Details({
   return (
     <div className={styles.details}>
       <div className={styles.detailsBody}>
-        <div className={styles.detailsHeader}>Details</div>
-        {allTokenDetails.map((detail) => {
+        <div className={styles.detailsHeader}>Your Details</div>
+        {amountOfTokensOfUser.map((amount, index) => {
           return (
             <div className={styles.detailsRow}>
               <div className={styles.detailsAttribute}>
-                Amount of {detail.symbol}:
+                {tokens[index] ? tokens[index].symbol : "some token"}:
               </div>
-              <div className={styles.detailsValue}>
-                {detail.amountOfUser.toString()}
-              </div>
+              <div className={styles.detailsValue}>{amount}</div>
             </div>
           );
         })}
         <div className={styles.detailsHeader}>Pool Details</div>
-        {allTokenDetails.map((detail) => {
+        {amountOfTokensInPool.map((amount, index) => {
           return (
             <div className={styles.detailsRow}>
               <div className={styles.detailsAttribute}>
-                Total {detail.symbol}:
+                Total {tokens[index] ? tokens[index].symbol : "some token"}::
               </div>
-              <div className={styles.detailsValue}>
-                {detail.amountOfPool.toString()}
-              </div>
+              <div className={styles.detailsValue}>{amount}</div>
             </div>
           );
         })}

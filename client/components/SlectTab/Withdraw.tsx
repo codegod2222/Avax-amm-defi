@@ -42,7 +42,7 @@ export default function Withdraw({
     try {
       setAmountOfEstimate([]);
       tokens.map(async (token) => {
-        let estimate = await ammContract.withdrawEstimate(
+        const estimate = await ammContract.withdrawEstimate(
           token.address,
           BigNumber.from(amountOfShare)
         );

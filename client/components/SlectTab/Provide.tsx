@@ -12,13 +12,12 @@ type Props = {
 };
 
 export default function Provide({ tokens, ammContract }: Props) {
-  const [amountOfTokens, setAmountOfTokens] = useState<string[]>([]);
-  const [error, setError] = useState("");
-
   enum TokenIndex {
     First,
     Second,
   }
+  const [amountOfTokens, setAmountOfTokens] = useState<string[]>([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     checkLiquidity();
