@@ -3,7 +3,6 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-// ehterで表すのは分かりづらくなるのでやめる, 桁をconstで用意する
 contract USDCToken is ERC20 {
     constructor() ERC20("USDC Token", "USDC") {
         _mint(msg.sender, 10000 ether);
