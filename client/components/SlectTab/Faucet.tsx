@@ -1,51 +1,43 @@
 import { ChangeEvent, useState } from "react";
-import { USDCToken as UsdcType } from "../../typechain-types";
-import { JOEToken as JoeType } from "../../typechain-types";
+import { TokenInfo } from "../../hooks/useContract";
 import styles from "./Select.module.css";
-import { BigNumber } from "ethers";
 import BoxTemplate from "../InputBox/BoxTemplate";
+import { ethers } from "ethers";
 
 type Props = {
-  usdcContract: UsdcType | undefined;
-  joeContract: JoeType | undefined;
+  tokens: TokenInfo[];
   currentAccount: string | undefined;
 };
 
-//TODO: トークンのコントラクト情報(コントラクト, アドレス, precision, シンボルなど)を構造体にまとめて, さらに二つの配列にするか, その配列が揃うまではdisableにする
-//TODO: 繰り返し処理はまとめるか？
-//TODO: 表示と中身の桁を確認する, 現状100とか打っても小さすぎる
-export default function Faucet({
-  usdcContract,
-  joeContract,
-  currentAccount,
-}: Props) {
-  const [amountOfUsdc, setAmountOfUsdc] = useState("");
-  const [amountOfJoe, setAmountOfJoe] = useState("");
+export default function Faucet({ tokens, currentAccount }: Props) {
+  const [amountOfFunds, setAmountOfFunds] = useState("");
+  const [currentTokenIndex, setCurrentTokenIndex] = useState(0);
 
-  const onChangeAmountOfUsdc = (e: ChangeEvent<HTMLInputElement>) => {
-    setAmountOfUsdc(e.target.value);
+  // 参照するインデックスを次に移動させます。
+  const onChangeToken = () => {
+    setCurrentTokenIndex((currentTokenIndex + 1) % tokens.length);
   };
 
-  const onChangeAmountOfJoe = (e: ChangeEvent<HTMLInputElement>) => {
-    setAmountOfJoe(e.target.value);
+  const onChangeAmountOfFunds = (e: ChangeEvent<HTMLInputElement>) => {
+    setAmountOfFunds(e.target.value);
   };
 
-  async function onClickFund(
-    tokenContract: UsdcType | JoeType | undefined,
-    amount: BigNumber
-  ) {
-    if (!tokenContract) return;
-    if (!currentAccount) return;
-    if (["", "."].includes(amount.toString())) {
+  async function onClickFund() {
+    if (!currentAccount) {
+      alert("connect wallet");
+      return;
+    }
+    if (["", "."].includes(amountOfFunds.toString())) {
       alert("Amount should be a valid number"); //TODO: あんまわかってない
       return;
     }
     try {
-      const txn = await tokenContract.faucet(currentAccount, amount);
+      const contract = tokens[currentTokenIndex].contract;
+      const amountInWei = ethers.utils.parseEther(amountOfFunds);
+
+      const txn = await contract.faucet(currentAccount, amountInWei);
       await txn.wait();
-      setAmountOfJoe("");
-      setAmountOfJoe("");
-      // await props.getHoldings(); ユーザ情報の更新
+      // await props.getHoldings();//TODO ユーザ情報の更新
       alert("Success");
     } catch (error) {
       console.log(error);
@@ -54,33 +46,26 @@ export default function Faucet({
 
   return (
     <div className={styles.tabBody}>
-      <BoxTemplate
-        leftHeader={"Amount of USDC"} // シンボルは定数使いたい
-        right={"USDC"}
-        value={amountOfUsdc.toString()}
-        onChange={(e) => onChangeAmountOfUsdc(e)}
-      />
       <div className={styles.bottomDiv}>
-        <div
-          className={styles.btn}
-          onClick={() =>
-            onClickFund(usdcContract, BigNumber.from(amountOfUsdc))
-          }
-        >
-          Fund
+        <div className={styles.btn} onClick={() => onChangeToken()}>
+          Change
         </div>
       </div>
       <BoxTemplate
-        leftHeader={"Amount of JOE"}
-        right={"JOE"}
-        value={amountOfJoe.toString()}
-        onChange={(e) => onChangeAmountOfJoe(e)}
+        leftHeader={
+          "Amount of " +
+          (tokens[currentTokenIndex]
+            ? tokens[currentTokenIndex].symbol
+            : "some token")
+        }
+        right={
+          tokens[currentTokenIndex] ? tokens[currentTokenIndex].symbol : ""
+        }
+        value={amountOfFunds.toString()}
+        onChange={(e) => onChangeAmountOfFunds(e)}
       />
       <div className={styles.bottomDiv}>
-        <div
-          className={styles.btn}
-          onClick={() => onClickFund(joeContract, BigNumber.from(amountOfJoe))}
-        >
+        <div className={styles.btn} onClick={() => onClickFund()}>
           Fund
         </div>
       </div>

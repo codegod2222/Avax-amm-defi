@@ -100,11 +100,7 @@ export default function Container({
         />
       )}
       {activeTab === "Faucet" && (
-        <Faucet
-          usdcContract={usdcContract}
-          joeContract={joeContract}
-          currentAccount={currentAccount}
-        />
+        <Faucet tokens={tokens} currentAccount={currentAccount} />
       )}
       <Details
         usdcContract={usdcContract}
