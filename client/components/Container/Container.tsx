@@ -93,8 +93,7 @@ export default function Container({
       )}
       {activeTab === "Withdraw" && (
         <Withdraw
-          usdcContract={usdcContract}
-          joeContract={joeContract}
+          tokens={tokens}
           ammContract={ammContract}
           currentAccount={currentAccount}
         />
