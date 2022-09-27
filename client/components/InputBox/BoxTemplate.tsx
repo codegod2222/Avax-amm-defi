@@ -1,7 +1,7 @@
 import { ChangeEvent } from "react";
 import styles from "./BoxTemplate.module.css";
 
-const regValidNumber = /^[0-9]*[.]?[0-9]{0,6}$/;
+const regValidNumber = /^[0-9]*[.]?[0-9]{0,6}$/; //TODO これをどこで使うのか検討
 
 type Props = {
   leftHeader: string;

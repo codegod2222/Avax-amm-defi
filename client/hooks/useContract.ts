@@ -15,7 +15,7 @@ export const AmmAddress = "0xE8430Ce3f3A5d4A0E63f5C69e93574e8c9C12db0";
 export type TokenInfo = {
   symbol: string;
   address: string;
-  contract: UsdcType | JoeType;
+  contract: UsdcType | JoeType; //TODO ERC20+faucetのインターフェースで定義
 };
 
 type ReturnUseContract = {
