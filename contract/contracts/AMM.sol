@@ -13,6 +13,7 @@ contract AMM {
     mapping(address => uint256) public shares; // 各ユーザのシェア
     mapping(IERC20 => uint256) public totalAmount; // プールにロックされた各トークンの量
 
+    //TODO こいつは中身だけで使う, 外部にはこれを除いた形でやればいい
     uint256 public constant PRECISION = 1_000_000; // 計算中の精度に使用する定数(= 6桁)
 
     // プールに使えるトークンを指定します。
