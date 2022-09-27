@@ -12,14 +12,12 @@ type Props = {
   usdcContract: UsdcType | undefined;
   joeContract: JoeType | undefined;
   ammContract: AmmType | undefined;
-  currentAccount: string | undefined;
 };
 
 export default function Provide({
   usdcContract,
   joeContract,
   ammContract,
-  currentAccount,
 }: Props) {
   const [amountOfUsdc, setAmountOfUsdc] = useState(BigNumber.from(0));
   const [amountOfJoe, setAmountOfJoe] = useState(BigNumber.from(0));
@@ -31,7 +29,6 @@ export default function Provide({
 
   const checkLiquidity = async () => {
     if (!ammContract) return;
-    if (!currentAccount) return; //TODO: currentAccountがないとコントラクトもundefinedにしたい
     try {
       const share = await ammContract.totalShares();
       if (share.toString() === "0") {

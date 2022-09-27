@@ -2,6 +2,7 @@ import { useState } from "react";
 import { USDCToken as UsdcType } from "../../typechain-types";
 import { JOEToken as JoeType } from "../../typechain-types";
 import { AMM as AmmType } from "../../typechain-types";
+import { TokenInfo } from "../../hooks/useContract";
 import styles from "./Container.module.css";
 import Swap from "../SlectTab/Swap";
 import Details from "../Details/Details";
@@ -12,6 +13,7 @@ import Provide from "../SlectTab/Provide";
 type Props = {
   usdcContract: UsdcType | undefined;
   joeContract: JoeType | undefined;
+  tokens: TokenInfo[];
   ammContract: AmmType | undefined;
   currentAccount: string | undefined;
 };
@@ -20,6 +22,7 @@ type Props = {
 export default function Container({
   usdcContract,
   joeContract,
+  tokens,
   ammContract,
   currentAccount,
 }: Props) {
@@ -86,7 +89,6 @@ export default function Container({
           usdcContract={usdcContract}
           joeContract={joeContract}
           ammContract={ammContract}
-          currentAccount={currentAccount}
         />
       )}
       {activeTab === "Withdraw" && (

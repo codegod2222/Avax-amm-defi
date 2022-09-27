@@ -18,7 +18,6 @@ export type TokenInfo = {
   contract: UsdcType | JoeType;
 };
 
-// useContractの返すオブジェクトの型定義です。
 type ReturnUseContract = {
   usdcContract: UsdcType | undefined; //TODO 消す
   joeContract: JoeType | undefined; //TODO 消す
@@ -26,7 +25,9 @@ type ReturnUseContract = {
   ammContract: AmmType | undefined;
 };
 
-export const useContract = (): ReturnUseContract => {
+export const useContract = (
+  currentAccount: string | undefined
+): ReturnUseContract => {
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
   const [usdcContract, setUsdcContract] = useState<UsdcType>();
   const [joeContract, setJoeContract] = useState<JoeType>(); //TODO 消す
@@ -40,6 +41,10 @@ export const useContract = (): ReturnUseContract => {
   ) => {
     if (!ethereum) {
       console.log("Ethereum object doesn't exist!");
+      return;
+    }
+    if (!currentAccount) {
+      console.log("currentAccount doesn't exist!");
       return;
     }
     try {
@@ -84,7 +89,7 @@ export const useContract = (): ReturnUseContract => {
     getContract(AmmAddress, AmmArtifact.abi, (Contract: ethers.Contract) => {
       setAmmContract(Contract as AmmType);
     });
-  }, [ethereum]);
+  }, [ethereum, currentAccount]);
 
   return {
     usdcContract: usdcContract,

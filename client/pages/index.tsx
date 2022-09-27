@@ -6,7 +6,8 @@ import Container from "../components/Container/Container";
 
 const Home: NextPage = () => {
   const { currentAccount, connectWallet } = useWallet();
-  const { usdcContract, joeContract, ammContract } = useContract();
+  const { usdcContract, joeContract, tokens, ammContract } =
+    useContract(currentAccount);
 
   return (
     <div className={styles.pageBody}>
@@ -27,6 +28,7 @@ const Home: NextPage = () => {
       <Container
         usdcContract={usdcContract}
         joeContract={joeContract}
+        tokens={tokens}
         ammContract={ammContract}
         currentAccount={currentAccount}
       />
