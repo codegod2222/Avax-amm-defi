@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { USDCToken as UsdcType } from "../../typechain-types";
-import { JOEToken as JoeType } from "../../typechain-types";
 import { AMM as AmmType } from "../../typechain-types";
 import { TokenInfo } from "../../hooks/useContract";
 import styles from "./Container.module.css";
@@ -9,21 +7,19 @@ import Details from "../Details/Details";
 import Faucet from "../SlectTab/Faucet";
 import Withdraw from "../SlectTab/Withdraw";
 import Provide from "../SlectTab/Provide";
+import { BigNumber } from "ethers";
 
 type Props = {
-  usdcContract: UsdcType | undefined;
-  joeContract: JoeType | undefined;
   tokens: TokenInfo[];
   ammContract: AmmType | undefined;
+  sharePrecision: BigNumber | undefined;
   currentAccount: string | undefined;
 };
 
-//TODO: セレクトタブのところ, 同じcssで囲みたい
 export default function Container({
-  usdcContract,
-  joeContract,
   tokens,
   ammContract,
+  sharePrecision,
   currentAccount,
 }: Props) {
   const [activeTab, setActiveTab] = useState("Swap");
@@ -78,15 +74,24 @@ export default function Container({
       </div>
 
       {activeTab === "Swap" && (
-        <Swap tokens={tokens} ammContract={ammContract} />
+        <Swap
+          tokens={tokens}
+          ammContract={ammContract}
+          currentAccount={currentAccount}
+        />
       )}
       {activeTab === "Provide" && (
-        <Provide tokens={tokens} ammContract={ammContract} />
+        <Provide
+          tokens={tokens}
+          ammContract={ammContract}
+          currentAccount={currentAccount}
+        />
       )}
       {activeTab === "Withdraw" && (
         <Withdraw
           tokens={tokens}
           ammContract={ammContract}
+          sharePrecision={sharePrecision}
           currentAccount={currentAccount}
         />
       )}
@@ -96,6 +101,7 @@ export default function Container({
       <Details
         tokens={tokens}
         ammContract={ammContract}
+        sharePrecision={sharePrecision}
         currentAccount={currentAccount}
       />
     </div>

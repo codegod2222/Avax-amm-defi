@@ -2,19 +2,22 @@ import { ChangeEvent, useEffect, useState } from "react";
 import { AMM as AmmType } from "../../typechain-types";
 import { TokenInfo } from "../../hooks/useContract";
 import styles from "./Select.module.css";
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import BoxTemplate from "../InputBox/BoxTemplate";
 import { validAmount } from "../../utils/validAmount";
-//TODO: shareの精度問題
+import { formatInContract, formatInClient } from "../../utils/format";
+
 type Props = {
   tokens: TokenInfo[];
   ammContract: AmmType | undefined;
+  sharePrecision: BigNumber | undefined;
   currentAccount: string | undefined;
 };
 
 export default function Withdraw({
   tokens,
   ammContract,
+  sharePrecision,
   currentAccount,
 }: Props) {
   const [maxShare, setMaxShare] = useState("");
@@ -28,26 +31,27 @@ export default function Withdraw({
   }, [ammContract]);
 
   const getMaxShare = async () => {
-    if (!ammContract || !currentAccount) return;
+    if (!ammContract || !currentAccount || !sharePrecision) return;
     try {
       const share = await ammContract.shares(currentAccount);
-      setMaxShare(share.toString());
+      setMaxShare(formatInClient(share, sharePrecision));
     } catch (error) {
       alert(error);
     }
   };
 
   const getEstimate = async () => {
-    if (!ammContract) return;
+    if (!ammContract || !sharePrecision) return;
     try {
       setAmountOfEstimate([]);
-      tokens.map(async (token) => {
-        const estimate = await ammContract.withdrawEstimate(
-          token.address,
-          BigNumber.from(amountOfShare)
+      for (let index = 0; index < tokens.length; index++) {
+        const estimateInWei = await ammContract.withdrawEstimate(
+          tokens[index].address,
+          formatInContract(amountOfShare, sharePrecision)
         );
-        setAmountOfEstimate((prevState) => [...prevState, estimate.toString()]);
-      });
+        const estimateInEther = ethers.utils.formatEther(estimateInWei);
+        setAmountOfEstimate((prevState) => [...prevState, estimateInEther]);
+      }
     } catch (error) {
       alert(error);
     }

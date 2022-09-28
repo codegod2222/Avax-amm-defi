@@ -27,6 +27,7 @@ export default function Swap({ tokens, ammContract, currentAccount }: Props) {
     setTokenIndexSrc(tokenIndexDst);
     setTokenIndexDst(srcCopy);
 
+    // 交換後はソースから推定量を計算します。
     getSwapEstimateFromSrc(amountSrc);
   };
 
