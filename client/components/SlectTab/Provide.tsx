@@ -23,7 +23,7 @@ export default function Provide({
     Second,
   }
   const [amountOfTokens, setAmountOfTokens] = useState<string[]>([]);
-  const [error, setError] = useState("");
+  const [activePool, setActivePool] = useState(false);
 
   useEffect(() => {
     checkLiquidity();
@@ -34,7 +34,9 @@ export default function Provide({
     try {
       const totalShares = await ammContract.totalShares();
       if (totalShares.toString() === "0") {
-        setError("Message: Empty pool. Set the initial conversion rate.");
+        setActivePool(false);
+      } else {
+        setActivePool(true);
       }
     } catch (error) {
       alert(error);
@@ -49,6 +51,7 @@ export default function Provide({
 
   const getProvideEstimate = async (tokenIndex: number) => {
     if (!ammContract || tokens.length !== 2) return;
+    if (!activePool) return;
     if (!validAmount(amountOfTokens[tokenIndex])) return;
     try {
       const amountInWei = ethers.utils.parseEther(amountOfTokens[tokenIndex]);
@@ -87,17 +90,32 @@ export default function Provide({
       return;
     }
     try {
+      const amountTokenFirstInWei = ethers.utils.parseEther(
+        amountOfTokens[TokenIndex.First]
+      );
+      const amountTokenSecondInWei = ethers.utils.parseEther(
+        amountOfTokens[TokenIndex.Second]
+      );
+
+      await tokens[TokenIndex.First].contract.approve(
+        "0xE8430Ce3f3A5d4A0E63f5C69e93574e8c9C12db0",
+        amountTokenFirstInWei
+      );
+      await tokens[TokenIndex.Second].contract.approve(
+        "0xE8430Ce3f3A5d4A0E63f5C69e93574e8c9C12db0",
+        amountTokenSecondInWei
+      );
+
       const txn = await ammContract.provide(
         tokens[TokenIndex.First].address,
-        ethers.utils.parseEther(amountOfTokens[TokenIndex.First]),
+        amountTokenFirstInWei,
         tokens[TokenIndex.Second].address,
-        ethers.utils.parseEther(amountOfTokens[TokenIndex.Second])
+        amountTokenSecondInWei
       );
       await txn.wait();
       setAmountOfTokens([]);
       // await props.getHoldings();//TODO ユーザ情報更新処理
       alert("Success");
-      setError("");
     } catch (error) {
       alert(error);
     }
@@ -132,7 +150,11 @@ export default function Provide({
         value={amountOfTokens[TokenIndex.Second]}
         onChange={(e) => onChangeAmount(1, e)}
       />
-      <div className={styles.error}>{error}</div>
+      {!activePool && (
+        <div className={styles.error}>
+          Message: Empty pool. Set the initial conversion rate.
+        </div>
+      )}
       <div className={styles.bottomDiv}>
         <div className={styles.btn} onClick={() => onClickProvide()}>
           Provide
