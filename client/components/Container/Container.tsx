@@ -81,7 +81,8 @@ export default function Container({
 
       {activeTab === "Swap" && (
         <Swap
-          tokens={tokens}
+          token0={tokens[0]}
+          token1={tokens[1]}
           ammContract={ammContract}
           currentAccount={currentAccount}
           updateDetails={updateDetails}

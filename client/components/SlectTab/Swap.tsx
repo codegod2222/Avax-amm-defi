@@ -8,43 +8,46 @@ import { ethers } from "ethers";
 import { validAmount } from "../../utils/validAmount";
 
 type Props = {
-  tokens: TokenInfo[];
+  token0: TokenInfo | undefined;
+  token1: TokenInfo | undefined;
   ammContract: AmmType | undefined;
   currentAccount: string | undefined;
   updateDetails: () => void;
 };
 
 export default function Swap({
-  tokens,
+  token0,
+  token1,
   ammContract,
   currentAccount,
   updateDetails,
 }: Props) {
-  // スワップ元とスワップ先のトークンのインデックス番号を格納します。
-  const [tokenIndexSrc, setTokenIndexSrc] = useState(0);
-  const [tokenIndexDst, setTokenIndexDst] = useState(1);
+  // スワップ元とスワップ先のトークンを格納します。
+  const [tokenSrc, setTokenSrc] = useState(token0);
+  const [tokenDst, setTokenDst] = useState(token1);
 
   const [amountSrc, setAmountSrc] = useState("");
   const [amountDst, setAmountDst] = useState("");
 
   const rev = () => {
-    // スワップ元とスワップ先のトークンのインデックスを交換します。
-    const srcCopy = tokenIndexSrc;
-    setTokenIndexSrc(tokenIndexDst);
-    setTokenIndexDst(srcCopy);
+    // スワップ元とスワップ先のトークンを交換します。
+    const srcCopy = tokenSrc;
+    setTokenSrc(tokenDst);
+    setTokenDst(srcCopy);
 
-    // 交換後はソースから推定量を計算します。
+    // 交換後はソーストークンから推定量を再計算します。
     getSwapEstimateFromSrc(amountSrc);
   };
 
   // スワップ元トークンに指定された量から, スワップ先トークンの受け取れる量を取得します。
   const getSwapEstimateFromSrc = async (amount: string) => {
-    if (!ammContract || tokens.length !== 2) return;
+    if (!ammContract || !tokenSrc) return;
     if (!validAmount(amount)) return;
     try {
+      const amountSrcInWei = ethers.utils.parseEther(amount);
       const amountDstInWei = await ammContract.swapEstimateFromSrcToken(
-        tokens[tokenIndexSrc].address,
-        ethers.utils.parseEther(amount)
+        tokenSrc.address,
+        amountSrcInWei
       );
       const amountDstInEther = ethers.utils.formatEther(amountDstInWei);
       setAmountDst(amountDstInEther);
@@ -55,13 +58,14 @@ export default function Swap({
 
   // スワップ先トークンに指定された量から, スワップ元トークンに必要な量を取得します。
   const getSwapEstimateFromDst = async (amount: string) => {
-    if (!ammContract || tokens.length !== 2) return;
-    if (!validAmount(amount)) return;
+    if (!ammContract || !tokenDst) return;
+    if (!validAmount(amount)) return; //TODO 他のやり方合わせる
     if (ammContract) {
       try {
+        const amountDstInWei = ethers.utils.parseEther(amount);
         const amountSrcInWei = await ammContract.swapEstimateFromDstToken(
-          tokens[tokenIndexDst].address,
-          ethers.utils.parseEther(amount)
+          tokenDst.address,
+          amountDstInWei
         );
         const amountSrcInEther = ethers.utils.formatEther(amountSrcInWei);
         setAmountSrc(amountSrcInEther);
@@ -72,6 +76,7 @@ export default function Swap({
   };
 
   const onChangeSrc = (amount: string) => {
+    //TODO このeではなくamount: stringのやり方他のところでもやる
     setAmountSrc(amount);
     getSwapEstimateFromSrc(amount);
   };
@@ -86,16 +91,17 @@ export default function Swap({
       alert("Connect to wallet");
       return;
     }
-    if (!ammContract || tokens.length !== 2) return;
+    if (!ammContract || !tokenSrc || !tokenDst) return;
     if (!validAmount(amountSrc)) {
       alert("Amount should be a valid number");
       return;
     }
     try {
+      const amountSrcInWei = ethers.utils.parseEther(amountSrc);
       const txn = await ammContract.swap(
-        tokens[tokenIndexSrc].address,
-        tokens[tokenIndexDst].address,
-        ethers.utils.parseEther(amountSrc)
+        tokenSrc.address,
+        tokenDst.address,
+        amountSrcInWei
       );
       await txn.wait();
       setAmountSrc("");
@@ -111,7 +117,7 @@ export default function Swap({
     <div className={styles.tabBody}>
       <BoxTemplate
         leftHeader={"From"}
-        right={tokens[tokenIndexSrc] ? tokens[tokenIndexSrc].symbol : ""}
+        right={tokenSrc ? tokenSrc.symbol : ""}
         value={amountSrc}
         onChange={(e) => onChangeSrc(e.target.value)}
       />
@@ -120,7 +126,7 @@ export default function Swap({
       </div>
       <BoxTemplate
         leftHeader={"To"}
-        right={tokens[tokenIndexDst] ? tokens[tokenIndexDst].symbol : ""}
+        right={tokenDst ? tokenDst.symbol : ""}
         value={amountDst}
         onChange={(e) => onChangeDst(e.target.value)}
       />
