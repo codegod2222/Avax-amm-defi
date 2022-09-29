@@ -6,7 +6,8 @@ import { BigNumber, ethers } from "ethers";
 import { formatWithoutPrecision } from "../../utils/format";
 
 type Props = {
-  tokens: TokenInfo[];
+  token0: TokenInfo | undefined;
+  token1: TokenInfo | undefined;
   ammContract: AmmType | undefined;
   sharePrecision: BigNumber | undefined;
   currentAccount: string | undefined;
@@ -14,53 +15,63 @@ type Props = {
 };
 
 export default function Details({
-  tokens,
+  token0,
+  token1,
   ammContract,
   sharePrecision,
   currentAccount,
   updateDetailsFlag,
 }: Props) {
-  const [amountOfTokensOfUser, setAmountOfTokensOfUser] = useState<string[]>(
-    []
-  );
-  const [amountOfTokensInPool, setAmountOfTokensInPool] = useState<string[]>(
-    []
-  );
+  const [amountOfUserTokens, setAmountOfUserTokens] = useState<string[]>([]);
+  const [amountOfPoolTokens, setAmountOfPoolTokens] = useState<string[]>([]);
+  const [tokens, setTokens] = useState<TokenInfo[]>([]);
+
   const [userShare, setUserShare] = useState("");
   const [totalShare, setTotalShare] = useState("");
 
   useEffect(() => {
-    getAmountOfTokensOfUser();
-    getAmountOfTokensInPool();
-    getShares();
+    if (!token0 || !token1) return;
+    setTokens([token0, token1]);
+  }, [token0, token1]);
+
+  useEffect(() => {
+    getAmountOfUserTokens();
+  }, [tokens, updateDetailsFlag]);
+
+  useEffect(() => {
+    getAmountOfPoolTokens();
   }, [ammContract, tokens, updateDetailsFlag]);
 
-  const getAmountOfTokensOfUser = async () => {
-    if (!ammContract || tokens.length !== 2 || !currentAccount) return;
+  useEffect(() => {
+    getShares();
+  }, [ammContract, sharePrecision, updateDetailsFlag]);
+
+  const getAmountOfUserTokens = async () => {
+    if (!currentAccount) return;
     try {
-      setAmountOfTokensOfUser([]);
+      setAmountOfUserTokens([]);
       for (let index = 0; index < tokens.length; index++) {
         const amountInWei = await tokens[index].contract.balanceOf(
           currentAccount
         );
         const amountInEther = ethers.utils.formatEther(amountInWei);
-        setAmountOfTokensOfUser((prevState) => [...prevState, amountInEther]);
+        setAmountOfUserTokens((prevState) => [...prevState, amountInEther]);
       }
     } catch (error) {
       console.log(error);
     }
   };
 
-  const getAmountOfTokensInPool = async () => {
-    if (!ammContract || tokens.length !== 2 || !currentAccount) return;
+  const getAmountOfPoolTokens = async () => {
+    if (!ammContract) return;
     try {
-      setAmountOfTokensInPool([]);
+      setAmountOfPoolTokens([]);
       for (let index = 0; index < tokens.length; index++) {
         const amountInWei = await ammContract.totalAmount(
           tokens[index].address
         );
         const amountInEther = ethers.utils.formatEther(amountInWei);
-        setAmountOfTokensInPool((prevState) => [...prevState, amountInEther]);
+        setAmountOfPoolTokens((prevState) => [...prevState, amountInEther]);
       }
     } catch (error) {
       console.log(error);
@@ -71,35 +82,38 @@ export default function Details({
     if (!ammContract || !currentAccount || !sharePrecision) return;
     try {
       let share = await ammContract.shares(currentAccount);
-      setUserShare(formatWithoutPrecision(share, sharePrecision));
+      let shareWithoutPrecision = formatWithoutPrecision(share, sharePrecision);
+      setUserShare(shareWithoutPrecision);
 
       share = await ammContract.totalShares();
-      setTotalShare(formatWithoutPrecision(share, sharePrecision));
+      shareWithoutPrecision = formatWithoutPrecision(share, sharePrecision);
+      setTotalShare(shareWithoutPrecision);
     } catch (err) {
       console.log("Couldn't Fetch details", err);
     }
   }
-  //TODO shareが表示されていない
+
+  //TODO shareなのかsharesなのか
   return (
     <div className={styles.details}>
       <div className={styles.detailsBody}>
         <div className={styles.detailsHeader}>Your Details</div>
-        {amountOfTokensOfUser.map((amount, index) => {
+        {amountOfUserTokens.map((amount, index) => {
           return (
             <div className={styles.detailsRow}>
               <div className={styles.detailsAttribute}>
-                {tokens[index] ? tokens[index].symbol : "some token"}:
+                {tokens[index].symbol}:
               </div>
               <div className={styles.detailsValue}>{amount}</div>
             </div>
           );
         })}
         <div className={styles.detailsHeader}>Pool Details</div>
-        {amountOfTokensInPool.map((amount, index) => {
+        {amountOfPoolTokens.map((amount, index) => {
           return (
             <div className={styles.detailsRow}>
               <div className={styles.detailsAttribute}>
-                Total {tokens[index] ? tokens[index].symbol : "some token"}::
+                Total {tokens[index].symbol}:
               </div>
               <div className={styles.detailsValue}>{amount}</div>
             </div>
