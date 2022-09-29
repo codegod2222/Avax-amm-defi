@@ -93,6 +93,7 @@ export default function Withdraw({
     }
   };
 
+  //TODO MAXは常時表示するようにする
   return (
     <div className={styles.tabBody}>
       <div className={styles.bottomDiv}>

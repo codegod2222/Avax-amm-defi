@@ -12,12 +12,13 @@ type Props = {
   ammContract: AmmType | undefined;
   currentAccount: string | undefined;
 };
-
+//TODO 順番が変わるのだるいのでmapは使わないようにするか？, それかorderする
 export default function Provide({
   tokens,
   ammContract,
   currentAccount,
 }: Props) {
+  //TODO ここtoken0とtoken1的な感じにする
   enum TokenIndex {
     First,
     Second,
