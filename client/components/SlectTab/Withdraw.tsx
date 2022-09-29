@@ -5,10 +5,14 @@ import styles from "./Select.module.css";
 import { BigNumber, ethers } from "ethers";
 import BoxTemplate from "../InputBox/BoxTemplate";
 import { validAmount } from "../../utils/validAmount";
-import { formatInContract, formatInClient } from "../../utils/format";
+import {
+  formatWithPrecision,
+  formatWithoutPrecision,
+} from "../../utils/format";
 
 type Props = {
-  tokens: TokenInfo[];
+  token0: TokenInfo | undefined;
+  token1: TokenInfo | undefined;
   ammContract: AmmType | undefined;
   sharePrecision: BigNumber | undefined;
   currentAccount: string | undefined;
@@ -16,17 +20,17 @@ type Props = {
 };
 
 export default function Withdraw({
-  tokens,
+  token0,
+  token1,
   ammContract,
   sharePrecision,
   currentAccount,
   updateDetails,
 }: Props) {
-  const [maxShare, setMaxShare] = useState("");
+  const [amountOfToken0, setAmountOfToken0] = useState("");
+  const [amountOfToken1, setAmountOfToken1] = useState("");
   const [amountOfShare, setAmountOfShare] = useState("");
-
-  // 各トークンの引き出せる推定量を保存する状態変数です。
-  const [amountOfEstimate, setAmountOfEstimate] = useState<string[]>([]);
+  const [amountOfMaxShare, setAmountOfMaxShare] = useState<string>(); //TODO ここみたいにコントラクトからの値はundefindeにするの他もやる
 
   useEffect(() => {
     getMaxShare();
@@ -35,38 +39,65 @@ export default function Withdraw({
   const getMaxShare = async () => {
     if (!ammContract || !currentAccount || !sharePrecision) return;
     try {
-      const share = await ammContract.shares(currentAccount);
-      setMaxShare(formatInClient(share, sharePrecision));
+      const shareWithPrecision = await ammContract.shares(currentAccount);
+      const shareWithoutPrecision = formatWithoutPrecision(
+        shareWithPrecision,
+        sharePrecision
+      );
+      setAmountOfMaxShare(shareWithoutPrecision);
     } catch (error) {
       alert(error);
     }
   };
 
-  const getEstimate = async () => {
-    if (!ammContract || !sharePrecision) return;
+  const leftLessThanRightAsBigNumber = (
+    left: string,
+    right: string
+  ): boolean => {
+    return BigNumber.from(left).lt(BigNumber.from(right));
+  };
+  //TODO 現状正しくない入力はここで拾われるため毎度alertが出て面倒, 入力自体できないようにしたい, ""の時は0として扱ってほしい考える, 他のところもやる
+  const getEstimate = async (
+    token: TokenInfo | undefined,
+    amountOfShare: string,
+    setAmount: (amount: string) => void
+  ) => {
+    if (!ammContract || !sharePrecision || !token || !amountOfMaxShare) return;
+    if (!validAmount(amountOfShare)) {
+      alert("Amount should be a valid number");
+      return;
+    }
+    if (leftLessThanRightAsBigNumber(amountOfMaxShare, amountOfShare)) {
+      alert("Amount should be less than your max share");
+      return;
+    }
     try {
-      setAmountOfEstimate([]);
-      for (let index = 0; index < tokens.length; index++) {
-        const estimateInWei = await ammContract.withdrawEstimate(
-          tokens[index].address,
-          formatInContract(amountOfShare, sharePrecision)
-        );
-        const estimateInEther = ethers.utils.formatEther(estimateInWei);
-        setAmountOfEstimate((prevState) => [...prevState, estimateInEther]);
-      }
+      const shareWithPrecision = formatWithPrecision(
+        amountOfShare,
+        sharePrecision
+      );
+      const estimateInWei = await ammContract.withdrawEstimate(
+        token.address,
+        shareWithPrecision
+      );
+      const estimateInEther = ethers.utils.formatEther(estimateInWei);
+      setAmount(estimateInEther);
     } catch (error) {
       alert(error);
     }
   };
 
   const onClickMax = async () => {
-    setAmountOfShare(maxShare);
-    getEstimate();
+    if (!amountOfMaxShare) return;
+    setAmountOfShare(amountOfMaxShare);
+    getEstimate(token0, amountOfMaxShare, setAmountOfToken0);
+    getEstimate(token1, amountOfMaxShare, setAmountOfToken1);
   };
 
   const onChangeAmountOfShare = async (e: ChangeEvent<HTMLInputElement>) => {
     setAmountOfShare(e.target.value);
-    getEstimate();
+    getEstimate(token0, e.target.value, setAmountOfToken0);
+    getEstimate(token1, e.target.value, setAmountOfToken1);
   };
 
   const onClickWithdraw = async () => {
@@ -74,20 +105,23 @@ export default function Withdraw({
       alert("connect wallet");
       return;
     }
-    if (!ammContract) return;
+    if (!ammContract || !sharePrecision || !amountOfMaxShare) return;
     if (!validAmount(amountOfShare)) {
       alert("Amount should be a valid number");
       return;
     }
-    if (maxShare < amountOfShare) {
+    if (leftLessThanRightAsBigNumber(amountOfMaxShare, amountOfShare)) {
       alert("Amount should be less than your max share");
       return;
     }
     try {
-      const txn = await ammContract.withdraw(BigNumber.from(amountOfShare));
+      const txn = await ammContract.withdraw(
+        formatWithPrecision(amountOfShare, sharePrecision)
+      );
       await txn.wait();
+      setAmountOfToken0("");
+      setAmountOfToken1("");
       setAmountOfShare("");
-      setAmountOfEstimate([]);
       updateDetails(); // ユーザとammの情報を更新
       alert("Success!");
     } catch (error) {
@@ -95,7 +129,6 @@ export default function Withdraw({
     }
   };
 
-  //TODO MAXは常時表示するようにする
   return (
     <div className={styles.tabBody}>
       <div className={styles.bottomDiv}>
@@ -109,11 +142,15 @@ export default function Withdraw({
         value={amountOfShare}
         onChange={(e) => onChangeAmountOfShare(e)}
       />
-      {amountOfEstimate.length === 2 && (
+      {token0 && token1 && (
         <div className={styles.withdrawEstimate}>
           <div>
-            Amount of {tokens[0].symbol}: {amountOfEstimate[0]}
-            Amount of {tokens[1].symbol}: {amountOfEstimate[1]}
+            <p>
+              Amount of {token0.symbol}: {amountOfToken0}
+            </p>
+            <p>
+              Amount of {token1.symbol}: {amountOfToken1}
+            </p>
           </div>
         </div>
       )}

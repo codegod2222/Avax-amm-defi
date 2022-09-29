@@ -10,7 +10,7 @@ import Provide from "../SlectTab/Provide";
 import { BigNumber } from "ethers";
 
 type Props = {
-  tokens: TokenInfo[];
+  tokens: TokenInfo[]; //TODO これ止める
   ammContract: AmmType | undefined;
   sharePrecision: BigNumber | undefined;
   currentAccount: string | undefined;
@@ -98,7 +98,8 @@ export default function Container({
       )}
       {activeTab === "Withdraw" && (
         <Withdraw
-          tokens={tokens}
+          token0={tokens[0]}
+          token1={tokens[1]}
           ammContract={ammContract}
           sharePrecision={sharePrecision}
           currentAccount={currentAccount}
