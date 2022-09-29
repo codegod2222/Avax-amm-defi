@@ -11,12 +11,14 @@ type Props = {
   tokens: TokenInfo[];
   ammContract: AmmType | undefined;
   currentAccount: string | undefined;
+  updateDetails: () => void;
 };
 //TODO 順番が変わるのだるいのでmapは使わないようにするか？, それかorderする
 export default function Provide({
   tokens,
   ammContract,
   currentAccount,
+  updateDetails,
 }: Props) {
   //TODO ここtoken0とtoken1的な感じにする
   enum TokenIndex {
@@ -115,7 +117,7 @@ export default function Provide({
       );
       await txn.wait();
       setAmountOfTokens([]);
-      // await props.getHoldings();//TODO ユーザ情報更新処理
+      updateDetails(); // ユーザとammの情報を更新
       alert("Success");
     } catch (error) {
       alert(error);

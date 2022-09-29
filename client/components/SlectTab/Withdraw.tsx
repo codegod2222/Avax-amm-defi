@@ -12,6 +12,7 @@ type Props = {
   ammContract: AmmType | undefined;
   sharePrecision: BigNumber | undefined;
   currentAccount: string | undefined;
+  updateDetails: () => void;
 };
 
 export default function Withdraw({
@@ -19,6 +20,7 @@ export default function Withdraw({
   ammContract,
   sharePrecision,
   currentAccount,
+  updateDetails,
 }: Props) {
   const [maxShare, setMaxShare] = useState("");
   const [amountOfShare, setAmountOfShare] = useState("");
@@ -86,7 +88,7 @@ export default function Withdraw({
       await txn.wait();
       setAmountOfShare("");
       setAmountOfEstimate([]);
-      // await props.getHoldings();//TODO ユーザ情報更新作業
+      updateDetails(); // ユーザとammの情報を更新
       alert("Success!");
     } catch (error) {
       alert(error);

@@ -11,9 +11,15 @@ type Props = {
   tokens: TokenInfo[];
   ammContract: AmmType | undefined;
   currentAccount: string | undefined;
+  updateDetails: () => void;
 };
 
-export default function Swap({ tokens, ammContract, currentAccount }: Props) {
+export default function Swap({
+  tokens,
+  ammContract,
+  currentAccount,
+  updateDetails,
+}: Props) {
   // スワップ元とスワップ先のトークンのインデックス番号を格納します。
   const [tokenIndexSrc, setTokenIndexSrc] = useState(0);
   const [tokenIndexDst, setTokenIndexDst] = useState(1);
@@ -94,7 +100,7 @@ export default function Swap({ tokens, ammContract, currentAccount }: Props) {
       await txn.wait();
       setAmountSrc("");
       setAmountDst("");
-      // await props.getHoldings(); // TODO: ここでユーザ情報の更新作業, このようにプロップスとして受け取ってもいかも, それかbool値
+      updateDetails(); // ユーザとammの情報を更新
       alert("Success!");
     } catch (error) {
       alert(error);

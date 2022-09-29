@@ -10,6 +10,7 @@ type Props = {
   ammContract: AmmType | undefined;
   sharePrecision: BigNumber | undefined;
   currentAccount: string | undefined;
+  updateDetailsFlag: number;
 };
 
 export default function Details({
@@ -17,6 +18,7 @@ export default function Details({
   ammContract,
   sharePrecision,
   currentAccount,
+  updateDetailsFlag,
 }: Props) {
   const [amountOfTokensOfUser, setAmountOfTokensOfUser] = useState<string[]>(
     []
@@ -31,7 +33,7 @@ export default function Details({
     getAmountOfTokensOfUser();
     getAmountOfTokensInPool();
     getShares();
-  }, [ammContract, tokens]);
+  }, [ammContract, tokens, updateDetailsFlag]);
 
   const getAmountOfTokensOfUser = async () => {
     if (!ammContract || tokens.length !== 2 || !currentAccount) return;
@@ -77,7 +79,7 @@ export default function Details({
       console.log("Couldn't Fetch details", err);
     }
   }
-
+  //TODO shareが表示されていない
   return (
     <div className={styles.details}>
       <div className={styles.detailsBody}>

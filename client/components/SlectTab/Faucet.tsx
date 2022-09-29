@@ -8,9 +8,14 @@ import { validAmount } from "../../utils/validAmount";
 type Props = {
   tokens: TokenInfo[];
   currentAccount: string | undefined;
+  updateDetails: () => void;
 };
 
-export default function Faucet({ tokens, currentAccount }: Props) {
+export default function Faucet({
+  tokens,
+  currentAccount,
+  updateDetails,
+}: Props) {
   const [amountOfFunds, setAmountOfFunds] = useState("");
   const [currentTokenIndex, setCurrentTokenIndex] = useState(0);
 
@@ -39,7 +44,7 @@ export default function Faucet({ tokens, currentAccount }: Props) {
 
       const txn = await contract.faucet(currentAccount, amountInWei);
       await txn.wait();
-      // await props.getHoldings();//TODO ユーザ情報の更新
+      updateDetails(); // ユーザとammの情報を更新
       alert("Success");
     } catch (error) {
       console.log(error);

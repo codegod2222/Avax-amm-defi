@@ -23,9 +23,15 @@ export default function Container({
   currentAccount,
 }: Props) {
   const [activeTab, setActiveTab] = useState("Swap");
+  const [updateDetailsFlag, setUpdateDetailsFlag] = useState(0);
 
   const changeTab = (tab: string) => {
     setActiveTab(tab);
+  };
+
+  const updateDetails = () => {
+    // フラグを0と1の間で交互に変更します。
+    setUpdateDetailsFlag((updateDetailsFlag + 1) % 2);
   };
 
   return (
@@ -78,6 +84,7 @@ export default function Container({
           tokens={tokens}
           ammContract={ammContract}
           currentAccount={currentAccount}
+          updateDetails={updateDetails}
         />
       )}
       {activeTab === "Provide" && (
@@ -85,6 +92,7 @@ export default function Container({
           tokens={tokens}
           ammContract={ammContract}
           currentAccount={currentAccount}
+          updateDetails={updateDetails}
         />
       )}
       {activeTab === "Withdraw" && (
@@ -93,16 +101,22 @@ export default function Container({
           ammContract={ammContract}
           sharePrecision={sharePrecision}
           currentAccount={currentAccount}
+          updateDetails={updateDetails}
         />
       )}
       {activeTab === "Faucet" && (
-        <Faucet tokens={tokens} currentAccount={currentAccount} />
+        <Faucet
+          tokens={tokens}
+          currentAccount={currentAccount}
+          updateDetails={updateDetails}
+        />
       )}
       <Details
         tokens={tokens}
         ammContract={ammContract}
         sharePrecision={sharePrecision}
         currentAccount={currentAccount}
+        updateDetailsFlag={updateDetailsFlag}
       />
     </div>
   );
