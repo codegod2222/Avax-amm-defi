@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { TokenInfo } from "../../hooks/useContract";
 import styles from "./Select.module.css";
 import BoxTemplate from "../InputBox/BoxTemplate";
@@ -6,20 +6,29 @@ import { ethers } from "ethers";
 import { validAmount } from "../../utils/validAmount";
 
 type Props = {
-  tokens: TokenInfo[];
+  token0: TokenInfo | undefined;
+  token1: TokenInfo | undefined;
   currentAccount: string | undefined;
   updateDetails: () => void;
 };
 
 export default function Faucet({
-  tokens,
+  token0,
+  token1,
   currentAccount,
   updateDetails,
 }: Props) {
   const [amountOfFunds, setAmountOfFunds] = useState("");
   const [currentTokenIndex, setCurrentTokenIndex] = useState(0);
 
-  // 参照するインデックスを次に移動させます。
+  const [tokens, setTokens] = useState<TokenInfo[]>([]);
+
+  useEffect(() => {
+    if (!token0 || !token1) return;
+    setTokens([token0, token1]);
+  }, [token0, token1]);
+
+  // tokensの範囲内で, 参照するインデックスを次に移動させます。
   const onChangeToken = () => {
     setCurrentTokenIndex((currentTokenIndex + 1) % tokens.length);
   };
@@ -33,7 +42,7 @@ export default function Faucet({
       alert("connect wallet");
       return;
     }
-    if (tokens.length !== 2) return;
+    if (tokens.length === 0) return;
     if (!validAmount(amountOfFunds)) {
       alert("Amount should be a valid number");
       return;

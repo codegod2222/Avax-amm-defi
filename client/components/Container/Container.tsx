@@ -109,7 +109,8 @@ export default function Container({
       )}
       {activeTab === "Faucet" && (
         <Faucet
-          tokens={tokens}
+          token0={tokens[0]}
+          token1={tokens[1]}
           currentAccount={currentAccount}
           updateDetails={updateDetails}
         />
