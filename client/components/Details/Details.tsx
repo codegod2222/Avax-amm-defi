@@ -3,7 +3,7 @@ import { AMM as AmmType } from "../../typechain-types";
 import styles from "./Details.module.css";
 import { TokenInfo } from "../../hooks/useContract";
 import { BigNumber, ethers } from "ethers";
-import { formatInClient } from "../../utils/format";
+import { formatWithoutPrecision } from "../../utils/format";
 
 type Props = {
   tokens: TokenInfo[];
@@ -71,10 +71,10 @@ export default function Details({
     if (!ammContract || !currentAccount || !sharePrecision) return;
     try {
       let share = await ammContract.shares(currentAccount);
-      setUserShare(formatInClient(share, sharePrecision));
+      setUserShare(formatWithoutPrecision(share, sharePrecision));
 
       share = await ammContract.totalShares();
-      setTotalShare(formatInClient(share, sharePrecision));
+      setTotalShare(formatWithoutPrecision(share, sharePrecision));
     } catch (err) {
       console.log("Couldn't Fetch details", err);
     }

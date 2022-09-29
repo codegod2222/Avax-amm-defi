@@ -1,13 +1,13 @@
 import { BigNumber } from "ethers";
 
-export const formatInContract = (
+export const formatWithPrecision = (
   share: string,
   precision: BigNumber
 ): BigNumber => {
   return BigNumber.from(share).mul(precision);
 };
 
-export const formatInClient = (
+export const formatWithoutPrecision = (
   share: BigNumber,
   precision: BigNumber
 ): string => {

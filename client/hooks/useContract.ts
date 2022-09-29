@@ -41,7 +41,7 @@ export const useContract = (
       console.log("Ethereum object doesn't exist!");
       return;
     }
-    // TODO 上記を実装した際に, ウォレットに非接続(コントラクトのオブジェクトはあるが呼び出しは失敗する状態)から接続に切り替え後に関数呼び出しが成功するか確認する
+    // TODO 下記を実装した際に, ウォレットに非接続(コントラクトのオブジェクトはあるが呼び出しは失敗する状態)から接続に切り替え後に関数呼び出しが成功するか確認する
     // TODO 以下URL参考にcurrentAccountの必要性をコメントで書いておく, 接続していないで関数を呼び出すとaccount#0がないと言われる
     // https://docs.ethers.io/v5/api/providers/jsonrpc-provider/#JsonRpcProvider-getSigner
     if (!currentAccount) {
@@ -79,7 +79,9 @@ export const useContract = (
   };
 
   const getPrecision = async () => {
-    if (!ammContract) return;
+    if (!ammContract) {
+      return;
+    }
     try {
       const p = await ammContract.PRECISION();
       setSharePrecision(p);
@@ -98,8 +100,11 @@ export const useContract = (
     getContract(AmmAddress, AmmArtifact.abi, (Contract: ethers.Contract) => {
       setAmmContract(Contract as AmmType);
     });
-    getPrecision();
   }, [ethereum, currentAccount]);
+
+  useEffect(() => {
+    getPrecision();
+  }, [ammContract]);
 
   return {
     ammContract: ammContract,
