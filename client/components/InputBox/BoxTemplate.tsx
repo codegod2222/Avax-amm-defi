@@ -7,7 +7,7 @@ type Props = {
   value: string;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 };
-
+// TODO やっぱりここで変な数字ならセットしないってやった方がいいかも, 変な数字はそもそもセットして欲しくないから
 export default function BoxTemplate({
   leftHeader,
   right,

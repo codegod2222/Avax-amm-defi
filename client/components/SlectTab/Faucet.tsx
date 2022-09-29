@@ -35,7 +35,7 @@ export default function Faucet({
     }
     if (tokens.length !== 2) return;
     if (!validAmount(amountOfFunds)) {
-      alert("Amount should be a valid number"); //TODO: あんまわかってない
+      alert("Amount should be a valid number");
       return;
     }
     try {
