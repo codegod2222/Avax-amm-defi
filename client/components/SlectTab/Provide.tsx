@@ -15,7 +15,7 @@ type Props = {
   updateDetails: () => void;
 };
 //TODO 順番が変わるのだるいのでmapは使わないようにするか？, それかorderする
-//TODO コントラクトのアドレスはcontract.addressで取得できる!定数も関数で持ってこれるようにしていいかも
+//TODO コントラクトのアドレスはcontract.addressで取得できる!定数も関数で持ってこれるようにしていいかも, ひとまずカレントアカウントだけ引数で渡すように, サインインで得たものと同じものを使うという意味で
 //TODO 一旦各コントラクトと, それぞれ定数を持ってくるようにリファクタ->コントラクトや定数はuseContractから各コンポーネントで呼び出す
 export default function Provide({
   token0,
