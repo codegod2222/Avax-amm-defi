@@ -127,7 +127,7 @@ export default function Provide({
       <BoxTemplate
         leftHeader={"Amount of " + (token1 ? token1.symbol : "some token")}
         right={token1 ? token1.symbol : ""}
-        value={amountOfToken0}
+        value={amountOfToken1}
         onChange={(e) =>
           onChangeAmount(e, token1, setAmountOfToken1, setAmountOfToken0)
         }
