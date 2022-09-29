@@ -89,7 +89,8 @@ export default function Container({
       )}
       {activeTab === "Provide" && (
         <Provide
-          tokens={tokens}
+          token0={tokens[0]}
+          token1={tokens[1]}
           ammContract={ammContract}
           currentAccount={currentAccount}
           updateDetails={updateDetails}
