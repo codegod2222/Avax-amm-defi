@@ -1,16 +1,15 @@
-import { useState } from "react";
-import { AMM as AmmType } from "../../typechain-types";
+import { useEffect, useState } from "react";
+import { TokenType, AmmType } from "../../hooks/useContract";
 import { MdSwapVert } from "react-icons/md";
 import styles from "./Select.module.css";
-import { TokenInfo } from "../../hooks/useContract";
 import BoxTemplate from "../InputBox/BoxTemplate";
 import { ethers } from "ethers";
 import { validAmount } from "../../utils/validAmount";
 
 type Props = {
-  token0: TokenInfo | undefined;
-  token1: TokenInfo | undefined;
-  ammContract: AmmType | undefined;
+  token0: TokenType | undefined;
+  token1: TokenType | undefined;
+  amm: AmmType | undefined;
   currentAccount: string | undefined;
   updateDetails: () => void;
 };
@@ -18,16 +17,21 @@ type Props = {
 export default function Swap({
   token0,
   token1,
-  ammContract,
+  amm,
   currentAccount,
   updateDetails,
 }: Props) {
   // スワップ元とスワップ先のトークンを格納します。
-  const [tokenSrc, setTokenSrc] = useState(token0);
-  const [tokenDst, setTokenDst] = useState(token1);
+  const [tokenSrc, setTokenSrc] = useState<TokenType>();
+  const [tokenDst, setTokenDst] = useState<TokenType>();
 
   const [amountSrc, setAmountSrc] = useState("");
   const [amountDst, setAmountDst] = useState("");
+
+  useEffect(() => {
+    setTokenSrc(token0);
+    setTokenDst(token1);
+  }, [token0, token1]);
 
   const rev = () => {
     // スワップ元とスワップ先のトークンを交換します。
@@ -41,12 +45,12 @@ export default function Swap({
 
   // スワップ元トークンに指定された量から, スワップ先トークンの受け取れる量を取得します。
   const getSwapEstimateFromSrc = async (amount: string) => {
-    if (!ammContract || !tokenSrc) return;
+    if (!amm || !tokenSrc) return;
     if (!validAmount(amount)) return;
     try {
       const amountSrcInWei = ethers.utils.parseEther(amount);
-      const amountDstInWei = await ammContract.swapEstimateFromSrcToken(
-        tokenSrc.address,
+      const amountDstInWei = await amm.contract.swapEstimateFromSrcToken(
+        tokenSrc.contract.address,
         amountSrcInWei
       );
       const amountDstInEther = ethers.utils.formatEther(amountDstInWei);
@@ -58,13 +62,13 @@ export default function Swap({
 
   // スワップ先トークンに指定された量から, スワップ元トークンに必要な量を取得します。
   const getSwapEstimateFromDst = async (amount: string) => {
-    if (!ammContract || !tokenDst) return;
-    if (!validAmount(amount)) return; //TODO 他のやり方合わせる
-    if (ammContract) {
+    if (!amm || !tokenDst) return;
+    if (!validAmount(amount)) return;
+    if (amm) {
       try {
         const amountDstInWei = ethers.utils.parseEther(amount);
-        const amountSrcInWei = await ammContract.swapEstimateFromDstToken(
-          tokenDst.address,
+        const amountSrcInWei = await amm.contract.swapEstimateFromDstToken(
+          tokenDst.contract.address,
           amountDstInWei
         );
         const amountSrcInEther = ethers.utils.formatEther(amountSrcInWei);
@@ -76,7 +80,6 @@ export default function Swap({
   };
 
   const onChangeSrc = (amount: string) => {
-    //TODO このeではなくamount: stringのやり方他のところでもやる
     setAmountSrc(amount);
     getSwapEstimateFromSrc(amount);
   };
@@ -91,16 +94,16 @@ export default function Swap({
       alert("Connect to wallet");
       return;
     }
-    if (!ammContract || !tokenSrc || !tokenDst) return;
+    if (!amm || !tokenSrc || !tokenDst) return;
     if (!validAmount(amountSrc)) {
       alert("Amount should be a valid number");
       return;
     }
     try {
       const amountSrcInWei = ethers.utils.parseEther(amountSrc);
-      const txn = await ammContract.swap(
-        tokenSrc.address,
-        tokenDst.address,
+      const txn = await amm.contract.swap(
+        tokenSrc.contract.address,
+        tokenDst.contract.address,
         amountSrcInWei
       );
       await txn.wait();

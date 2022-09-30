@@ -1,6 +1,5 @@
 import { ChangeEvent, useEffect, useState } from "react";
-import { AMM as AmmType } from "../../typechain-types";
-import { TokenInfo } from "../../hooks/useContract";
+import { TokenType, AmmType } from "../../hooks/useContract";
 import styles from "./Select.module.css";
 import { BigNumber, ethers } from "ethers";
 import BoxTemplate from "../InputBox/BoxTemplate";
@@ -11,10 +10,9 @@ import {
 } from "../../utils/format";
 
 type Props = {
-  token0: TokenInfo | undefined;
-  token1: TokenInfo | undefined;
-  ammContract: AmmType | undefined;
-  sharePrecision: BigNumber | undefined;
+  token0: TokenType | undefined;
+  token1: TokenType | undefined;
+  amm: AmmType | undefined;
   currentAccount: string | undefined;
   updateDetails: () => void;
 };
@@ -22,27 +20,26 @@ type Props = {
 export default function Withdraw({
   token0,
   token1,
-  ammContract,
-  sharePrecision,
+  amm,
   currentAccount,
   updateDetails,
 }: Props) {
   const [amountOfToken0, setAmountOfToken0] = useState("");
   const [amountOfToken1, setAmountOfToken1] = useState("");
   const [amountOfShare, setAmountOfShare] = useState("");
-  const [amountOfMaxShare, setAmountOfMaxShare] = useState<string>(); //TODO ここみたいにコントラクトからの値はundefindeにするの他もやる
+  const [amountOfMaxShare, setAmountOfMaxShare] = useState<string>();
 
   useEffect(() => {
     getMaxShare();
-  }, [ammContract]);
+  }, [amm]);
 
   const getMaxShare = async () => {
-    if (!ammContract || !currentAccount || !sharePrecision) return;
+    if (!amm || !currentAccount) return;
     try {
-      const shareWithPrecision = await ammContract.shares(currentAccount);
+      const shareWithPrecision = await amm.contract.shares(currentAccount);
       const shareWithoutPrecision = formatWithoutPrecision(
         shareWithPrecision,
-        sharePrecision
+        amm.sharePrecision
       );
       setAmountOfMaxShare(shareWithoutPrecision);
     } catch (error) {
@@ -56,13 +53,14 @@ export default function Withdraw({
   ): boolean => {
     return BigNumber.from(left).lt(BigNumber.from(right));
   };
+
   //TODO 現状正しくない入力はここで拾われるため毎度alertが出て面倒, 入力自体できないようにしたい, ""の時は0として扱ってほしい考える, 他のところもやる
   const getEstimate = async (
-    token: TokenInfo | undefined,
+    token: TokenType | undefined,
     amountOfShare: string,
     setAmount: (amount: string) => void
   ) => {
-    if (!ammContract || !sharePrecision || !token || !amountOfMaxShare) return;
+    if (!amm || !token || !amountOfMaxShare) return;
     if (!validAmount(amountOfShare)) {
       alert("Amount should be a valid number");
       return;
@@ -74,10 +72,10 @@ export default function Withdraw({
     try {
       const shareWithPrecision = formatWithPrecision(
         amountOfShare,
-        sharePrecision
+        amm.sharePrecision
       );
-      const estimateInWei = await ammContract.withdrawEstimate(
-        token.address,
+      const estimateInWei = await amm.contract.withdrawEstimate(
+        token.contract.address,
         shareWithPrecision
       );
       const estimateInEther = ethers.utils.formatEther(estimateInWei);
@@ -94,10 +92,10 @@ export default function Withdraw({
     getEstimate(token1, amountOfMaxShare, setAmountOfToken1);
   };
 
-  const onChangeAmountOfShare = async (e: ChangeEvent<HTMLInputElement>) => {
-    setAmountOfShare(e.target.value);
-    getEstimate(token0, e.target.value, setAmountOfToken0);
-    getEstimate(token1, e.target.value, setAmountOfToken1);
+  const onChangeAmountOfShare = async (amount: string) => {
+    setAmountOfShare(amount);
+    getEstimate(token0, amount, setAmountOfToken0);
+    getEstimate(token1, amount, setAmountOfToken1);
   };
 
   const onClickWithdraw = async () => {
@@ -105,7 +103,7 @@ export default function Withdraw({
       alert("connect wallet");
       return;
     }
-    if (!ammContract || !sharePrecision || !amountOfMaxShare) return;
+    if (!amm || !amountOfMaxShare) return;
     if (!validAmount(amountOfShare)) {
       alert("Amount should be a valid number");
       return;
@@ -115,8 +113,8 @@ export default function Withdraw({
       return;
     }
     try {
-      const txn = await ammContract.withdraw(
-        formatWithPrecision(amountOfShare, sharePrecision)
+      const txn = await amm.contract.withdraw(
+        formatWithPrecision(amountOfShare, amm.sharePrecision)
       );
       await txn.wait();
       setAmountOfToken0("");
@@ -140,7 +138,7 @@ export default function Withdraw({
         leftHeader={"Amount of share:"}
         right=""
         value={amountOfShare}
-        onChange={(e) => onChangeAmountOfShare(e)}
+        onChange={(e) => onChangeAmountOfShare(e.target.value)}
       />
       {token0 && token1 && (
         <div className={styles.withdrawEstimate}>

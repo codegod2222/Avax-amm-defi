@@ -1,29 +1,20 @@
 import { useState } from "react";
-import { AMM as AmmType } from "../../typechain-types";
-import { TokenInfo } from "../../hooks/useContract";
+import { useContract } from "../../hooks/useContract";
 import styles from "./Container.module.css";
 import Swap from "../SlectTab/Swap";
 import Details from "../Details/Details";
 import Faucet from "../SlectTab/Faucet";
 import Withdraw from "../SlectTab/Withdraw";
 import Provide from "../SlectTab/Provide";
-import { BigNumber } from "ethers";
 
 type Props = {
-  tokens: TokenInfo[]; //TODO これ止める
-  ammContract: AmmType | undefined;
-  sharePrecision: BigNumber | undefined;
   currentAccount: string | undefined;
 };
 
-export default function Container({
-  tokens,
-  ammContract,
-  sharePrecision,
-  currentAccount,
-}: Props) {
+export default function Container({ currentAccount }: Props) {
   const [activeTab, setActiveTab] = useState("Swap");
   const [updateDetailsFlag, setUpdateDetailsFlag] = useState(0);
+  const { usdc: token0, joe: token1, amm } = useContract(currentAccount);
 
   const changeTab = (tab: string) => {
     setActiveTab(tab);
@@ -81,45 +72,43 @@ export default function Container({
 
       {activeTab === "Swap" && (
         <Swap
-          token0={tokens[0]}
-          token1={tokens[1]}
-          ammContract={ammContract}
+          token0={token0}
+          token1={token1}
+          amm={amm}
           currentAccount={currentAccount}
           updateDetails={updateDetails}
         />
       )}
       {activeTab === "Provide" && (
         <Provide
-          token0={tokens[0]}
-          token1={tokens[1]}
-          ammContract={ammContract}
+          token0={token0}
+          token1={token1}
+          amm={amm}
           currentAccount={currentAccount}
           updateDetails={updateDetails}
         />
       )}
       {activeTab === "Withdraw" && (
         <Withdraw
-          token0={tokens[0]}
-          token1={tokens[1]}
-          ammContract={ammContract}
-          sharePrecision={sharePrecision}
+          token0={token0}
+          token1={token1}
+          amm={amm}
           currentAccount={currentAccount}
           updateDetails={updateDetails}
         />
       )}
       {activeTab === "Faucet" && (
         <Faucet
-          token0={tokens[0]}
-          token1={tokens[1]}
+          token0={token0}
+          token1={token1}
           currentAccount={currentAccount}
           updateDetails={updateDetails}
         />
       )}
       <Details
-        token0={tokens[0]}
-        token1={tokens[1]}
-        ammContract={ammContract}
-        sharePrecision={sharePrecision}
+        token0={token0}
+        token1={token1}
+        amm={amm}
         currentAccount={currentAccount}
         updateDetailsFlag={updateDetailsFlag}
       />

@@ -1,26 +1,23 @@
 import { ChangeEvent, useEffect, useState } from "react";
-import { AMM as AmmType } from "../../typechain-types";
-import { TokenInfo } from "../../hooks/useContract";
+import { TokenType, AmmType } from "../../hooks/useContract";
 import styles from "./Select.module.css";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import BoxTemplate from "../InputBox/BoxTemplate";
 import { MdAdd } from "react-icons/md";
 import { validAmount } from "../../utils/validAmount";
 
 type Props = {
-  token0: TokenInfo | undefined;
-  token1: TokenInfo | undefined;
-  ammContract: AmmType | undefined;
+  token0: TokenType | undefined;
+  token1: TokenType | undefined;
+  amm: AmmType | undefined;
   currentAccount: string | undefined;
   updateDetails: () => void;
 };
-//TODO 順番が変わるのだるいのでmapは使わないようにするか？, それかorderする
-//TODO コントラクトのアドレスはcontract.addressで取得できる!定数も関数で持ってこれるようにしていいかも, ひとまずカレントアカウントだけ引数で渡すように, サインインで得たものと同じものを使うという意味で
-//TODO 一旦各コントラクトと, それぞれ定数を持ってくるようにリファクタ->コントラクトや定数はuseContractから各コンポーネントで呼び出す
+
 export default function Provide({
   token0,
   token1,
-  ammContract,
+  amm,
   currentAccount,
   updateDetails,
 }: Props) {
@@ -30,13 +27,13 @@ export default function Provide({
 
   useEffect(() => {
     checkLiquidity();
-  }, [ammContract]);
+  }, [amm]);
 
   const checkLiquidity = async () => {
-    if (!ammContract) return;
+    if (!amm) return;
     try {
-      const totalShares = await ammContract.totalShares();
-      if (totalShares.toString() === "0") {
+      const totalShares = await amm.contract.totalShares();
+      if (totalShares.eq(BigNumber.from(0))) {
         setActivePool(false);
       } else {
         setActivePool(true);
@@ -47,17 +44,17 @@ export default function Provide({
   };
 
   const getProvideEstimate = async (
-    token: TokenInfo,
+    token: TokenType,
     amount: string,
     setPairTokenAmount: (amount: string) => void
   ) => {
-    if (!ammContract || !token0 || !token1) return;
+    if (!amm || !token0 || !token1) return;
     if (!activePool) return;
     if (!validAmount(amount)) return;
     try {
       const amountInWei = ethers.utils.parseEther(amount);
-      const pairAmountInWei = await ammContract.equivalentToken(
-        token.address,
+      const pairAmountInWei = await amm.contract.equivalentToken(
+        token.contract.address,
         amountInWei
       );
       const pairAmountInEther = ethers.utils.formatEther(pairAmountInWei);
@@ -68,14 +65,14 @@ export default function Provide({
   };
 
   const onChangeAmount = (
-    e: ChangeEvent<HTMLInputElement>,
-    token: TokenInfo | undefined,
+    amount: string,
+    token: TokenType | undefined,
     setAmount: (amount: string) => void,
     setPairTokenAmount: (amount: string) => void
   ) => {
     if (!token) return;
-    setAmount(e.target.value);
-    getProvideEstimate(token, e.target.value, setPairTokenAmount);
+    setAmount(amount);
+    getProvideEstimate(token, amount, setPairTokenAmount);
   };
 
   const onClickProvide = async () => {
@@ -83,7 +80,7 @@ export default function Provide({
       alert("connect wallet");
       return;
     }
-    if (!ammContract || !token0 || !token1) return;
+    if (!amm || !token0 || !token1) return;
     if (!validAmount(amountOfToken0) || !validAmount(amountOfToken1)) {
       alert("Amount should be a valid number");
       return;
@@ -92,13 +89,13 @@ export default function Provide({
       const amountToken0InWei = ethers.utils.parseEther(amountOfToken0);
       const amountToken1InWei = ethers.utils.parseEther(amountOfToken1);
 
-      await token0.contract.approve(ammContract.address, amountToken0InWei);
-      await token1.contract.approve(ammContract.address, amountToken1InWei);
+      await token0.contract.approve(amm.contract.address, amountToken0InWei);
+      await token1.contract.approve(amm.contract.address, amountToken1InWei);
 
-      const txn = await ammContract.provide(
-        token0.address,
+      const txn = await amm.contract.provide(
+        token0.contract.address,
         amountToken0InWei,
-        token1.address,
+        token1.contract.address,
         amountToken1InWei
       );
       await txn.wait();
@@ -118,7 +115,12 @@ export default function Provide({
         right={token0 ? token0.symbol : ""}
         value={amountOfToken0}
         onChange={(e) =>
-          onChangeAmount(e, token0, setAmountOfToken0, setAmountOfToken1)
+          onChangeAmount(
+            e.target.value,
+            token0,
+            setAmountOfToken0,
+            setAmountOfToken1
+          )
         }
       />
       <div className={styles.swapIcon}>
@@ -129,7 +131,12 @@ export default function Provide({
         right={token1 ? token1.symbol : ""}
         value={amountOfToken1}
         onChange={(e) =>
-          onChangeAmount(e, token1, setAmountOfToken1, setAmountOfToken0)
+          onChangeAmount(
+            e.target.value,
+            token1,
+            setAmountOfToken1,
+            setAmountOfToken0
+          )
         }
       />
       {!activePool && (

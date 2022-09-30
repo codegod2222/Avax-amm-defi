@@ -1,12 +1,10 @@
 import type { NextPage } from "next";
 import styles from "../styles/Home.module.css";
 import { useWallet } from "../hooks/useWallet";
-import { useContract } from "../hooks/useContract";
 import Container from "../components/Container/Container";
 
 const Home: NextPage = () => {
   const { currentAccount, connectWallet } = useWallet();
-  const { tokens, ammContract, sharePrecision } = useContract(currentAccount);
 
   return (
     <div className={styles.pageBody}>
@@ -24,12 +22,7 @@ const Home: NextPage = () => {
           </div>
         )}
       </div>
-      <Container
-        tokens={tokens}
-        ammContract={ammContract}
-        sharePrecision={sharePrecision}
-        currentAccount={currentAccount}
-      />
+      <Container currentAccount={currentAccount} />
     </div>
   );
 };

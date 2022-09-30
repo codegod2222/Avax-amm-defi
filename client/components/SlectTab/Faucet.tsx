@@ -1,13 +1,13 @@
 import { ChangeEvent, useEffect, useState } from "react";
-import { TokenInfo } from "../../hooks/useContract";
+import { TokenType } from "../../hooks/useContract";
 import styles from "./Select.module.css";
 import BoxTemplate from "../InputBox/BoxTemplate";
 import { ethers } from "ethers";
 import { validAmount } from "../../utils/validAmount";
 
 type Props = {
-  token0: TokenInfo | undefined;
-  token1: TokenInfo | undefined;
+  token0: TokenType | undefined;
+  token1: TokenType | undefined;
   currentAccount: string | undefined;
   updateDetails: () => void;
 };
@@ -21,7 +21,7 @@ export default function Faucet({
   const [amountOfFunds, setAmountOfFunds] = useState("");
   const [currentTokenIndex, setCurrentTokenIndex] = useState(0);
 
-  const [tokens, setTokens] = useState<TokenInfo[]>([]);
+  const [tokens, setTokens] = useState<TokenType[]>([]);
 
   useEffect(() => {
     if (!token0 || !token1) return;
@@ -33,8 +33,8 @@ export default function Faucet({
     setCurrentTokenIndex((currentTokenIndex + 1) % tokens.length);
   };
 
-  const onChangeAmountOfFunds = (e: ChangeEvent<HTMLInputElement>) => {
-    setAmountOfFunds(e.target.value);
+  const onChangeAmountOfFunds = (amount: string) => {
+    setAmountOfFunds(amount);
   };
 
   async function onClickFund() {
@@ -78,7 +78,7 @@ export default function Faucet({
           tokens[currentTokenIndex] ? tokens[currentTokenIndex].symbol : ""
         }
         value={amountOfFunds}
-        onChange={(e) => onChangeAmountOfFunds(e)}
+        onChange={(e) => onChangeAmountOfFunds(e.target.value)}
       />
       <div className={styles.bottomDiv}>
         <div className={styles.btn} onClick={() => onClickFund()}>

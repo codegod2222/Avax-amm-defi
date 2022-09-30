@@ -3,33 +3,37 @@ import { BigNumber, ethers } from "ethers";
 import UsdcArtifact from "../utils/USDCToken.json";
 import JoeArtifact from "../utils/USDCToken.json";
 import AmmArtifact from "../utils/AMM.json";
-import { USDCToken as UsdcType } from "../typechain-types";
-import { JOEToken as JoeType } from "../typechain-types";
-import { AMM as AmmType } from "../typechain-types";
+import { USDCToken as UsdcContractType } from "../typechain-types";
+import { JOEToken as JoeContractType } from "../typechain-types";
+import { AMM as AmmContractType } from "../typechain-types";
 import { getEthereum } from "../utils/ethereum";
 
 export const UsdcAddress = "0x3C25603dD3Af61597bb6c9D15B76F68d9926F385";
 export const JoeAddress = "0xAc3bB21014CBf5a671AFB199B1D2B9a30116604F";
 export const AmmAddress = "0xE8430Ce3f3A5d4A0E63f5C69e93574e8c9C12db0";
 
-export type TokenInfo = {
+export type TokenType = {
   symbol: string;
-  address: string;
-  contract: UsdcType | JoeType; //TODO ERC20+faucetのインターフェースで定義
+  contract: UsdcContractType | JoeContractType;
+};
+
+export type AmmType = {
+  sharePrecision: BigNumber;
+  contract: AmmContractType;
 };
 
 type ReturnUseContract = {
-  tokens: TokenInfo[];
-  ammContract: AmmType | undefined;
-  sharePrecision: BigNumber | undefined;
+  usdc: TokenType | undefined;
+  joe: TokenType | undefined;
+  amm: AmmType | undefined;
 };
 
 export const useContract = (
   currentAccount: string | undefined
 ): ReturnUseContract => {
-  const [tokens, setTokens] = useState<TokenInfo[]>([]);
-  const [ammContract, setAmmContract] = useState<AmmType>();
-  const [sharePrecision, setSharePrecision] = useState<BigNumber>();
+  const [usdc, setUsdc] = useState<TokenType>();
+  const [joe, setJoe] = useState<TokenType>();
+  const [amm, setAmm] = useState<AmmType>();
   const ethereum = getEthereum();
 
   const getContract = (
@@ -41,10 +45,9 @@ export const useContract = (
       console.log("Ethereum object doesn't exist!");
       return;
     }
-    // TODO 下記を実装した際に, ウォレットに非接続(コントラクトのオブジェクトはあるが呼び出しは失敗する状態)から接続に切り替え後に関数呼び出しが成功するか確認する
-    // TODO 以下URL参考にcurrentAccountの必要性をコメントで書いておく, 接続していないで関数を呼び出すとaccount#0がないと言われる
-    // https://docs.ethers.io/v5/api/providers/jsonrpc-provider/#JsonRpcProvider-getSigner
     if (!currentAccount) {
+      // ログインしていない状態でコントラクトの関数を呼び出すと失敗するため
+      // currentAccountがundefinedの場合はcontractオブジェクトもundefinedにします。
       console.log("currentAccount doesn't exist!");
       return;
     }
@@ -59,56 +62,48 @@ export const useContract = (
     }
   };
 
-  const addTokenInfo = async (
-    address: string,
-    contract: UsdcType | JoeType
-  ) => {
+  const generateUsdc = async (contract: UsdcContractType) => {
     try {
       const symbol = await contract.symbol();
-      setTokens((prevState) => [
-        ...prevState,
-        {
-          symbol: symbol,
-          address: address,
-          contract: contract,
-        },
-      ]);
+      setUsdc({ symbol: symbol, contract: contract } as TokenType);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const getPrecision = async () => {
-    if (!ammContract) {
-      return;
-    }
+  const generateJoe = async (contract: UsdcContractType) => {
     try {
-      const p = await ammContract.PRECISION();
-      setSharePrecision(p);
+      const symbol = await contract.symbol();
+      setJoe({ symbol: symbol, contract: contract } as TokenType);
     } catch (error) {
-      alert(error);
+      console.log(error);
+    }
+  };
+
+  const generateAmm = async (contract: AmmContractType) => {
+    try {
+      const precision = await contract.PRECISION();
+      setAmm({ sharePrecision: precision, contract: contract } as AmmType);
+    } catch (error) {
+      console.log(error);
     }
   };
 
   useEffect(() => {
     getContract(UsdcAddress, UsdcArtifact.abi, (Contract: ethers.Contract) => {
-      addTokenInfo(UsdcAddress, Contract as UsdcType);
+      generateUsdc(Contract as UsdcContractType);
     });
     getContract(JoeAddress, JoeArtifact.abi, (Contract: ethers.Contract) => {
-      addTokenInfo(JoeAddress, Contract as JoeType);
+      generateJoe(Contract as JoeContractType);
     });
     getContract(AmmAddress, AmmArtifact.abi, (Contract: ethers.Contract) => {
-      setAmmContract(Contract as AmmType);
+      generateAmm(Contract as AmmContractType);
     });
   }, [ethereum, currentAccount]);
 
-  useEffect(() => {
-    getPrecision();
-  }, [ammContract]);
-
   return {
-    ammContract: ammContract,
-    tokens: tokens,
-    sharePrecision: sharePrecision,
+    usdc,
+    joe,
+    amm,
   };
 };

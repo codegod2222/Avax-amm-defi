@@ -1,15 +1,13 @@
 import { useEffect, useState } from "react";
-import { AMM as AmmType } from "../../typechain-types";
 import styles from "./Details.module.css";
-import { TokenInfo } from "../../hooks/useContract";
-import { BigNumber, ethers } from "ethers";
+import { TokenType, AmmType } from "../../hooks/useContract";
+import { ethers } from "ethers";
 import { formatWithoutPrecision } from "../../utils/format";
 
 type Props = {
-  token0: TokenInfo | undefined;
-  token1: TokenInfo | undefined;
-  ammContract: AmmType | undefined;
-  sharePrecision: BigNumber | undefined;
+  token0: TokenType | undefined;
+  token1: TokenType | undefined;
+  amm: AmmType | undefined;
   currentAccount: string | undefined;
   updateDetailsFlag: number;
 };
@@ -17,14 +15,13 @@ type Props = {
 export default function Details({
   token0,
   token1,
-  ammContract,
-  sharePrecision,
+  amm,
   currentAccount,
   updateDetailsFlag,
 }: Props) {
   const [amountOfUserTokens, setAmountOfUserTokens] = useState<string[]>([]);
   const [amountOfPoolTokens, setAmountOfPoolTokens] = useState<string[]>([]);
-  const [tokens, setTokens] = useState<TokenInfo[]>([]);
+  const [tokens, setTokens] = useState<TokenType[]>([]);
 
   const [userShare, setUserShare] = useState("");
   const [totalShare, setTotalShare] = useState("");
@@ -40,11 +37,11 @@ export default function Details({
 
   useEffect(() => {
     getAmountOfPoolTokens();
-  }, [ammContract, tokens, updateDetailsFlag]);
+  }, [amm, tokens, updateDetailsFlag]);
 
   useEffect(() => {
     getShares();
-  }, [ammContract, sharePrecision, updateDetailsFlag]);
+  }, [amm, updateDetailsFlag]);
 
   const getAmountOfUserTokens = async () => {
     if (!currentAccount) return;
@@ -63,12 +60,12 @@ export default function Details({
   };
 
   const getAmountOfPoolTokens = async () => {
-    if (!ammContract) return;
+    if (!amm) return;
     try {
       setAmountOfPoolTokens([]);
       for (let index = 0; index < tokens.length; index++) {
-        const amountInWei = await ammContract.totalAmount(
-          tokens[index].address
+        const amountInWei = await amm.contract.totalAmount(
+          tokens[index].contract.address
         );
         const amountInEther = ethers.utils.formatEther(amountInWei);
         setAmountOfPoolTokens((prevState) => [...prevState, amountInEther]);
@@ -79,14 +76,17 @@ export default function Details({
   };
 
   async function getShares() {
-    if (!ammContract || !currentAccount || !sharePrecision) return;
+    if (!amm || !currentAccount) return;
     try {
-      let share = await ammContract.shares(currentAccount);
-      let shareWithoutPrecision = formatWithoutPrecision(share, sharePrecision);
+      let share = await amm.contract.shares(currentAccount);
+      let shareWithoutPrecision = formatWithoutPrecision(
+        share,
+        amm.sharePrecision
+      );
       setUserShare(shareWithoutPrecision);
 
-      share = await ammContract.totalShares();
-      shareWithoutPrecision = formatWithoutPrecision(share, sharePrecision);
+      share = await amm.contract.totalShares();
+      shareWithoutPrecision = formatWithoutPrecision(share, amm.sharePrecision);
       setTotalShare(shareWithoutPrecision);
     } catch (err) {
       console.log("Couldn't Fetch details", err);
