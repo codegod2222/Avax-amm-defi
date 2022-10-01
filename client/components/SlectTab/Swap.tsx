@@ -101,6 +101,9 @@ export default function Swap({
     }
     try {
       const amountSrcInWei = ethers.utils.parseEther(amountSrc);
+
+      await tokenSrc.contract.approve(amm.contract.address, amountSrcInWei);
+
       const txn = await amm.contract.swap(
         tokenSrc.contract.address,
         tokenDst.contract.address,
