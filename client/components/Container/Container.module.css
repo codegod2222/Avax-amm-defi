@@ -1,6 +1,11 @@
 .centerBody {
-    justify-content: center;
-    height: 100%;
+    display: flex;
+}
+
+.centerContent {
+    position:fixed;
+    inset: auto 0;
+    margin: 0px auto;
 }
 
 .selectTab {

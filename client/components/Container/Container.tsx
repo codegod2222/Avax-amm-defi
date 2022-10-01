@@ -27,84 +27,86 @@ export default function Container({ currentAccount }: Props) {
 
   return (
     <div className={styles.centerBody}>
-      <div className={styles.selectTab}>
-        <div
-          className={
-            styles.tabStyle +
-            " " +
-            (activeTab === "Swap" ? styles.activeTab : "")
-          }
-          onClick={() => changeTab("Swap")}
-        >
-          Swap
+      <div className={styles.centerContent}>
+        <div className={styles.selectTab}>
+          <div
+            className={
+              styles.tabStyle +
+              " " +
+              (activeTab === "Swap" ? styles.activeTab : "")
+            }
+            onClick={() => changeTab("Swap")}
+          >
+            Swap
+          </div>
+          <div
+            className={
+              styles.tabStyle +
+              " " +
+              (activeTab === "Provide" ? styles.activeTab : "")
+            }
+            onClick={() => changeTab("Provide")}
+          >
+            Provide
+          </div>
+          <div
+            className={
+              styles.tabStyle +
+              " " +
+              (activeTab === "Withdraw" ? styles.activeTab : "")
+            }
+            onClick={() => changeTab("Withdraw")}
+          >
+            Withdraw
+          </div>
+          <div
+            className={
+              styles.tabStyle +
+              " " +
+              (activeTab === "Faucet" ? styles.activeTab : "")
+            }
+            onClick={() => changeTab("Faucet")}
+          >
+            Faucet
+          </div>
         </div>
-        <div
-          className={
-            styles.tabStyle +
-            " " +
-            (activeTab === "Provide" ? styles.activeTab : "")
-          }
-          onClick={() => changeTab("Provide")}
-        >
-          Provide
-        </div>
-        <div
-          className={
-            styles.tabStyle +
-            " " +
-            (activeTab === "Withdraw" ? styles.activeTab : "")
-          }
-          onClick={() => changeTab("Withdraw")}
-        >
-          Withdraw
-        </div>
-        <div
-          className={
-            styles.tabStyle +
-            " " +
-            (activeTab === "Faucet" ? styles.activeTab : "")
-          }
-          onClick={() => changeTab("Faucet")}
-        >
-          Faucet
-        </div>
-      </div>
 
-      {activeTab === "Swap" && (
-        <Swap
-          token0={token0}
-          token1={token1}
-          amm={amm}
-          currentAccount={currentAccount}
-          updateDetails={updateDetails}
-        />
-      )}
-      {activeTab === "Provide" && (
-        <Provide
-          token0={token0}
-          token1={token1}
-          amm={amm}
-          currentAccount={currentAccount}
-          updateDetails={updateDetails}
-        />
-      )}
-      {activeTab === "Withdraw" && (
-        <Withdraw
-          token0={token0}
-          token1={token1}
-          amm={amm}
-          currentAccount={currentAccount}
-          updateDetails={updateDetails}
-        />
-      )}
-      {activeTab === "Faucet" && (
-        <Faucet
-          token0={token0}
-          token1={token1}
-          currentAccount={currentAccount}
-          updateDetails={updateDetails}
-        />
-      )}
+        {activeTab === "Swap" && (
+          <Swap
+            token0={token0}
+            token1={token1}
+            amm={amm}
+            currentAccount={currentAccount}
+            updateDetails={updateDetails}
+          />
+        )}
+        {activeTab === "Provide" && (
+          <Provide
+            token0={token0}
+            token1={token1}
+            amm={amm}
+            currentAccount={currentAccount}
+            updateDetails={updateDetails}
+          />
+        )}
+        {activeTab === "Withdraw" && (
+          <Withdraw
+            token0={token0}
+            token1={token1}
+            amm={amm}
+            currentAccount={currentAccount}
+            updateDetails={updateDetails}
+          />
+        )}
+        {activeTab === "Faucet" && (
+          <Faucet
+            token0={token0}
+            token1={token1}
+            currentAccount={currentAccount}
+            updateDetails={updateDetails}
+          />
+        )}
+      </div>
       <Details
         token0={token0}
         token1={token1}
