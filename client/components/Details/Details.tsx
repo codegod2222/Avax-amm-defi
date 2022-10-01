@@ -26,6 +26,8 @@ export default function Details({
   const [userShare, setUserShare] = useState("");
   const [totalShare, setTotalShare] = useState("");
 
+  const DISPLAY_CHAR_LIMIT = 7;
+
   useEffect(() => {
     if (!token0 || !token1) return;
     setTokens([token0, token1]);
@@ -104,7 +106,9 @@ export default function Details({
               <div className={styles.detailsAttribute}>
                 {tokens[index].symbol}:
               </div>
-              <div className={styles.detailsValue}>{amount}</div>
+              <div className={styles.detailsValue}>
+                {amount.substring(0, DISPLAY_CHAR_LIMIT)}
+              </div>
             </div>
           );
         })}
@@ -115,17 +119,23 @@ export default function Details({
               <div className={styles.detailsAttribute}>
                 Total {tokens[index].symbol}:
               </div>
-              <div className={styles.detailsValue}>{amount}</div>
+              <div className={styles.detailsValue}>
+                {amount.substring(0, DISPLAY_CHAR_LIMIT)}
+              </div>
             </div>
           );
         })}
         <div className={styles.detailsRow}>
           <div className={styles.detailsAttribute}>Your Share:</div>
-          <div className={styles.detailsValue}>{userShare}</div>
+          <div className={styles.detailsValue}>
+            {userShare.substring(0, DISPLAY_CHAR_LIMIT)}
+          </div>
         </div>
         <div className={styles.detailsRow}>
           <div className={styles.detailsAttribute}>Total Shares:</div>
-          <div className={styles.detailsValue}>{totalShare}</div>
+          <div className={styles.detailsValue}>
+            {totalShare.substring(0, DISPLAY_CHAR_LIMIT)}
+          </div>
         </div>
       </div>
     </div>
