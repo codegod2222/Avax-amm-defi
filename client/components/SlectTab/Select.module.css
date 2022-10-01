@@ -32,7 +32,9 @@
     cursor: pointer;
 }
 
-/* TODO これより下は個々のモジュール */
+.btn:hover {
+    background: #57adea;
+}
 
 .swapIcon {
     width: 5%;
