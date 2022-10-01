@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { TokenType, AmmType } from "../../hooks/useContract";
 import { MdSwapVert } from "react-icons/md";
-import styles from "./Select.module.css";
+import styles from "./SelectTab.module.css";
 import InputNumberBox from "../Box/InputNumberBox";
 import { ethers } from "ethers";
 import { validAmount } from "../../utils/validAmount";

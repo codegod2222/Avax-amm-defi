@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { TokenType, AmmType } from "../../hooks/useContract";
-import styles from "./Select.module.css";
+import styles from "./SelectTab.module.css";
 import { BigNumber, ethers } from "ethers";
 import InputNumberBox from "../Box/InputNumberBox";
 import { MdAdd } from "react-icons/md";
