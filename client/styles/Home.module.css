@@ -1,7 +1,6 @@
-.pageBody,
-#root {
+.pageBody{
     height: 100%;
-    background: linear-gradient(180deg, #242525 0%, #000 180%);
+    background: linear-gradient(0deg, rgb(49, 62, 80) 0%, rgb(122, 153, 182) 180%);
 }
 
 .navBar {
@@ -42,13 +41,12 @@
   position: absolute;
   right: 50px;
   top: 20px;
-  background-color: #4caf50;
+  background-color: #4e4b56;
   color: white;
   height: 30px;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 5px 10px 5px 10px;
-  border: 1px solid #2a722c;
   border-radius: 15px;
 }
