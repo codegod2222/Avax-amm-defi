@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { TokenType } from "../../hooks/useContract";
 import styles from "./SelectTab.module.css";
-import InputNumberBox from "../Box/InputNumberBox";
+import InputNumberBox from "../InputBox/InputNumberBox";
 import { ethers } from "ethers";
 import { validAmount } from "../../utils/validAmount";
 
