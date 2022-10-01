@@ -9,7 +9,10 @@ const Home: NextPage = () => {
   return (
     <div className={styles.pageBody}>
       <div className={styles.navBar}>
-        <div className={styles.appName}> AMM </div>
+        <div className={styles.rightHeader}>
+          <img src="bird.png" width="40px" height="30px" />
+          <div className={styles.appName}> AMM </div>
+        </div>
         {currentAccount == undefined ? (
           <div className={styles.connectBtn} onClick={connectWallet}>
             {" "}

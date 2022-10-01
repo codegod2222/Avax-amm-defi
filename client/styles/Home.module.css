@@ -12,7 +12,13 @@
   padding: 0px 30px;
 }
 
+.rightHeader {
+  display: flex;
+  padding: 5px 10px 5px 10px;
+}
+
 .appName {
+  margin: 0 10px;
   font-size: 28px;
   font-weight: 800;
 }
