@@ -26,7 +26,7 @@ export default function Container({ currentAccount }: Props) {
   };
 
   return (
-    <div className={styles.centerBody}>
+    <div className={styles.mainBody}>
       <div className={styles.centerContent}>
         <div className={styles.selectTab}>
           <div
