@@ -47,7 +47,9 @@
 .withdrawEstimate {
     height: 30px;
     width: 75%;
-    margin: 10px auto;
+    margin: 0px auto;
+    margin-top: 10px;
+    margin-bottom: 30px;
     color: white;
 }
 
