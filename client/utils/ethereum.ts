@@ -1,5 +1,4 @@
 import { MetaMaskInpageProvider } from "@metamask/providers";
-//TODO metamaskのライブラリを使っていて良いのか調べる
 
 declare global {
   interface Window {
