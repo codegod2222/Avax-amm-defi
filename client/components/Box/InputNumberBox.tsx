@@ -1,5 +1,5 @@
 import { ChangeEvent } from "react";
-import styles from "./BoxTemplate.module.css";
+import styles from "./InputNumberBox.module.css";
 
 type Props = {
   leftHeader: string;
@@ -7,8 +7,8 @@ type Props = {
   value: string;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 };
-// TODO やっぱりここで変な数字ならセットしないってやった方がいいかも, 変な数字はそもそもセットして欲しくないから
-export default function BoxTemplate({
+
+export default function InputNumberBox({
   leftHeader,
   right,
   value,
@@ -21,6 +21,7 @@ export default function BoxTemplate({
           <p className={styles.leftHeader}> {leftHeader} </p>
           <input
             className={styles.textField}
+            type="number"
             value={value}
             onChange={(e) => onChange(e)}
             placeholder={"Enter amount"}

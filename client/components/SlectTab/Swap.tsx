@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { TokenType, AmmType } from "../../hooks/useContract";
 import { MdSwapVert } from "react-icons/md";
 import styles from "./Select.module.css";
-import BoxTemplate from "../InputBox/BoxTemplate";
+import InputNumberBox from "../Box/InputNumberBox";
 import { ethers } from "ethers";
 import { validAmount } from "../../utils/validAmount";
 
@@ -118,7 +118,7 @@ export default function Swap({
 
   return (
     <div className={styles.tabBody}>
-      <BoxTemplate
+      <InputNumberBox
         leftHeader={"From"}
         right={tokenSrc ? tokenSrc.symbol : ""}
         value={amountSrc}
@@ -127,7 +127,7 @@ export default function Swap({
       <div className={styles.swapIcon} onClick={() => rev()}>
         <MdSwapVert />
       </div>
-      <BoxTemplate
+      <InputNumberBox
         leftHeader={"To"}
         right={tokenDst ? tokenDst.symbol : ""}
         value={amountDst}

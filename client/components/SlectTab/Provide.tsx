@@ -1,8 +1,8 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { TokenType, AmmType } from "../../hooks/useContract";
 import styles from "./Select.module.css";
 import { BigNumber, ethers } from "ethers";
-import BoxTemplate from "../InputBox/BoxTemplate";
+import InputNumberBox from "../Box/InputNumberBox";
 import { MdAdd } from "react-icons/md";
 import { validAmount } from "../../utils/validAmount";
 
@@ -110,7 +110,7 @@ export default function Provide({
 
   return (
     <div className={styles.tabBody}>
-      <BoxTemplate
+      <InputNumberBox
         leftHeader={"Amount of " + (token0 ? token0.symbol : "some token")}
         right={token0 ? token0.symbol : ""}
         value={amountOfToken0}
@@ -126,7 +126,7 @@ export default function Provide({
       <div className={styles.swapIcon}>
         <MdAdd />
       </div>
-      <BoxTemplate
+      <InputNumberBox
         leftHeader={"Amount of " + (token1 ? token1.symbol : "some token")}
         right={token1 ? token1.symbol : ""}
         value={amountOfToken1}

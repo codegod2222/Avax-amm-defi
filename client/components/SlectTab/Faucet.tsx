@@ -1,7 +1,7 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { TokenType } from "../../hooks/useContract";
 import styles from "./Select.module.css";
-import BoxTemplate from "../InputBox/BoxTemplate";
+import InputNumberBox from "../Box/InputNumberBox";
 import { ethers } from "ethers";
 import { validAmount } from "../../utils/validAmount";
 
@@ -67,7 +67,7 @@ export default function Faucet({
           Change
         </div>
       </div>
-      <BoxTemplate
+      <InputNumberBox
         leftHeader={
           "Amount of " +
           (tokens[currentTokenIndex]

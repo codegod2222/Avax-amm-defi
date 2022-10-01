@@ -1,8 +1,8 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { TokenType, AmmType } from "../../hooks/useContract";
 import styles from "./Select.module.css";
 import { BigNumber, ethers } from "ethers";
-import BoxTemplate from "../InputBox/BoxTemplate";
+import InputNumberBox from "../Box/InputNumberBox";
 import { validAmount } from "../../utils/validAmount";
 import {
   formatWithPrecision,
@@ -54,7 +54,6 @@ export default function Withdraw({
     return BigNumber.from(left).lt(BigNumber.from(right));
   };
 
-  //TODO 現状正しくない入力はここで拾われるため毎度alertが出て面倒, 入力自体できないようにしたい, ""の時は0として扱ってほしい考える, 他のところもやる
   const getEstimate = async (
     token: TokenType | undefined,
     amountOfShare: string,
@@ -134,7 +133,7 @@ export default function Withdraw({
           Max
         </div>
       </div>
-      <BoxTemplate
+      <InputNumberBox
         leftHeader={"Amount of share:"}
         right=""
         value={amountOfShare}
