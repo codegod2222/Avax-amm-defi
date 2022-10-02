@@ -65,7 +65,8 @@ contract AMM {
     function equivalentToken(IERC20 _srcToken, uint256 _amountSrc)
         public
         view
-        validToken(_srcToken) //TODO activePool追加
+        validToken(_srcToken)
+        activePool
         returns (uint256)
     {
         IERC20 dstToken = pairToken(_srcToken);
@@ -84,7 +85,8 @@ contract AMM {
         validToken(_tokenX)
         validToken(_tokenY)
         validAmount(_amountX)
-        validAmount(_amountY) //TODO activePool追加
+        validAmount(_amountY)
+        activePool
         returns (uint256)
     {
         uint256 share;
