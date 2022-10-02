@@ -20,6 +20,7 @@ contract AMM {
     }
 
     // トークンの量が正しいことを確認します。
+    // TODO これ定義曖昧なので消すかも
     modifier validAmount(uint256 _amount) {
         require(_amount > 0, "Amount cannot be zero!");
         _;
@@ -155,19 +156,18 @@ contract AMM {
     {
         IERC20 dstToken = pairToken(_srcToken);
 
-        uint256 totalAmountSrcAfter = totalAmount[_srcToken] + _amountSrc;
-        uint256 totalAmountDstAfter = (totalAmount[_srcToken] *
-            totalAmount[dstToken]) / (totalAmountSrcAfter);
-        uint256 amountDst = totalAmount[dstToken] - totalAmountDstAfter;
-
-        // uint numerator = _amountSrc * totalAmount[_srcToken]
+        uint256 numerator = _amountSrc * totalAmount[dstToken];
+        uint256 denominator = totalAmount[_srcToken] + _amountSrc;
+        uint256 amountDst = numerator / denominator;
 
         // swapの結果, トークン量が0になるのを防ぎます。
         if (amountDst == totalAmount[dstToken]) amountDst--;
+
         return amountDst;
     }
 
     // swap先のトークン量からswap元のトークン量を算出
+    // TODO 計算式のせる
     function swapEstimateFromDstToken(IERC20 _dstToken, uint256 _amountDst)
         public
         view
@@ -180,10 +180,11 @@ contract AMM {
         );
         IERC20 srcToken = pairToken(_dstToken);
 
-        uint256 totalAmountDstAfter = totalAmount[_dstToken] - _amountDst;
-        uint256 totalAmountSrcAfter = (totalAmount[srcToken] *
-            totalAmount[_dstToken]) / totalAmountDstAfter;
-        return totalAmountSrcAfter - totalAmount[srcToken];
+        uint256 numerator = totalAmount[srcToken] * _amountDst;
+        uint256 denominator = totalAmount[_dstToken] - _amountDst;
+        uint256 amountSrc = numerator / denominator;
+
+        return amountSrc;
     }
 
     function swap(
