@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
 contract AMM {
-    uint256 K; // 価格を決める定数
     IERC20 tokenX; // ERC20を実装したコントラクト1
     IERC20 tokenY; // ERC20を実装したコントラクト2
     uint256 public totalShares; // 全てのシェア(割合の分母, 株式みたいなもの)
@@ -108,7 +107,6 @@ contract AMM {
 
         totalAmount[_tokenX] += _amountX;
         totalAmount[_tokenY] += _amountY;
-        K = totalAmount[_tokenX] * totalAmount[_tokenY];
 
         totalShares += share;
         shares[msg.sender] += share;
@@ -141,7 +139,6 @@ contract AMM {
 
         totalAmount[tokenX] -= amountTokenX;
         totalAmount[tokenY] -= amountTokenY;
-        K = totalAmount[tokenX] * totalAmount[tokenY];
 
         tokenX.transfer(msg.sender, amountTokenX);
         tokenY.transfer(msg.sender, amountTokenY);
@@ -159,8 +156,11 @@ contract AMM {
         IERC20 dstToken = pairToken(_srcToken);
 
         uint256 totalAmountSrcAfter = totalAmount[_srcToken] + _amountSrc;
-        uint256 totalAmountDstAfter = K / (totalAmountSrcAfter);
+        uint256 totalAmountDstAfter = (totalAmount[_srcToken] *
+            totalAmount[dstToken]) / (totalAmountSrcAfter);
         uint256 amountDst = totalAmount[dstToken] - totalAmountDstAfter;
+
+        // uint numerator = _amountSrc * totalAmount[_srcToken]
 
         // swapの結果, トークン量が0になるのを防ぎます。
         if (amountDst == totalAmount[dstToken]) amountDst--;
@@ -181,7 +181,8 @@ contract AMM {
         IERC20 srcToken = pairToken(_dstToken);
 
         uint256 totalAmountDstAfter = totalAmount[_dstToken] - _amountDst;
-        uint256 totalAmountSrcAfter = K / totalAmountDstAfter;
+        uint256 totalAmountSrcAfter = (totalAmount[srcToken] *
+            totalAmount[_dstToken]) / totalAmountDstAfter;
         return totalAmountSrcAfter - totalAmount[srcToken];
     }
 
