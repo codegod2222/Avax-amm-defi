@@ -4,6 +4,9 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
+//TODO shareなのかsharesなのか
+//TODO src, dstをin, outにする
+//TODO swapestimateをgetSwapestimateInとかOutとか
 contract AMM {
     IERC20 tokenX; // ERC20を実装したコントラクト1
     IERC20 tokenY; // ERC20を実装したコントラクト2
@@ -144,10 +147,6 @@ contract AMM {
         uint256 numerator = _amountSrc * totalAmount[dstToken];
         uint256 denominator = totalAmount[_srcToken] + _amountSrc;
         uint256 amountDst = numerator / denominator;
-
-        // swapの結果, トークン量が0になるのを防ぎます。
-        //TODO ここのテスト
-        if (amountDst == totalAmount[dstToken]) amountDst--;
 
         return amountDst;
     }
