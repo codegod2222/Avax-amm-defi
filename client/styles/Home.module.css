@@ -1,6 +1,6 @@
 .pageBody{
     height: 100vh;
-    background: linear-gradient(0deg, rgb(49, 62, 80) 0%, rgb(122, 153, 182) 180%);
+    background: linear-gradient(20deg, rgb(49, 62, 80) 0%, rgb(122, 153, 182) 180%);
 }
 
 .navBar {

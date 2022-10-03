@@ -42,7 +42,7 @@ export default function Details({
   }, [amm, tokens, updateDetailsFlag]);
 
   useEffect(() => {
-    getShares();
+    getShare();
   }, [amm, updateDetailsFlag]);
 
   const getAmountOfUserTokens = async () => {
@@ -77,17 +77,17 @@ export default function Details({
     }
   };
 
-  async function getShares() {
+  async function getShare() {
     if (!amm || !currentAccount) return;
     try {
-      let share = await amm.contract.shares(currentAccount);
+      let share = await amm.contract.share(currentAccount);
       let shareWithoutPrecision = formatWithoutPrecision(
         share,
         amm.sharePrecision
       );
       setUserShare(shareWithoutPrecision);
 
-      share = await amm.contract.totalShares();
+      share = await amm.contract.totalShare();
       shareWithoutPrecision = formatWithoutPrecision(share, amm.sharePrecision);
       setTotalShare(shareWithoutPrecision);
     } catch (err) {
@@ -95,7 +95,6 @@ export default function Details({
     }
   }
 
-  //TODO shareなのかsharesなのか
   return (
     <div className={styles.details}>
       <div className={styles.detailsBody}>
@@ -112,6 +111,12 @@ export default function Details({
             </div>
           );
         })}
+        <div className={styles.detailsRow}>
+          <div className={styles.detailsAttribute}>Share:</div>
+          <div className={styles.detailsValue}>
+            {userShare.substring(0, DISPLAY_CHAR_LIMIT)}
+          </div>
+        </div>
         <div className={styles.detailsHeader}>Pool Details</div>
         {amountOfPoolTokens.map((amount, index) => {
           return (
@@ -126,13 +131,7 @@ export default function Details({
           );
         })}
         <div className={styles.detailsRow}>
-          <div className={styles.detailsAttribute}>Your Share:</div>
-          <div className={styles.detailsValue}>
-            {userShare.substring(0, DISPLAY_CHAR_LIMIT)}
-          </div>
-        </div>
-        <div className={styles.detailsRow}>
-          <div className={styles.detailsAttribute}>Total Shares:</div>
+          <div className={styles.detailsAttribute}>Total Share:</div>
           <div className={styles.detailsValue}>
             {totalShare.substring(0, DISPLAY_CHAR_LIMIT)}
           </div>

@@ -22,71 +22,71 @@ export default function Swap({
   updateDetails,
 }: Props) {
   // スワップ元とスワップ先のトークンを格納します。
-  const [tokenSrc, setTokenSrc] = useState<TokenType>();
-  const [tokenDst, setTokenDst] = useState<TokenType>();
+  const [tokenIn, setTokenIn] = useState<TokenType>();
+  const [tokenOut, setTokenOut] = useState<TokenType>();
 
-  const [amountSrc, setAmountSrc] = useState("");
-  const [amountDst, setAmountDst] = useState("");
+  const [amountIn, setAmountIn] = useState("");
+  const [amountOut, setAmountOut] = useState("");
 
   useEffect(() => {
-    setTokenSrc(token0);
-    setTokenDst(token1);
+    setTokenIn(token0);
+    setTokenOut(token1);
   }, [token0, token1]);
 
   const rev = () => {
     // スワップ元とスワップ先のトークンを交換します。
-    const srcCopy = tokenSrc;
-    setTokenSrc(tokenDst);
-    setTokenDst(srcCopy);
+    const inCopy = tokenIn;
+    setTokenIn(tokenOut);
+    setTokenOut(inCopy);
 
     // 交換後はソーストークンから推定量を再計算します。
-    getSwapEstimateFromSrc(amountSrc);
+    getSwapEstimateOut(amountIn);
   };
 
   // スワップ元トークンに指定された量から, スワップ先トークンの受け取れる量を取得します。
-  const getSwapEstimateFromSrc = async (amount: string) => {
-    if (!amm || !tokenSrc) return;
+  const getSwapEstimateOut = async (amount: string) => {
+    if (!amm || !tokenIn) return;
     if (!validAmount(amount)) return;
     try {
-      const amountSrcInWei = ethers.utils.parseEther(amount);
-      const amountDstInWei = await amm.contract.swapEstimateFromSrcToken(
-        tokenSrc.contract.address,
-        amountSrcInWei
+      const amountInInWei = ethers.utils.parseEther(amount);
+      const amountOutInWei = await amm.contract.getSwapEstimateOut(
+        tokenIn.contract.address,
+        amountInInWei
       );
-      const amountDstInEther = ethers.utils.formatEther(amountDstInWei);
-      setAmountDst(amountDstInEther);
+      const amountOutInEther = ethers.utils.formatEther(amountOutInWei);
+      setAmountOut(amountOutInEther);
     } catch (error) {
       alert(error);
     }
   };
 
   // スワップ先トークンに指定された量から, スワップ元トークンに必要な量を取得します。
-  const getSwapEstimateFromDst = async (amount: string) => {
-    if (!amm || !tokenDst) return;
+  const getSwapEstimateIn = async (amount: string) => {
+    if (!amm || !tokenOut) return;
     if (!validAmount(amount)) return;
     if (amm) {
       try {
-        const amountDstInWei = ethers.utils.parseEther(amount);
-        const amountSrcInWei = await amm.contract.swapEstimateFromDstToken(
-          tokenDst.contract.address,
-          amountDstInWei
+        const amountOutInWei = ethers.utils.parseEther(amount);
+        const amountInInWei = await amm.contract.getSwapEstimateIn(
+          tokenOut.contract.address,
+          amountOutInWei
         );
-        const amountSrcInEther = ethers.utils.formatEther(amountSrcInWei);
-        setAmountSrc(amountSrcInEther);
+        const amountInInEther = ethers.utils.formatEther(amountInInWei);
+        setAmountIn(amountInInEther);
       } catch (error) {
         alert(error);
       }
     }
   };
 
-  const onChangeSrc = (amount: string) => {
-    setAmountSrc(amount);
-    getSwapEstimateFromSrc(amount);
+  const onChangeIn = (amount: string) => {
+    setAmountIn(amount);
+    getSwapEstimateOut(amount);
   };
 
-  const onChangeDst = (amount: string) => {
-    setAmountDst(amount);
-    getSwapEstimateFromDst(amount);
+  const onChangeOut = (amount: string) => {
+    setAmountOut(amount);
+    getSwapEstimateIn(amount);
   };
 
   const onClickSwap = async () => {
@@ -94,24 +94,28 @@ export default function Swap({
       alert("Connect to wallet");
       return;
     }
-    if (!amm || !tokenSrc || !tokenDst) return;
-    if (!validAmount(amountSrc)) {
+    if (!amm || !tokenIn || !tokenOut) return;
+    if (!validAmount(amountIn)) {
       alert("Amount should be a valid number");
       return;
     }
     try {
-      const amountSrcInWei = ethers.utils.parseEther(amountSrc);
+      const amountInInWei = ethers.utils.parseEther(amountIn);
 
-      await tokenSrc.contract.approve(amm.contract.address, amountSrcInWei);
+      const txnIn = await tokenIn.contract.approve(
+        amm.contract.address,
+        amountInInWei
+      );
+      await txnIn.wait();
 
       const txn = await amm.contract.swap(
-        tokenSrc.contract.address,
-        tokenDst.contract.address,
-        amountSrcInWei
+        tokenIn.contract.address,
+        tokenOut.contract.address,
+        amountInInWei
       );
       await txn.wait();
-      setAmountSrc("");
-      setAmountDst("");
+      setAmountIn("");
+      setAmountOut("");
       updateDetails(); // ユーザとammの情報を更新
       alert("Success!");
     } catch (error) {
@@ -123,18 +127,18 @@ export default function Swap({
     <div className={styles.tabBody}>
       <InputNumberBox
         leftHeader={"From"}
-        right={tokenSrc ? tokenSrc.symbol : ""}
-        value={amountSrc}
-        onChange={(e) => onChangeSrc(e.target.value)}
+        right={tokenIn ? tokenIn.symbol : ""}
+        value={amountIn}
+        onChange={(e) => onChangeIn(e.target.value)}
       />
       <div className={styles.swapIcon} onClick={() => rev()}>
         <MdSwapVert />
       </div>
       <InputNumberBox
         leftHeader={"To"}
-        right={tokenDst ? tokenDst.symbol : ""}
-        value={amountDst}
-        onChange={(e) => onChangeDst(e.target.value)}
+        right={tokenOut ? tokenOut.symbol : ""}
+        value={amountOut}
+        onChange={(e) => onChangeOut(e.target.value)}
       />
       <div className={styles.bottomDiv}>
         <div className={styles.btn} onClick={() => onClickSwap()}>

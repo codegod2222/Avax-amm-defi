@@ -4,14 +4,11 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
-//TODO shareなのかsharesなのか
-//TODO src, dstをin, outにする
-//TODO swapestimateをgetSwapestimateInとかOutとか
 contract AMM {
     IERC20 tokenX; // ERC20を実装したコントラクト1
     IERC20 tokenY; // ERC20を実装したコントラクト2
-    uint256 public totalShares; // 全てのシェア(割合の分母, 株式みたいなもの)
-    mapping(address => uint256) public shares; // 各ユーザのシェア
+    uint256 public totalShare; // 全てのシェア(割合の分母, 株式みたいなもの)
+    mapping(address => uint256) public share; // 各ユーザのシェア
     mapping(IERC20 => uint256) public totalAmount; // プールにロックされた各トークンの量
 
     uint256 public constant PRECISION = 1_000_000; // 計算中の精度に使用する定数(= 6桁)
@@ -24,7 +21,7 @@ contract AMM {
 
     // プールに流動性があり, 使用可能であることを確認します。
     modifier activePool() {
-        require(totalShares > 0, "Zero Liquidity");
+        require(totalShare > 0, "Zero Liquidity");
         _;
     }
 
@@ -51,16 +48,16 @@ contract AMM {
     }
 
     // 引数のトークンの量に値するペアのトークンの量を返します。
-    function equivalentToken(IERC20 _srcToken, uint256 _amountSrc)
+    function getEquivalentToken(IERC20 _inToken, uint256 _amountIn)
         public
         view
-        validToken(_srcToken)
+        validToken(_inToken)
         activePool
         returns (uint256)
     {
-        IERC20 dstToken = pairToken(_srcToken);
+        IERC20 outToken = pairToken(_inToken);
 
-        return (totalAmount[dstToken] * _amountSrc) / totalAmount[_srcToken];
+        return (totalAmount[outToken] * _amountIn) / totalAmount[_inToken];
     }
 
     // プールに流動性を提供します。
@@ -73,21 +70,24 @@ contract AMM {
         require(_amountX > 0, "Amount cannot be zero!");
         require(_amountY > 0, "Amount cannot be zero!");
 
-        uint256 share;
-        if (totalShares == 0) {
+        uint256 newshare;
+        if (totalShare == 0) {
             // 初期は100
-            share = 100 * PRECISION;
+            newshare = 100 * PRECISION;
         } else {
-            uint256 shareX = (totalShares * _amountX) / totalAmount[_tokenX];
-            uint256 shareY = (totalShares * _amountY) / totalAmount[_tokenY];
+            uint256 shareX = (totalShare * _amountX) / totalAmount[_tokenX];
+            uint256 shareY = (totalShare * _amountY) / totalAmount[_tokenY];
             require(
                 shareX == shareY,
                 "Equivalent value of tokens not provided..."
             );
-            share = shareX;
+            newshare = shareX;
         }
 
-        require(share > 0, "Asset value less than threshold for contribution!");
+        require(
+            newshare > 0,
+            "Asset value less than threshold for contribution!"
+        );
 
         _tokenX.transferFrom(msg.sender, address(this), _amountX);
         _tokenY.transferFrom(msg.sender, address(this), _amountY);
@@ -95,21 +95,21 @@ contract AMM {
         totalAmount[_tokenX] += _amountX;
         totalAmount[_tokenY] += _amountY;
 
-        totalShares += share;
-        shares[msg.sender] += share;
+        totalShare += newshare;
+        share[msg.sender] += newshare;
 
-        return share;
+        return newshare;
     }
 
     // ユーザのシェアから引き出せるトークンの量を算出します。
-    function withdrawEstimate(IERC20 _token, uint256 _share)
+    function getWithdrawEstimate(IERC20 _token, uint256 _share)
         public
         view
         activePool
         returns (uint256)
     {
-        require(_share <= totalShares, "Share should be less than totalShare");
-        return (_share * totalAmount[_token]) / totalShares;
+        require(_share <= totalShare, "Share should be less than totalShare");
+        return (_share * totalAmount[_token]) / totalShare;
     }
 
     function withdraw(uint256 _share)
@@ -118,13 +118,13 @@ contract AMM {
         returns (uint256, uint256)
     {
         require(_share > 0, "share cannot be zero!");
-        require(_share <= shares[msg.sender], "Insufficient share");
+        require(_share <= share[msg.sender], "Insufficient share");
 
-        uint256 amountTokenX = withdrawEstimate(tokenX, _share);
-        uint256 amountTokenY = withdrawEstimate(tokenY, _share);
+        uint256 amountTokenX = getWithdrawEstimate(tokenX, _share);
+        uint256 amountTokenY = getWithdrawEstimate(tokenY, _share);
 
-        shares[msg.sender] -= _share;
-        totalShares -= _share;
+        share[msg.sender] -= _share;
+        totalShare -= _share;
 
         totalAmount[tokenX] -= amountTokenX;
         totalAmount[tokenY] -= amountTokenY;
@@ -136,54 +136,54 @@ contract AMM {
     }
 
     // swap元のトークン量からswap先のトークン量を算出
-    function swapEstimateFromSrcToken(IERC20 _srcToken, uint256 _amountSrc)
+    function getSwapEstimateOut(IERC20 _inToken, uint256 _amountIn)
         public
         view
         activePool
         returns (uint256)
     {
-        IERC20 dstToken = pairToken(_srcToken);
+        IERC20 outToken = pairToken(_inToken);
 
-        uint256 numerator = _amountSrc * totalAmount[dstToken];
-        uint256 denominator = totalAmount[_srcToken] + _amountSrc;
-        uint256 amountDst = numerator / denominator;
+        uint256 numerator = _amountIn * totalAmount[outToken];
+        uint256 denominator = totalAmount[_inToken] + _amountIn;
+        uint256 amountOut = numerator / denominator;
 
-        return amountDst;
+        return amountOut;
     }
 
     // swap先のトークン量からswap元のトークン量を算出
-    function swapEstimateFromDstToken(IERC20 _dstToken, uint256 _amountDst)
+    function getSwapEstimateIn(IERC20 _outToken, uint256 _amountOut)
         public
         view
         activePool
         returns (uint256)
     {
         require(
-            _amountDst < totalAmount[_dstToken],
+            _amountOut < totalAmount[_outToken],
             "Insufficient pool balance"
         );
-        IERC20 srcToken = pairToken(_dstToken);
+        IERC20 inToken = pairToken(_outToken);
 
-        uint256 numerator = totalAmount[srcToken] * _amountDst;
-        uint256 denominator = totalAmount[_dstToken] - _amountDst;
-        uint256 amountSrc = numerator / denominator;
+        uint256 numerator = totalAmount[inToken] * _amountOut;
+        uint256 denominator = totalAmount[_outToken] - _amountOut;
+        uint256 amountIn = numerator / denominator;
 
-        return amountSrc;
+        return amountIn;
     }
 
     function swap(
-        IERC20 _srcToken,
-        IERC20 _dstToken,
-        uint256 _amountSrc
+        IERC20 _inToken,
+        IERC20 _outToken,
+        uint256 _amountIn
     ) external activePool returns (uint256) {
-        require(_amountSrc > 0, "Amount cannot be zero!");
+        require(_amountIn > 0, "Amount cannot be zero!");
 
-        uint256 amountDst = swapEstimateFromSrcToken(_srcToken, _amountSrc);
+        uint256 amountOut = getSwapEstimateOut(_inToken, _amountIn);
 
-        _srcToken.transferFrom(msg.sender, address(this), _amountSrc);
-        totalAmount[_srcToken] += _amountSrc;
-        totalAmount[_dstToken] -= amountDst;
-        _dstToken.transfer(msg.sender, amountDst);
-        return amountDst;
+        _inToken.transferFrom(msg.sender, address(this), _amountIn);
+        totalAmount[_inToken] += _amountIn;
+        totalAmount[_outToken] -= amountOut;
+        _outToken.transfer(msg.sender, amountOut);
+        return amountOut;
     }
 }

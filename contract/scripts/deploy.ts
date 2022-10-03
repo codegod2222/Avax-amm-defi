@@ -19,10 +19,10 @@ async function deploy() {
   const amm = await AMM.deploy(usdc.address, joe.address);
   await amm.deployed();
 
-  console.log("amm address:", amm.address);
   console.log("usdc address:", usdc.address);
   console.log("joe address:", joe.address);
-  console.log("Contracts deployed with the account:", deployer.address);
+  console.log("amm address:", amm.address);
+  console.log("account address that deploy contract:", deployer.address);
 }
 
 deploy()

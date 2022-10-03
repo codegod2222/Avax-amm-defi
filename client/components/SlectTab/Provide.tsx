@@ -32,8 +32,8 @@ export default function Provide({
   const checkLiquidity = async () => {
     if (!amm) return;
     try {
-      const totalShares = await amm.contract.totalShares();
-      if (totalShares.eq(BigNumber.from(0))) {
+      const totalShare = await amm.contract.totalShare();
+      if (totalShare.eq(BigNumber.from(0))) {
         setActivePool(false);
       } else {
         setActivePool(true);
@@ -53,7 +53,7 @@ export default function Provide({
     if (!validAmount(amount)) return;
     try {
       const amountInWei = ethers.utils.parseEther(amount);
-      const pairAmountInWei = await amm.contract.equivalentToken(
+      const pairAmountInWei = await amm.contract.getEquivalentToken(
         token.contract.address,
         amountInWei
       );
@@ -89,8 +89,17 @@ export default function Provide({
       const amountToken0InWei = ethers.utils.parseEther(amountOfToken0);
       const amountToken1InWei = ethers.utils.parseEther(amountOfToken1);
 
-      await token0.contract.approve(amm.contract.address, amountToken0InWei);
-      await token1.contract.approve(amm.contract.address, amountToken1InWei);
+      const txn0 = await token0.contract.approve(
+        amm.contract.address,
+        amountToken0InWei
+      );
+      const txn1 = await token1.contract.approve(
+        amm.contract.address,
+        amountToken1InWei
+      );
+
+      await txn0.wait();
+      await txn1.wait();
 
       const txn = await amm.contract.provide(
         token0.contract.address,

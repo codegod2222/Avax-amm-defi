@@ -36,7 +36,7 @@ export default function Withdraw({
   const getMaxShare = async () => {
     if (!amm || !currentAccount) return;
     try {
-      const shareWithPrecision = await amm.contract.shares(currentAccount);
+      const shareWithPrecision = await amm.contract.share(currentAccount);
       const shareWithoutPrecision = formatWithoutPrecision(
         shareWithPrecision,
         amm.sharePrecision
@@ -73,7 +73,7 @@ export default function Withdraw({
         amountOfShare,
         amm.sharePrecision
       );
-      const estimateInWei = await amm.contract.withdrawEstimate(
+      const estimateInWei = await amm.contract.getWithdrawEstimate(
         token.contract.address,
         shareWithPrecision
       );
@@ -140,7 +140,7 @@ export default function Withdraw({
         onChange={(e) => onChangeAmountOfShare(e.target.value)}
       />
       {token0 && token1 && (
-        <div className={styles.withdrawEstimate}>
+        <div className={styles.estimate}>
           <div>
             <p>
               Amount of {token0.symbol}: {amountOfToken0}
