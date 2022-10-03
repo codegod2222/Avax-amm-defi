@@ -4,6 +4,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
+//TODO token0とtoken1にするか？
 contract AMM {
     IERC20 tokenX; // ERC20を実装したコントラクト1
     IERC20 tokenY; // ERC20を実装したコントラクト2
