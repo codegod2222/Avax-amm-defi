@@ -146,13 +146,13 @@ contract AMM {
         uint256 amountDst = numerator / denominator;
 
         // swapの結果, トークン量が0になるのを防ぎます。
+        //TODO ここのテスト
         if (amountDst == totalAmount[dstToken]) amountDst--;
 
         return amountDst;
     }
 
     // swap先のトークン量からswap元のトークン量を算出
-    // TODO 計算式のせる
     function swapEstimateFromDstToken(IERC20 _dstToken, uint256 _amountDst)
         public
         view

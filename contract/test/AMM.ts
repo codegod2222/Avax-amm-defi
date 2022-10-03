@@ -34,7 +34,7 @@ describe("AMM", function () {
       amountOtherAccount,
     };
   }
-
+  //TODO テスト名を訂正
   describe("Deploy", function () {
     it("Should set the right number of holdings", async function () {
       const { amm, usdc, joe, owner, otherAccount, amountOtherAccount } =
