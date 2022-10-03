@@ -5,17 +5,16 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 describe("AMM", function () {
   async function deployContract() {
-    // 初めのアドレスはコントラクトのデプロイに使用されます。
     const [owner, otherAccount] = await ethers.getSigners();
 
-    const amountOtherAccount = ethers.utils.parseEther("5000");
+    const amountForOther = ethers.utils.parseEther("5000");
     const USDCToken = await ethers.getContractFactory("USDCToken");
     const usdc = await USDCToken.deploy();
-    await usdc.faucet(otherAccount.address, amountOtherAccount);
+    await usdc.faucet(otherAccount.address, amountForOther);
 
     const JOEToken = await ethers.getContractFactory("JOEToken");
     const joe = await JOEToken.deploy();
-    await joe.faucet(otherAccount.address, amountOtherAccount);
+    await joe.faucet(otherAccount.address, amountForOther);
 
     const AMM = await ethers.getContractFactory("AMM");
     const amm = await AMM.deploy(usdc.address, joe.address);
@@ -34,59 +33,98 @@ describe("AMM", function () {
       deployContract
     );
 
-    const OwnerProvidedToken0 = ethers.utils.parseEther("100");
-    const OwnerProvidedToken1 = ethers.utils.parseEther("200");
+    const amountOwnerProvided0 = ethers.utils.parseEther("100");
+    const amountOwnerProvided1 = ethers.utils.parseEther("200");
 
-    await token0.approve(amm.address, OwnerProvidedToken0);
-    await token1.approve(amm.address, OwnerProvidedToken1);
+    await token0.approve(amm.address, amountOwnerProvided0);
+    await token1.approve(amm.address, amountOwnerProvided1);
     await amm.provide(
       token0.address,
-      OwnerProvidedToken0,
+      amountOwnerProvided0,
       token1.address,
-      OwnerProvidedToken1
+      amountOwnerProvided1
     );
 
-    const OtherProvidedToken0 = ethers.utils.parseEther("10");
-    const OtherProvidedToken1 = ethers.utils.parseEther("20");
+    const amountOtherProvided0 = ethers.utils.parseEther("10");
+    const amountOtherProvided1 = ethers.utils.parseEther("20");
 
     await token0
       .connect(otherAccount)
-      .approve(amm.address, OtherProvidedToken0);
+      .approve(amm.address, amountOtherProvided0);
     await token1
       .connect(otherAccount)
-      .approve(amm.address, OtherProvidedToken1);
+      .approve(amm.address, amountOtherProvided1);
     await amm
       .connect(otherAccount)
       .provide(
         token0.address,
-        OtherProvidedToken0,
+        amountOtherProvided0,
         token1.address,
-        OtherProvidedToken1
+        amountOtherProvided1
       );
 
     return {
       amm,
       token0,
-      OwnerProvidedToken0,
-      OtherProvidedToken0,
+      amountOwnerProvided0,
+      amountOtherProvided0,
       token1,
-      OwnerProvidedToken1,
-      OtherProvidedToken1,
+      amountOwnerProvided1,
+      amountOtherProvided1,
       owner,
       otherAccount,
     };
   }
 
   describe("Provide", function () {
+    it("Token should be moved", async function () {
+      const { amm, token0, token1, owner } = await loadFixture(deployContract);
+
+      const ownerBalance0Before = token0.balanceOf(owner.address);
+      const ownerBalance1Before = token1.balanceOf(owner.address);
+
+      const ammBalance0Before = token0.balanceOf(amm.address);
+      const ammBalance1Before = token1.balanceOf(amm.address);
+
+      const amountProvide0 = ethers.utils.parseEther("100");
+      const amountProvide1 = ethers.utils.parseEther("200");
+
+      await token0.approve(amm.address, amountProvide0);
+      await token1.approve(amm.address, amountProvide1);
+      await amm.provide(
+        token0.address,
+        amountProvide0,
+        token1.address,
+        amountProvide1
+      );
+
+      expect(await token0.balanceOf(owner.address)).to.eql(
+        (await ownerBalance0Before).sub(amountProvide0)
+      );
+      expect(await token1.balanceOf(owner.address)).to.eql(
+        (await ownerBalance1Before).sub(amountProvide1)
+      );
+
+      expect(await token0.balanceOf(amm.address)).to.eql(
+        (await ammBalance0Before).add(amountProvide0)
+      );
+      expect(await token1.balanceOf(amm.address)).to.eql(
+        (await ammBalance1Before).add(amountProvide1)
+      );
+    });
+  });
+
+  // deployContractWithLiquidity 後の初期値のチェックをします。
+  describe("Deploy with liquidity", function () {
     it("Should set the right number of amm details", async function () {
       const {
         amm,
         token0,
-        OwnerProvidedToken0,
-        OtherProvidedToken0,
+        amountOwnerProvided0,
+        amountOtherProvided0,
         token1,
-        OwnerProvidedToken1,
-        OtherProvidedToken1,
+        amountOwnerProvided1,
+        amountOtherProvided1,
         owner,
         otherAccount,
       } = await loadFixture(deployContractWithLiquidity);
@@ -101,38 +139,97 @@ describe("AMM", function () {
         BN10.mul(precision)
       );
       expect(await amm.totalAmount(token0.address)).to.equal(
-        OwnerProvidedToken0.add(OtherProvidedToken0)
+        amountOwnerProvided0.add(amountOtherProvided0)
       );
       expect(await amm.totalAmount(token1.address)).to.equal(
-        OwnerProvidedToken1.add(OtherProvidedToken1)
+        amountOwnerProvided1.add(amountOtherProvided1)
       );
     });
+  });
 
-    it("Should get the right number of equivalent token", async function () {
+  describe("equivalentToken", function () {
+    it("Should set the right number of amm details", async function () {
       const { amm, token0, token1 } = await loadFixture(
         deployContractWithLiquidity
       );
 
       const totalToken0 = await amm.totalAmount(token0.address);
       const totalToken1 = await amm.totalAmount(token1.address);
-      const provideToken0 = ethers.utils.parseEther("10");
-      // totalToken0 : totalToken1 = provideToken0 : equivalentToken1
-      const equivalentToken1 = provideToken0.mul(totalToken1).div(totalToken0);
+      const amountProvide0 = ethers.utils.parseEther("10");
+      // totalToken0 : totalToken1 = amountProvide0 : equivalentToken1
+      const equivalentToken1 = amountProvide0.mul(totalToken1).div(totalToken0);
 
-      expect(await amm.equivalentToken(token0.address, provideToken0)).to.equal(
-        equivalentToken1
+      expect(
+        await amm.equivalentToken(token0.address, amountProvide0)
+      ).to.equal(equivalentToken1);
+    });
+  });
+
+  describe("withdrawEstimate", function () {
+    it("Should get the right number of estimated amount", async function () {
+      const {
+        amm,
+        token0,
+        amountOtherProvided0,
+        token1,
+        amountOtherProvided1,
+        otherAccount,
+      } = await loadFixture(deployContractWithLiquidity);
+
+      // otherAccountが全てのシェア分引き出し
+      let share = await amm.shares(otherAccount.address);
+
+      expect(await amm.withdrawEstimate(token0.address, share)).to.eql(
+        amountOtherProvided0
+      );
+      expect(await amm.withdrawEstimate(token1.address, share)).to.eql(
+        amountOtherProvided1
       );
     });
   });
 
   describe("Withdraw", function () {
+    it("Token should be moved", async function () {
+      const {
+        amm,
+        token0,
+        amountOwnerProvided0,
+        token1,
+        amountOwnerProvided1,
+        owner,
+      } = await loadFixture(deployContractWithLiquidity);
+
+      const ownerBalance0Before = token0.balanceOf(owner.address);
+      const ownerBalance1Before = token1.balanceOf(owner.address);
+
+      const ammBalance0Before = token0.balanceOf(amm.address);
+      const ammBalance1Before = token1.balanceOf(amm.address);
+
+      let share = await amm.shares(owner.address);
+      await amm.withdraw(share);
+
+      expect(await token0.balanceOf(owner.address)).to.eql(
+        (await ownerBalance0Before).add(amountOwnerProvided0)
+      );
+      expect(await token1.balanceOf(owner.address)).to.eql(
+        (await ownerBalance1Before).add(amountOwnerProvided1)
+      );
+
+      expect(await token0.balanceOf(amm.address)).to.eql(
+        (await ammBalance0Before).sub(amountOwnerProvided0)
+      );
+      expect(await token1.balanceOf(amm.address)).to.eql(
+        (await ammBalance1Before).sub(amountOwnerProvided1)
+      );
+    });
+
     it("Should set the right number of amm details", async function () {
       const {
         amm,
         token0,
-        OwnerProvidedToken0,
+        amountOwnerProvided0,
         token1,
-        OwnerProvidedToken1,
+        amountOwnerProvided1,
         owner,
         otherAccount,
       } = await loadFixture(deployContractWithLiquidity);
@@ -148,84 +245,57 @@ describe("AMM", function () {
       expect(await amm.shares(owner.address)).to.equal(BN100.mul(precision));
       expect(await amm.shares(otherAccount.address)).to.equal(0);
       expect(await amm.totalAmount(token0.address)).to.equal(
-        OwnerProvidedToken0
+        amountOwnerProvided0
       );
       expect(await amm.totalAmount(token1.address)).to.equal(
-        OwnerProvidedToken1
+        amountOwnerProvided1
       );
     });
   });
 
   // describe("Swap", function () {
-  //   it("Should set the right number of funds", async function () {
-  //     const { amm, usdc, joe, sharePrecision, owner, otherAccount } =
-  //       await loadFixture(deployContract);
+  //   it("Should set the right number of amm details", async function () {
+  //     const {
+  //       amm,
+  //       token0,
+  //       amountOwnerProvided0,
+  //       token1,
+  //       amountOwnerProvided1,
+  //       owner,
+  //       otherAccount,
+  //     } = await loadFixture(deployContractWithLiquidity);
 
-  //     // ownerの流動性提供
-  //     const ownerProvidedToken1 = 100;
-  //     const ownerProvidedToken2 = 10;
-  //     await usdc.approve(amm.address, ownerProvidedToken1);
-  //     await joe.approve(amm.address, ownerProvidedToken2);
-  //     await amm.provide(
-  //       usdc.address,
-  //       ownerProvidedToken1,
-  //       joe.address,
-  //       ownerProvidedToken2
-  //     );
-
-  //     // otherの流動性提供
-  //     const otherProvidedToken1 = 50;
-  //     const otherProvidedToken2 = await amm.equivalentToken(
-  //       usdc.address,
-  //       otherProvidedToken1
-  //     );
-  //     await usdc
-  //       .connect(otherAccount)
-  //       .approve(amm.address, otherProvidedToken1);
-  //     await joe.connect(otherAccount).approve(amm.address, otherProvidedToken2);
-  //     await amm
-  //       .connect(otherAccount)
-  //       .provide(
-  //         usdc.address,
-  //         otherProvidedToken1,
-  //         joe.address,
-  //         otherProvidedToken2
-  //       );
-
-  //     // pool 150:15
-  //     // token2を10swapする場合の取得できるtoken1の量(60)の確認
-  //     const amountSwapJoe = 10;
-  //     const amountReceiveUsdc = 60;
+  //     const amountSendToken0 = ethers.utils.parseEther("10");
+  //     const amountReceiveToken1 = ;
   //     expect(
-  //       await amm.swapEstimateFromSrcToken(joe.address, amountSwapJoe)
-  //     ).to.equal(amountReceiveUsdc);
+  //       await amm.swapEstimateFromSrcToken(joe.address, amountSendToken0)
+  //     ).to.equal(amountReceiveToken1);
   //     expect(
-  //       await amm.swapEstimateFromDstToken(usdc.address, amountReceiveUsdc)
-  //     ).to.equal(amountSwapJoe);
+  //       await amm.swapEstimateFromDstToken(usdc.address, amountReceiveToken1)
+  //     ).to.equal(amountSendToken0);
   //     //token2を10swap
   //     const amountBeforeSwapUsdc = await usdc.balanceOf(owner.address);
   //     const amountBeforeSwapJoe = await joe.balanceOf(owner.address);
-  //     await joe.approve(amm.address, amountSwapJoe);
-  //     await amm.swap(joe.address, usdc.address, amountSwapJoe);
+  //     await joe.approve(amm.address, amountSendToken0);
+  //     await amm.swap(joe.address, usdc.address, amountSendToken0);
   //     const amountAfterSwapUsdc = await usdc.balanceOf(owner.address);
   //     const amountAfterSwapJoe = await joe.balanceOf(owner.address);
 
   //     // トークン保有量の確認
   //     expect(amountAfterSwapUsdc.sub(amountBeforeSwapUsdc)).to.equal(
-  //       amountReceiveUsdc
+  //       amountReceiveToken1
   //     );
   //     expect(amountBeforeSwapJoe.sub(amountAfterSwapJoe)).to.equal(
-  //       amountSwapJoe
+  //       amountSendToken0
   //     );
 
   //     // コントラクトの各値の確認
   //     expect(await amm.totalAmount(usdc.address)).to.equal(
-  //       ownerProvidedToken1 + otherProvidedToken1 - amountReceiveUsdc
+  //       ownerProvidedToken1 + otherProvidedToken1 - amountReceiveToken1
   //     );
   //     expect(await amm.totalAmount(joe.address)).to.equal(
-  //       ownerProvidedToken2 + otherProvidedToken2.toNumber() + amountSwapJoe
+  //       ownerProvidedToken2 + otherProvidedToken2.toNumber() + amountSendToken0
   //     );
-  //     expect(await amm.totalShares()).to.equal(sharePrecision.mul(150));
   //   });
   // });
 
