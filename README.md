@@ -1,0 +1,72 @@
+# About The Project
+
+`Miniswap` is a amm dapp that allows tokens to be exchanged like `Uniswap`.
+
+![](/public/images/swap.gif)
+
+# Build & run
+
+```
+git clone [this_repository]
+cd [this_repository]
+npm install
+npm run dev
+```
+
+After executing the above command, access `localhost:3000` in your browser.
+
+# Description
+
+## Chain deployed to: `Avalanche`
+
+## Contract
+
+### Stack description
+
+contract
+
+- Solidity
+
+test & deploy
+
+- hardhat
+- typescript
+
+### Directory structure
+
+Root: `package/contract`
+
+- `AMM.sol`  
+  Implementing AMM contract code.
+- `ERC20Tokens.sol`  
+  Implementing ERC20 contracts To simulate the AMM
+
+### Walk-through of `AMM`'s code
+
+- function: `provide`  
+  Provide liquidity with the address and quantity of the token as arguments.  
+  The contract records share (like `LP token`) for the user who calls this function.
+
+- function: `withdraw`  
+  Withdraw tokens deposited with share as an argument.
+
+- function: `swap`  
+  Swap tokens.  
+  Using the formula:`k = x * y` for calculation, and there is a 0.3% fee for swapping.
+
+## Client
+
+### Stack description
+
+- typescript
+- React.js
+- Next.js
+
+### Directory structure
+
+Root: `package/client`
+
+- `components`, `hooks`, `pages`, `styles`, `public`  
+  Contains client side code
+- `utils`  
+  Contains the contracts ABI and utility functions.
