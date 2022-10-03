@@ -14,7 +14,8 @@ module.exports = {
     fuji: {
       url: "https://api.avax-test.network/ext/bc/C/rpc",
       accounts: {
-        mnemonic: process.env.MNEMONIC,
+        mnemonic:
+          process.env.MNEMONIC !== undefined ? [process.env.MNEMONIC] : "",
       },
     },
   },
