@@ -2,6 +2,10 @@
 
 `Miniswap` is a amm dapp that allows tokens to be exchanged like `Uniswap`.
 
+![](/public/images/start.gif)
+
+### swap
+
 ![](/public/images/swap1.gif)
 ↓
 ![](/public/images/swap2.gif)
