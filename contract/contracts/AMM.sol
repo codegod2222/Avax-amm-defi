@@ -19,20 +19,6 @@ contract AMM {
         tokenY = _tokenY;
     }
 
-    // トークンの量が正しいことを確認します。
-    // TODO これ定義曖昧なので消すかも
-    modifier validAmount(uint256 _amount) {
-        require(_amount > 0, "Amount cannot be zero!");
-        _;
-    }
-
-    // ユーザが引き出そうとするシェアが有効な値であることを確認します。
-    modifier validShare(uint256 _share) {
-        require(_share > 0, "share cannot be zero!");
-        require(_share <= shares[msg.sender], "Insufficient share");
-        _;
-    }
-
     // プールに流動性があり, 使用可能であることを確認します。
     modifier activePool() {
         require(totalShares > 0, "Zero Liquidity");
@@ -80,15 +66,10 @@ contract AMM {
         uint256 _amountX,
         IERC20 _tokenY,
         uint256 _amountY
-    )
-        external
-        validToken(_tokenX)
-        validToken(_tokenY)
-        validAmount(_amountX)
-        validAmount(_amountY)
-        activePool
-        returns (uint256)
-    {
+    ) external validToken(_tokenX) validToken(_tokenY) returns (uint256) {
+        require(_amountX > 0, "Amount cannot be zero!");
+        require(_amountY > 0, "Amount cannot be zero!");
+
         uint256 share;
         if (totalShares == 0) {
             // 初期は100
@@ -131,9 +112,11 @@ contract AMM {
     function withdraw(uint256 _share)
         external
         activePool
-        validShare(_share)
         returns (uint256, uint256)
     {
+        require(_share > 0, "share cannot be zero!");
+        require(_share <= shares[msg.sender], "Insufficient share");
+
         uint256 amountTokenX = withdrawEstimate(tokenX, _share);
         uint256 amountTokenY = withdrawEstimate(tokenY, _share);
 
@@ -193,7 +176,9 @@ contract AMM {
         IERC20 _srcToken,
         IERC20 _dstToken,
         uint256 _amountSrc
-    ) external activePool validAmount(_amountSrc) returns (uint256) {
+    ) external activePool returns (uint256) {
+        require(_amountSrc > 0, "Amount cannot be zero!");
+
         uint256 amountDst = swapEstimateFromSrcToken(_srcToken, _amountSrc);
 
         _srcToken.transferFrom(msg.sender, address(this), _amountSrc);
