@@ -60,10 +60,7 @@ export default function Withdraw({
     setAmount: (amount: string) => void
   ) => {
     if (!amm || !token || !amountOfMaxShare) return;
-    if (!validAmount(amountOfShare)) {
-      alert("Amount should be a valid number");
-      return;
-    }
+    if (!validAmount(amountOfShare)) return;
     if (leftLessThanRightAsBigNumber(amountOfMaxShare, amountOfShare)) {
       alert("Amount should be less than your max share");
       return;

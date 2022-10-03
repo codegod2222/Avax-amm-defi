@@ -8,9 +8,9 @@ import { JOEToken as JoeContractType } from "../typechain-types";
 import { AMM as AmmContractType } from "../typechain-types";
 import { getEthereum } from "../utils/ethereum";
 
-export const UsdcAddress = "0x16f24907F2F49E146249D2d6ED8d3464C46eA15d";
-export const JoeAddress = "0x40B5Ad24A87F634a4DFa054b6Ca472ca5a581090";
-export const AmmAddress = "0x565e35B5e69fE0563eeBdCb22C358b484fF516a7";
+export const UsdcAddress = "0x0a1d32E80B22A5D6D1Bfe58CE158684F8d8Cc125";
+export const JoeAddress = "0xf599e56d3e259AD722C88824F1ff614F44B97a2d";
+export const AmmAddress = "0x18426047a5f6775b102e1fE2581F4262068f9AeB";
 
 export type TokenType = {
   symbol: string;
