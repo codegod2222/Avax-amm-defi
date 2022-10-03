@@ -144,8 +144,10 @@ contract AMM {
     {
         IERC20 outToken = pairToken(_inToken);
 
-        uint256 numerator = _amountIn * totalAmount[outToken];
-        uint256 denominator = totalAmount[_inToken] + _amountIn;
+        uint256 amountInWithFee = _amountIn * 997;
+
+        uint256 numerator = amountInWithFee * totalAmount[outToken];
+        uint256 denominator = totalAmount[_inToken] * 1000 + amountInWithFee;
         uint256 amountOut = numerator / denominator;
 
         return amountOut;
@@ -164,8 +166,8 @@ contract AMM {
         );
         IERC20 inToken = pairToken(_outToken);
 
-        uint256 numerator = totalAmount[inToken] * _amountOut;
-        uint256 denominator = totalAmount[_outToken] - _amountOut;
+        uint256 numerator = 1000 * totalAmount[inToken] * _amountOut;
+        uint256 denominator = 997 * (totalAmount[_outToken] - _amountOut);
         uint256 amountIn = numerator / denominator;
 
         return amountIn;

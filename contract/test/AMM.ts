@@ -262,14 +262,16 @@ describe("AMM", function () {
       const totalToken0 = await amm.totalAmount(token0.address);
       const totalToken1 = await amm.totalAmount(token1.address);
 
-      const amountSendToken0 = ethers.utils.parseEther("10");
+      const amountInToken0 = ethers.utils.parseEther("10");
       // basic formula: k = x * y
-      const amountReceiveToken1 = amountSendToken0
+      // fee = 0.3%
+      const amountInToken0WithFee = amountInToken0.mul(997);
+      const amountReceiveToken1 = amountInToken0WithFee
         .mul(totalToken1)
-        .div(totalToken0.add(amountSendToken0));
+        .div(totalToken0.mul(1000).add(amountInToken0WithFee));
 
       expect(
-        await amm.getSwapEstimateOut(token0.address, amountSendToken0)
+        await amm.getSwapEstimateOut(token0.address, amountInToken0)
       ).to.eql(amountReceiveToken1);
     });
   });
@@ -283,15 +285,17 @@ describe("AMM", function () {
       const totalToken0 = await amm.totalAmount(token0.address);
       const totalToken1 = await amm.totalAmount(token1.address);
 
-      const amountSendToken1 = ethers.utils.parseEther("10");
+      const amountOutToken1 = ethers.utils.parseEther("10");
       // basic formula: k = x * y
-      const amountReceiveToken0 = totalToken0
-        .mul(amountSendToken1)
-        .div(totalToken1.sub(amountSendToken1));
+      // fee = 0.3%
+      const amountInToken0 = totalToken0
+        .mul(amountOutToken1)
+        .mul(1000)
+        .div(totalToken1.sub(amountOutToken1).mul(997));
 
       expect(
-        await amm.getSwapEstimateIn(token1.address, amountSendToken1)
-      ).to.eql(amountReceiveToken0);
+        await amm.getSwapEstimateIn(token1.address, amountOutToken1)
+      ).to.eql(amountInToken0);
     });
 
     it("Should revert if the amount of out token exceed the total", async function () {
