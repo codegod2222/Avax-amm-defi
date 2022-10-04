@@ -2,19 +2,55 @@
 
 `Miniswap` is a amm dapp that allows tokens to be exchanged like `Uniswap`.
 
-### overview
+### Connect wallet
 
-![](/public/images/start.gif)
+Add the following network before:
 
-### start from faucet
+```
+Network Name: Avalanche FUJI C-Chain
+New RPC URL: https://api.avax-test.network/ext/bc/C/rpc
+ChainID: 43113
+Symbol: AVAX
+Explorer: https://testnet.snowtrace.io/
+```
+
+![](/public/images/connect.gif)
+
+### Start from faucet
+
+Get the two tokens (fake USDC and fake JOE) from faucet.
 
 ![](/public/images/faucet.gif)
 
-### swap
+### Swap
+
+First, sign transaction that approve amm contract to move token.
 
 ![](/public/images/swap1.gif)
+
 ↓
+
+Sign transaction to call swap.
+
 ![](/public/images/swap2.gif)
+
+### Provide
+
+First, sign two transactions that approve amm contract to move tokens.
+
+![](/public/images/provide1.gif)
+
+↓
+
+Sign transaction to call provide.
+
+![](/public/images/provide2.gif)
+
+### Withdraw
+
+Withdraw tokens equivalent to the share.
+
+![](/public/images/withdraw.gif)
 
 # Build & run
 
