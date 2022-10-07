@@ -5,13 +5,13 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
 contract AMM {
-    IERC20 tokenX; // ERC20を実装したコントラクト1
-    IERC20 tokenY; // ERC20を実装したコントラクト2
-    uint256 public totalShare; // 全てのシェア(割合の分母, 株式みたいなもの)
+    IERC20 tokenX; // ERC20を実装したコントラクト
+    IERC20 tokenY; // ERC20を実装したコントラクト
+    uint256 public totalShare; // シェアの総量
     mapping(address => uint256) public share; // 各ユーザのシェア
     mapping(IERC20 => uint256) public totalAmount; // プールにロックされた各トークンの量
 
-    uint256 public constant PRECISION = 1_000_000; // 計算中の精度に使用する定数(= 6桁)
+    uint256 public constant PRECISION = 1_000_000; // シェアの精度に使用する定数(= 6桁)
 
     // プールに使えるトークンを指定します。
     constructor(IERC20 _tokenX, IERC20 _tokenY) {
