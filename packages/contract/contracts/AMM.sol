@@ -34,6 +34,20 @@ contract AMM {
         _;
     }
 
+    // スマートコントラクトが扱えるトークンであることを確認します。
+    modifier validTokens(IERC20 _tokenX, IERC20 _tokenY) {
+        require(
+            _tokenX == tokenX || _tokenY == tokenY,
+            "Token is not in the pool"
+        );
+        require(
+            _tokenY == tokenX || _tokenY == tokenY,
+            "Token is not in the pool"
+        );
+        require(_tokenX != _tokenY, "Tokens should be different!");
+        _;
+    }
+
     // 引数のトークンとペアのトークンのコントラクトを返します。
     function pairToken(IERC20 token)
         private
@@ -51,8 +65,8 @@ contract AMM {
     function getEquivalentToken(IERC20 _inToken, uint256 _amountIn)
         public
         view
-        validToken(_inToken)
         activePool
+        validToken(_inToken)
         returns (uint256)
     {
         IERC20 outToken = pairToken(_inToken);
@@ -66,7 +80,7 @@ contract AMM {
         uint256 _amountX,
         IERC20 _tokenY,
         uint256 _amountY
-    ) external validToken(_tokenX) validToken(_tokenY) returns (uint256) {
+    ) external validTokens(_tokenX, _tokenY) returns (uint256) {
         require(_amountX > 0, "Amount cannot be zero!");
         require(_amountY > 0, "Amount cannot be zero!");
 
@@ -106,6 +120,7 @@ contract AMM {
         public
         view
         activePool
+        validToken(_token)
         returns (uint256)
     {
         require(_share <= totalShare, "Share should be less than totalShare");
@@ -140,6 +155,7 @@ contract AMM {
         public
         view
         activePool
+        validToken(_inToken)
         returns (uint256)
     {
         IERC20 outToken = pairToken(_inToken);
@@ -158,6 +174,7 @@ contract AMM {
         public
         view
         activePool
+        validToken(_outToken)
         returns (uint256)
     {
         require(
@@ -177,7 +194,7 @@ contract AMM {
         IERC20 _inToken,
         IERC20 _outToken,
         uint256 _amountIn
-    ) external activePool returns (uint256) {
+    ) external activePool validTokens(_inToken, _outToken) returns (uint256) {
         require(_amountIn > 0, "Amount cannot be zero!");
 
         uint256 amountOut = getSwapEstimateOut(_inToken, _amountIn);
