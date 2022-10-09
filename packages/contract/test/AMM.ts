@@ -28,6 +28,44 @@ describe("AMM", function () {
     };
   }
 
+  describe("provide", function () {
+    it("Token should be moved", async function () {
+      const { amm, token0, token1, owner } = await loadFixture(deployContract);
+
+      const ownerBalance0Before = await token0.balanceOf(owner.address);
+      const ownerBalance1Before = await token1.balanceOf(owner.address);
+
+      const ammBalance0Before = await token0.balanceOf(amm.address);
+      const ammBalance1Before = await token1.balanceOf(amm.address);
+
+      const amountProvide0 = ethers.utils.parseEther("100");
+      const amountProvide1 = ethers.utils.parseEther("200");
+
+      await token0.approve(amm.address, amountProvide0);
+      await token1.approve(amm.address, amountProvide1);
+      await amm.provide(
+        token0.address,
+        amountProvide0,
+        token1.address,
+        amountProvide1
+      );
+
+      expect(await token0.balanceOf(owner.address)).to.eql(
+        ownerBalance0Before.sub(amountProvide0)
+      );
+      expect(await token1.balanceOf(owner.address)).to.eql(
+        ownerBalance1Before.sub(amountProvide1)
+      );
+
+      expect(await token0.balanceOf(amm.address)).to.eql(
+        ammBalance0Before.add(amountProvide0)
+      );
+      expect(await token1.balanceOf(amm.address)).to.eql(
+        ammBalance1Before.add(amountProvide1)
+      );
+    });
+  });
+
   async function deployContractWithLiquidity() {
     const { amm, token0, token1, owner, otherAccount } = await loadFixture(
       deployContract
@@ -75,44 +113,6 @@ describe("AMM", function () {
       otherAccount,
     };
   }
-
-  describe("provide", function () {
-    it("Token should be moved", async function () {
-      const { amm, token0, token1, owner } = await loadFixture(deployContract);
-
-      const ownerBalance0Before = await token0.balanceOf(owner.address);
-      const ownerBalance1Before = await token1.balanceOf(owner.address);
-
-      const ammBalance0Before = await token0.balanceOf(amm.address);
-      const ammBalance1Before = await token1.balanceOf(amm.address);
-
-      const amountProvide0 = ethers.utils.parseEther("100");
-      const amountProvide1 = ethers.utils.parseEther("200");
-
-      await token0.approve(amm.address, amountProvide0);
-      await token1.approve(amm.address, amountProvide1);
-      await amm.provide(
-        token0.address,
-        amountProvide0,
-        token1.address,
-        amountProvide1
-      );
-
-      expect(await token0.balanceOf(owner.address)).to.eql(
-        ownerBalance0Before.sub(amountProvide0)
-      );
-      expect(await token1.balanceOf(owner.address)).to.eql(
-        ownerBalance1Before.sub(amountProvide1)
-      );
-
-      expect(await token0.balanceOf(amm.address)).to.eql(
-        ammBalance0Before.add(amountProvide0)
-      );
-      expect(await token1.balanceOf(amm.address)).to.eql(
-        ammBalance1Before.add(amountProvide1)
-      );
-    });
-  });
 
   // deployContractWithLiquidity 後の初期値のチェックをします。
   describe("Deploy with liquidity", function () {
