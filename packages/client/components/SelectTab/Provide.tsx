@@ -110,6 +110,7 @@ export default function Provide({
       await txn.wait();
       setAmountOfToken0("");
       setAmountOfToken1("");
+      checkLiquidity(); // プールの状態を確認
       updateDetails(); // ユーザとammの情報を更新
       alert("Success");
     } catch (error) {
