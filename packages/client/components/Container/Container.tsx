@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useContract } from "../../hooks/useContract";
 import styles from "./Container.module.css";
-import Swap from "../SlectTab/Swap";
+import Swap from "../SelectTab/Swap";
 import Details from "../Details/Details";
-import Faucet from "../SlectTab/Faucet";
-import Withdraw from "../SlectTab/Withdraw";
-import Provide from "../SlectTab/Provide";
+import Faucet from "../SelectTab/Faucet";
+import Withdraw from "../SelectTab/Withdraw";
+import Provide from "../SelectTab/Provide";
 
 type Props = {
   currentAccount: string | undefined;
