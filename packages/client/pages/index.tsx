@@ -2,6 +2,7 @@ import type { NextPage } from "next";
 import styles from "../styles/Home.module.css";
 import { useWallet } from "../hooks/useWallet";
 import Container from "../components/Container/Container";
+import Image from "next/image";
 
 const Home: NextPage = () => {
   const { currentAccount, connectWallet } = useWallet();
@@ -10,7 +11,12 @@ const Home: NextPage = () => {
     <div className={styles.pageBody}>
       <div className={styles.navBar}>
         <div className={styles.rightHeader}>
-          <img src="bird.png" width="40px" height="30px" />
+          <Image
+            alt="Picture of icon"
+            src="bird.png"
+            width="40px"
+            height="30px"
+          />
           <div className={styles.appName}> Miniswap </div>
         </div>
         {currentAccount == undefined ? (
