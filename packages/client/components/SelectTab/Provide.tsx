@@ -27,6 +27,7 @@ export default function Provide({
 
   useEffect(() => {
     checkLiquidity();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [amm]);
 
   const checkLiquidity = async () => {

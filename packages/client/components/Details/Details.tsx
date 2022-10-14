@@ -35,14 +35,17 @@ export default function Details({
 
   useEffect(() => {
     getAmountOfUserTokens();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tokens, updateDetailsFlag]);
 
   useEffect(() => {
     getAmountOfPoolTokens();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [amm, tokens, updateDetailsFlag]);
 
   useEffect(() => {
     getShare();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [amm, updateDetailsFlag]);
 
   const getAmountOfUserTokens = async () => {

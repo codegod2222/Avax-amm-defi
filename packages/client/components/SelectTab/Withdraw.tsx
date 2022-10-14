@@ -31,6 +31,7 @@ export default function Withdraw({
 
   useEffect(() => {
     getMaxShare();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [amm]);
 
   const getMaxShare = async () => {
