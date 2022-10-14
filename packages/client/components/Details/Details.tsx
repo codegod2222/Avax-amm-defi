@@ -101,7 +101,7 @@ export default function Details({
         <div className={styles.detailsHeader}>Your Details</div>
         {amountOfUserTokens.map((amount, index) => {
           return (
-            <div className={styles.detailsRow}>
+            <div key={index} className={styles.detailsRow}>
               <div className={styles.detailsAttribute}>
                 {tokens[index].symbol}:
               </div>
@@ -120,7 +120,7 @@ export default function Details({
         <div className={styles.detailsHeader}>Pool Details</div>
         {amountOfPoolTokens.map((amount, index) => {
           return (
-            <div className={styles.detailsRow}>
+            <div key={index} className={styles.detailsRow}>
               <div className={styles.detailsAttribute}>
                 Total {tokens[index].symbol}:
               </div>
