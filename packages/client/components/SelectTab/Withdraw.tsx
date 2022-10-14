@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { TokenType, AmmType } from "../../hooks/useContract";
 import styles from "./SelectTab.module.css";
 import { BigNumber, ethers } from "ethers";
@@ -29,11 +29,7 @@ export default function Withdraw({
   const [amountOfShare, setAmountOfShare] = useState("");
   const [amountOfMaxShare, setAmountOfMaxShare] = useState<string>();
 
-  useEffect(() => {
-    getMaxShare();
-  }, [amm]);
-
-  const getMaxShare = async () => {
+  const getMaxShare = useCallback(async () => {
     if (!amm || !currentAccount) return;
     try {
       const shareWithPrecision = await amm.contract.share(currentAccount);
@@ -45,7 +41,11 @@ export default function Withdraw({
     } catch (error) {
       alert(error);
     }
-  };
+  }, [amm, currentAccount]);
+
+  useEffect(() => {
+    getMaxShare();
+  }, [getMaxShare]);
 
   const leftLessThanRightAsBigNumber = (
     left: string,

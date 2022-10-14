@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import styles from "./Details.module.css";
 import { TokenType, AmmType } from "../../hooks/useContract";
 import { ethers } from "ethers";
@@ -33,19 +33,7 @@ export default function Details({
     setTokens([token0, token1]);
   }, [token0, token1]);
 
-  useEffect(() => {
-    getAmountOfUserTokens();
-  }, [tokens, updateDetailsFlag]);
-
-  useEffect(() => {
-    getAmountOfPoolTokens();
-  }, [amm, tokens, updateDetailsFlag]);
-
-  useEffect(() => {
-    getShare();
-  }, [amm, updateDetailsFlag]);
-
-  const getAmountOfUserTokens = async () => {
+  const getAmountOfUserTokens = useCallback(async () => {
     if (!currentAccount) return;
     try {
       setAmountOfUserTokens([]);
@@ -59,9 +47,9 @@ export default function Details({
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [currentAccount, tokens]);
 
-  const getAmountOfPoolTokens = async () => {
+  const getAmountOfPoolTokens = useCallback(async () => {
     if (!amm) return;
     try {
       setAmountOfPoolTokens([]);
@@ -75,9 +63,9 @@ export default function Details({
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [amm, tokens]);
 
-  async function getShare() {
+  const getShare = useCallback(async () => {
     if (!amm || !currentAccount) return;
     try {
       let share = await amm.contract.share(currentAccount);
@@ -93,7 +81,19 @@ export default function Details({
     } catch (err) {
       console.log("Couldn't Fetch details", err);
     }
-  }
+  }, [amm, currentAccount]);
+
+  useEffect(() => {
+    getAmountOfUserTokens();
+  }, [getAmountOfUserTokens, updateDetailsFlag]);
+
+  useEffect(() => {
+    getAmountOfPoolTokens();
+  }, [getAmountOfPoolTokens, updateDetailsFlag]);
+
+  useEffect(() => {
+    getShare();
+  }, [getShare, updateDetailsFlag]);
 
   return (
     <div className={styles.details}>
@@ -101,7 +101,7 @@ export default function Details({
         <div className={styles.detailsHeader}>Your Details</div>
         {amountOfUserTokens.map((amount, index) => {
           return (
-            <div className={styles.detailsRow}>
+            <div key={index} className={styles.detailsRow}>
               <div className={styles.detailsAttribute}>
                 {tokens[index].symbol}:
               </div>
@@ -120,7 +120,7 @@ export default function Details({
         <div className={styles.detailsHeader}>Pool Details</div>
         {amountOfPoolTokens.map((amount, index) => {
           return (
-            <div className={styles.detailsRow}>
+            <div key={index} className={styles.detailsRow}>
               <div className={styles.detailsAttribute}>
                 Total {tokens[index].symbol}:
               </div>

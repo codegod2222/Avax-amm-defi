@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { TokenType, AmmType } from "../../hooks/useContract";
 import styles from "./SelectTab.module.css";
 import { BigNumber, ethers } from "ethers";
@@ -25,11 +25,7 @@ export default function Provide({
   const [amountOfToken1, setAmountOfToken1] = useState("");
   const [activePool, setActivePool] = useState(true);
 
-  useEffect(() => {
-    checkLiquidity();
-  }, [amm]);
-
-  const checkLiquidity = async () => {
+  const checkLiquidity = useCallback(async () => {
     if (!amm) return;
     try {
       const totalShare = await amm.contract.totalShare();
@@ -41,7 +37,11 @@ export default function Provide({
     } catch (error) {
       alert(error);
     }
-  };
+  }, [amm]);
+
+  useEffect(() => {
+    checkLiquidity();
+  }, [checkLiquidity]);
 
   const getProvideEstimate = async (
     token: TokenType,
