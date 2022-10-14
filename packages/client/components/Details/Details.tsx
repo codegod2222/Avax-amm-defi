@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import styles from "./Details.module.css";
 import { TokenType, AmmType } from "../../hooks/useContract";
 import { ethers } from "ethers";
@@ -33,22 +33,7 @@ export default function Details({
     setTokens([token0, token1]);
   }, [token0, token1]);
 
-  useEffect(() => {
-    getAmountOfUserTokens();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tokens, updateDetailsFlag]);
-
-  useEffect(() => {
-    getAmountOfPoolTokens();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [amm, tokens, updateDetailsFlag]);
-
-  useEffect(() => {
-    getShare();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [amm, updateDetailsFlag]);
-
-  const getAmountOfUserTokens = async () => {
+  const getAmountOfUserTokens = useCallback(async () => {
     if (!currentAccount) return;
     try {
       setAmountOfUserTokens([]);
@@ -62,9 +47,9 @@ export default function Details({
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [currentAccount, tokens]);
 
-  const getAmountOfPoolTokens = async () => {
+  const getAmountOfPoolTokens = useCallback(async () => {
     if (!amm) return;
     try {
       setAmountOfPoolTokens([]);
@@ -78,9 +63,9 @@ export default function Details({
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [amm, tokens]);
 
-  async function getShare() {
+  const getShare = useCallback(async () => {
     if (!amm || !currentAccount) return;
     try {
       let share = await amm.contract.share(currentAccount);
@@ -96,7 +81,19 @@ export default function Details({
     } catch (err) {
       console.log("Couldn't Fetch details", err);
     }
-  }
+  }, [amm, currentAccount]);
+
+  useEffect(() => {
+    getAmountOfUserTokens();
+  }, [getAmountOfUserTokens, updateDetailsFlag]);
+
+  useEffect(() => {
+    getAmountOfPoolTokens();
+  }, [getAmountOfPoolTokens, updateDetailsFlag]);
+
+  useEffect(() => {
+    getShare();
+  }, [getShare, updateDetailsFlag]);
 
   return (
     <div className={styles.details}>
