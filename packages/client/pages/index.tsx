@@ -13,7 +13,7 @@ const Home: NextPage = () => {
         <div className={styles.rightHeader}>
           <Image
             alt="Picture of icon"
-            src="bird.png"
+            src="/bird.png"
             width="40px"
             height="30px"
           />
