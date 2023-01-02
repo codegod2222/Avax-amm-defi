@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "deploy": "npx hardhat run scripts/deploy.ts --network fuji",
+    "cp": "npm run cp:typechain && npm run cp:artifact",
+      "cp:typechain": "cp -r typechain-types ../client/",
+      "cp:artifact": "cp artifacts/contracts/ERC20Tokens.sol/USDCToken.json artifacts/contracts/ERC20Tokens.sol/JOEToken.json artifacts/contracts/AMM.sol/AMM.json ../client/utils/",
+    "test": "npx hardhat test"
   },
   "keywords": [],
   "author": "",
