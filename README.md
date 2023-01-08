@@ -1,4 +1,4 @@
-# About The Project
+# About This Project
 
 `Miniswap` is a amm dapp that allows tokens to be exchanged like `Uniswap`.
 
