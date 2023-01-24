@@ -2,7 +2,9 @@
 
 `Miniswap` is a amm dapp that allows tokens to be exchanged like `Uniswap`.
 
-Vercel link: https://avax-amm.vercel.app/
+App link (vercel): https://avax-amm.vercel.app/
+
+How to make: https://github.com/unchain-dev/UNCHAIN-projects/tree/main/docs/AVAX-AMM/ja
 
 ### Connect wallet
 
