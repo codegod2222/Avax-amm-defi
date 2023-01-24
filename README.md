@@ -4,7 +4,9 @@
 
 App link (vercel): https://avax-amm.vercel.app/
 
-Tutorial: https://github.com/unchain-dev/UNCHAIN-projects/tree/main/docs/AVAX-AMM/ja
+Tutorial document: https://github.com/unchain-dev/UNCHAIN-projects/tree/main/docs/AVAX-AMM/ja
+
+# Usage
 
 ### Connect wallet
 
