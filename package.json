@@ -1,0 +1,25 @@
+{
+  "name": "AVAX-AMM",
+  "version": "1.0.0",
+  "description": "`Miniswap` is a amm dapp that allows tokens to be exchanged like `Uniswap`.",
+  "license": "",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unchain-tech/AVAX-AMM.git"
+  },
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/unchain-tech/AVAX-AMM/issues"
+  },
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
+  "scripts": {
+    "contract": "npm run --workspace=contract",
+    "client": "npm run --workspace=client",
+    "test": "npm run contract test"
+  }
+}
