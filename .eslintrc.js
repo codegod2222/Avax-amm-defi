@@ -13,6 +13,16 @@ module.exports = {
   },
   rules: {
     "import/no-duplicates": ["warn"],
+    "node/no-extraneous-import": [
+      "error",
+      {
+        allowModules: [
+          "chai",
+          "ethers",
+          "@nomicfoundation/hardhat-network-helpers",
+        ],
+      },
+    ],
     "node/no-unsupported-features/es-syntax": [
       "error",
       { ignores: ["modules"] },
