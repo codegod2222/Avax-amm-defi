@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
-import styles from "./Details.module.css";
-import { TokenType, AmmType } from "../../hooks/useContract";
 import { ethers } from "ethers";
+import { useCallback, useEffect, useState } from "react";
+
+import { AmmType, TokenType } from "../../hooks/useContract";
 import { formatWithoutPrecision } from "../../utils/format";
+import styles from "./Details.module.css";
 
 type Props = {
   token0: TokenType | undefined;
@@ -39,7 +40,7 @@ export default function Details({
       setAmountOfUserTokens([]);
       for (let index = 0; index < tokens.length; index++) {
         const amountInWei = await tokens[index].contract.balanceOf(
-          currentAccount
+          currentAccount,
         );
         const amountInEther = ethers.utils.formatEther(amountInWei);
         setAmountOfUserTokens((prevState) => [...prevState, amountInEther]);
@@ -55,7 +56,7 @@ export default function Details({
       setAmountOfPoolTokens([]);
       for (let index = 0; index < tokens.length; index++) {
         const amountInWei = await amm.contract.totalAmount(
-          tokens[index].contract.address
+          tokens[index].contract.address,
         );
         const amountInEther = ethers.utils.formatEther(amountInWei);
         setAmountOfPoolTokens((prevState) => [...prevState, amountInEther]);
@@ -71,7 +72,7 @@ export default function Details({
       let share = await amm.contract.share(currentAccount);
       let shareWithoutPrecision = formatWithoutPrecision(
         share,
-        amm.sharePrecision
+        amm.sharePrecision,
       );
       setUserShare(shareWithoutPrecision);
 

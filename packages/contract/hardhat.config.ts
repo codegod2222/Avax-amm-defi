@@ -1,6 +1,6 @@
-import { HardhatUserConfig } from "hardhat/config";
+import * as dotenv from "dotenv";
 import "@nomicfoundation/hardhat-toolbox";
-import * as dotenv from "dotenv"; // 環境構築時にこのパッケージはインストールしてあります。
+import { HardhatUserConfig } from "hardhat/config";
 
 // .envファイルから環境変数をロードします。
 dotenv.config();

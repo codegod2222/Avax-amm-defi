@@ -1,4 +1,5 @@
 import { ChangeEvent } from "react";
+
 import styles from "./InputNumberBox.module.css";
 
 type Props = {

@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
 import { BigNumber, ethers } from "ethers";
-import UsdcArtifact from "../utils/USDCToken.json";
-import JoeArtifact from "../utils/USDCToken.json";
-import AmmArtifact from "../utils/AMM.json";
+import { useEffect, useState } from "react";
+
 import { USDCToken as UsdcContractType } from "../typechain-types";
 import { JOEToken as JoeContractType } from "../typechain-types";
 import { AMM as AmmContractType } from "../typechain-types";
+import AmmArtifact from "../utils/AMM.json";
 import { getEthereum } from "../utils/ethereum";
+import UsdcArtifact from "../utils/USDCToken.json";
+import JoeArtifact from "../utils/USDCToken.json";
 
 export const UsdcAddress = "0x0a1d32E80B22A5D6D1Bfe58CE158684F8d8Cc125";
 export const JoeAddress = "0xf599e56d3e259AD722C88824F1ff614F44B97a2d";
@@ -29,7 +30,7 @@ type ReturnUseContract = {
 };
 
 export const useContract = (
-  currentAccount: string | undefined
+  currentAccount: string | undefined,
 ): ReturnUseContract => {
   const [usdc, setUsdc] = useState<TokenType>();
   const [joe, setJoe] = useState<TokenType>();
@@ -39,7 +40,7 @@ export const useContract = (
   const getContract = (
     contractAddress: string,
     abi: ethers.ContractInterface,
-    storeContract: (_: ethers.Contract) => void
+    storeContract: (_: ethers.Contract) => void,
   ) => {
     if (!ethereum) {
       console.log("Ethereum object doesn't exist!");

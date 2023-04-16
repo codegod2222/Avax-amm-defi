@@ -1,13 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
-import { TokenType, AmmType } from "../../hooks/useContract";
-import styles from "./SelectTab.module.css";
 import { BigNumber, ethers } from "ethers";
-import InputNumberBox from "../InputBox/InputNumberBox";
-import { validAmount } from "../../utils/validAmount";
+import { useCallback, useEffect, useState } from "react";
+
+import { AmmType, TokenType } from "../../hooks/useContract";
 import {
-  formatWithPrecision,
   formatWithoutPrecision,
+  formatWithPrecision,
 } from "../../utils/format";
+import { validAmount } from "../../utils/validAmount";
+import InputNumberBox from "../InputBox/InputNumberBox";
+import styles from "./SelectTab.module.css";
 
 type Props = {
   token0: TokenType | undefined;
@@ -35,7 +36,7 @@ export default function Withdraw({
       const shareWithPrecision = await amm.contract.share(currentAccount);
       const shareWithoutPrecision = formatWithoutPrecision(
         shareWithPrecision,
-        amm.sharePrecision
+        amm.sharePrecision,
       );
       setAmountOfMaxShare(shareWithoutPrecision);
     } catch (error) {
@@ -49,7 +50,7 @@ export default function Withdraw({
 
   const leftLessThanRightAsBigNumber = (
     left: string,
-    right: string
+    right: string,
   ): boolean => {
     return BigNumber.from(left).lt(BigNumber.from(right));
   };
@@ -57,7 +58,7 @@ export default function Withdraw({
   const getEstimate = async (
     token: TokenType | undefined,
     amountOfShare: string,
-    setAmount: (amount: string) => void
+    setAmount: (amount: string) => void,
   ) => {
     if (!amm || !token || !amountOfMaxShare) return;
     if (!validAmount(amountOfShare)) return;
@@ -68,11 +69,11 @@ export default function Withdraw({
     try {
       const shareWithPrecision = formatWithPrecision(
         amountOfShare,
-        amm.sharePrecision
+        amm.sharePrecision,
       );
       const estimateInWei = await amm.contract.getWithdrawEstimate(
         token.contract.address,
-        shareWithPrecision
+        shareWithPrecision,
       );
       const estimateInEther = ethers.utils.formatEther(estimateInWei);
       setAmount(estimateInEther);
@@ -110,7 +111,7 @@ export default function Withdraw({
     }
     try {
       const txn = await amm.contract.withdraw(
-        formatWithPrecision(amountOfShare, amm.sharePrecision)
+        formatWithPrecision(amountOfShare, amm.sharePrecision),
       );
       await txn.wait();
       setAmountOfToken0("");

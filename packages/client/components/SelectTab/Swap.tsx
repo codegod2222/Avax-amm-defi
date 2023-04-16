@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
-import { TokenType, AmmType } from "../../hooks/useContract";
-import { MdSwapVert } from "react-icons/md";
-import styles from "./SelectTab.module.css";
-import InputNumberBox from "../InputBox/InputNumberBox";
 import { ethers } from "ethers";
+import { useEffect, useState } from "react";
+import { MdSwapVert } from "react-icons/md";
+
+import { AmmType, TokenType } from "../../hooks/useContract";
 import { validAmount } from "../../utils/validAmount";
+import InputNumberBox from "../InputBox/InputNumberBox";
+import styles from "./SelectTab.module.css";
 
 type Props = {
   token0: TokenType | undefined;
@@ -51,7 +52,7 @@ export default function Swap({
       const amountInInWei = ethers.utils.parseEther(amount);
       const amountOutInWei = await amm.contract.getSwapEstimateOut(
         tokenIn.contract.address,
-        amountInInWei
+        amountInInWei,
       );
       const amountOutInEther = ethers.utils.formatEther(amountOutInWei);
       setAmountOut(amountOutInEther);
@@ -69,7 +70,7 @@ export default function Swap({
         const amountOutInWei = ethers.utils.parseEther(amount);
         const amountInInWei = await amm.contract.getSwapEstimateIn(
           tokenOut.contract.address,
-          amountOutInWei
+          amountOutInWei,
         );
         const amountInInEther = ethers.utils.formatEther(amountInInWei);
         setAmountIn(amountInInEther);
@@ -104,14 +105,14 @@ export default function Swap({
 
       const txnIn = await tokenIn.contract.approve(
         amm.contract.address,
-        amountInInWei
+        amountInInWei,
       );
       await txnIn.wait();
 
       const txn = await amm.contract.swap(
         tokenIn.contract.address,
         tokenOut.contract.address,
-        amountInInWei
+        amountInInWei,
       );
       await txn.wait();
       setAmountIn("");

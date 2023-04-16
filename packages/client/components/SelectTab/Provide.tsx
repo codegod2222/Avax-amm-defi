@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
-import { TokenType, AmmType } from "../../hooks/useContract";
-import styles from "./SelectTab.module.css";
 import { BigNumber, ethers } from "ethers";
-import InputNumberBox from "../InputBox/InputNumberBox";
+import { useCallback, useEffect, useState } from "react";
 import { MdAdd } from "react-icons/md";
+
+import { AmmType, TokenType } from "../../hooks/useContract";
 import { validAmount } from "../../utils/validAmount";
+import InputNumberBox from "../InputBox/InputNumberBox";
+import styles from "./SelectTab.module.css";
 
 type Props = {
   token0: TokenType | undefined;
@@ -46,7 +47,7 @@ export default function Provide({
   const getProvideEstimate = async (
     token: TokenType,
     amount: string,
-    setPairTokenAmount: (amount: string) => void
+    setPairTokenAmount: (amount: string) => void,
   ) => {
     if (!amm || !token0 || !token1) return;
     if (!activePool) return;
@@ -55,7 +56,7 @@ export default function Provide({
       const amountInWei = ethers.utils.parseEther(amount);
       const pairAmountInWei = await amm.contract.getEquivalentToken(
         token.contract.address,
-        amountInWei
+        amountInWei,
       );
       const pairAmountInEther = ethers.utils.formatEther(pairAmountInWei);
       setPairTokenAmount(pairAmountInEther);
@@ -68,7 +69,7 @@ export default function Provide({
     amount: string,
     token: TokenType | undefined,
     setAmount: (amount: string) => void,
-    setPairTokenAmount: (amount: string) => void
+    setPairTokenAmount: (amount: string) => void,
   ) => {
     if (!token) return;
     setAmount(amount);
@@ -91,11 +92,11 @@ export default function Provide({
 
       const txn0 = await token0.contract.approve(
         amm.contract.address,
-        amountToken0InWei
+        amountToken0InWei,
       );
       const txn1 = await token1.contract.approve(
         amm.contract.address,
-        amountToken1InWei
+        amountToken1InWei,
       );
 
       await txn0.wait();
@@ -105,7 +106,7 @@ export default function Provide({
         token0.contract.address,
         amountToken0InWei,
         token1.contract.address,
-        amountToken1InWei
+        amountToken1InWei,
       );
       await txn.wait();
       setAmountOfToken0("");
@@ -129,7 +130,7 @@ export default function Provide({
             e.target.value,
             token0,
             setAmountOfToken0,
-            setAmountOfToken1
+            setAmountOfToken1,
           )
         }
       />
@@ -145,7 +146,7 @@ export default function Provide({
             e.target.value,
             token1,
             setAmountOfToken1,
-            setAmountOfToken0
+            setAmountOfToken0,
           )
         }
       />
