@@ -64,7 +64,7 @@ Withdraw tokens equivalent to the share.
 git clone [this_repository]
 cd [this_repository]
 npm install
-npm run dev
+npm run client dev
 ```
 
 After executing the above command, access `localhost:3000` in your browser.
