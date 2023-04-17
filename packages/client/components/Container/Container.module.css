@@ -1,0 +1,44 @@
+.centerContent {
+  margin: 0px auto;
+}
+
+.selectTab {
+  width: 460px;
+  height: 80px;
+  display: flex;
+  justify-content: space-between;
+  margin: 0px auto;
+  margin-top: 10px;
+  background-color: #0e0e10;
+  border-radius: 19px 19px 0px 0px;
+  padding: 0px 20px 0px 20px;
+}
+
+.tabStyle {
+  text-align: center;
+  width: 80px;
+  padding: 5px;
+  font: 18px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  margin-top: 15px;
+  border-radius: 15px;
+  cursor: pointer;
+}
+
+.tabStyle:hover {
+  background: #204158;
+}
+
+.activeTab {
+  background: #356c93;
+}
+
+@media only screen and (min-width: 1180px) {
+  .mainBody {
+    display: flex;
+  }
+}

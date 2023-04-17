@@ -1,0 +1,61 @@
+.tabBody {
+  margin: 0px auto;
+  width: 460px;
+  padding-top: 5px;
+  justify-content: center;
+  align-items: center;
+  background-color: #0e0e10;
+  border-radius: 0px 0px 19px 19px;
+  border-top: 0px;
+}
+
+.bottomDiv {
+  margin: 10px auto;
+  width: 30%;
+  padding: 5px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 19px;
+}
+
+.btn {
+  background-color: #356c93;
+  margin: 10px 30px;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  width: 100px;
+  height: 40px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #57adea;
+}
+
+.swapIcon {
+  width: 5%;
+  text-align: center;
+  display: flex;
+  margin: 40px auto;
+  color: #ff726e;
+}
+
+.estimate {
+  height: 30px;
+  width: 75%;
+  margin: 0px auto;
+  margin-top: 10px;
+  margin-bottom: 30px;
+  color: white;
+}
+
+.error {
+  color: white;
+  display: flex;
+  justify-content: flex-start;
+  padding: 0px 20px;
+}

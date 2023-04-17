@@ -1,0 +1,52 @@
+.details {
+  padding: 15px 10px 15px 0px;
+  width: 370px;
+  height: fit-content;
+  position: absolute;
+  right: 0px;
+  display: flex;
+  justify-content: center;
+}
+
+.detailsBody {
+  background-color: #0e0e10;
+  width: 90%;
+  padding: 10px;
+  border-radius: 19px;
+}
+
+.detailsHeader {
+  height: 30px;
+  font-size: 20px;
+  font-weight: 600;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  margin-bottom: 15px;
+}
+
+.detailsRow {
+  padding: 0px 25px;
+  height: 35px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.detailsAttribute {
+  font: 18px;
+  font-weight: 600;
+  color: white;
+  display: flex;
+  justify-content: flex-start;
+  width: 50%;
+}
+
+.detailsValue {
+  font: 18px;
+  font-weight: 900;
+  color: white;
+  display: flex;
+  justify-content: center;
+  width: 50%;
+}

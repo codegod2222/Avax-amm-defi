@@ -1,0 +1,61 @@
+.pageBody {
+  height: 100vh;
+  background: linear-gradient(
+    20deg,
+    rgb(49, 62, 80) 0%,
+    rgb(122, 153, 182) 180%
+  );
+}
+
+.navBar {
+  height: 80px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  color: white;
+  padding: 0px 30px;
+}
+
+.rightHeader {
+  display: flex;
+  padding: 5px 10px 5px 10px;
+}
+
+.appName {
+  margin: 0 10px;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.connectBtn {
+  position: absolute;
+  right: 50px;
+  top: 20px;
+  background-color: #ff726e;
+  color: #0e0e10;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px 10px 5px 10px;
+  border-radius: 15px;
+}
+
+.connectBtn:hover {
+  color: white;
+  border: 2px solid #c8332e;
+}
+
+.connected {
+  position: absolute;
+  right: 50px;
+  top: 20px;
+  background-color: #4e4b56;
+  color: white;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px 10px 5px 10px;
+  border-radius: 15px;
+}
