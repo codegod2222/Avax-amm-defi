@@ -4,15 +4,29 @@
   "private": true,
   "scripts": {
     "deploy": "npx hardhat run scripts/deploy.ts --network fuji",
-    "cp": "npm run cp:typechain && npm run cp:artifact",
+    "cp": "yarn cp:typechain && yarn cp:artifact",
     "cp:typechain": "cp -r typechain-types ../client/",
     "cp:artifact": "cp artifacts/contracts/ERC20Tokens.sol/USDCToken.json artifacts/contracts/ERC20Tokens.sol/JOEToken.json artifacts/contracts/AMM.sol/AMM.json ../client/utils/",
     "test": "npx hardhat test"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^1.0.0",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
     "@nomicfoundation/hardhat-toolbox": "^2.0.0",
+    "@nomiclabs/hardhat-ethers": "^2.0.0",
+    "@nomiclabs/hardhat-etherscan": "^3.0.0",
     "@openzeppelin/test-helpers": "^0.5.16",
-    "hardhat": "^2.11.2"
+    "@typechain/ethers-v5": "^10.1.0",
+    "@typechain/hardhat": "^6.1.2",
+    "@types/chai": "^4.2.0",
+    "@types/mocha": ">=9.1.0",
+    "eslint": "^8.41.0",
+    "eslint-plugin-node": "^11.1.0",
+    "hardhat": "^2.11.2",
+    "hardhat-gas-reporter": "^1.0.8",
+    "solidity-coverage": "^0.8.1",
+    "ts-node": "^10.9.1",
+    "typechain": "^8.1.0"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.7.3",

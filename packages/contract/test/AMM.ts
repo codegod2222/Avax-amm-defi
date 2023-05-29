@@ -1,22 +1,22 @@
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { expect } from "chai";
-import { BigNumber } from "ethers";
-import { ethers } from "hardhat";
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import { expect } from 'chai';
+import { BigNumber } from 'ethers';
+import { ethers } from 'hardhat';
 
-describe("AMM", function () {
+describe('AMM', function () {
   async function deployContract() {
     const [owner, otherAccount] = await ethers.getSigners();
 
-    const amountForOther = ethers.utils.parseEther("5000");
-    const USDCToken = await ethers.getContractFactory("USDCToken");
+    const amountForOther = ethers.utils.parseEther('5000');
+    const USDCToken = await ethers.getContractFactory('USDCToken');
     const usdc = await USDCToken.deploy();
     await usdc.faucet(otherAccount.address, amountForOther);
 
-    const JOEToken = await ethers.getContractFactory("JOEToken");
+    const JOEToken = await ethers.getContractFactory('JOEToken');
     const joe = await JOEToken.deploy();
     await joe.faucet(otherAccount.address, amountForOther);
 
-    const AMM = await ethers.getContractFactory("AMM");
+    const AMM = await ethers.getContractFactory('AMM');
     const amm = await AMM.deploy(usdc.address, joe.address);
 
     return {
@@ -28,8 +28,8 @@ describe("AMM", function () {
     };
   }
 
-  describe("provide", function () {
-    it("Token should be moved", async function () {
+  describe('provide', function () {
+    it('Token should be moved', async function () {
       const { amm, token0, token1, owner } = await loadFixture(deployContract);
 
       const ownerBalance0Before = await token0.balanceOf(owner.address);
@@ -38,8 +38,8 @@ describe("AMM", function () {
       const ammBalance0Before = await token0.balanceOf(amm.address);
       const ammBalance1Before = await token1.balanceOf(amm.address);
 
-      const amountProvide0 = ethers.utils.parseEther("100");
-      const amountProvide1 = ethers.utils.parseEther("200");
+      const amountProvide0 = ethers.utils.parseEther('100');
+      const amountProvide1 = ethers.utils.parseEther('200');
 
       await token0.approve(amm.address, amountProvide0);
       await token1.approve(amm.address, amountProvide1);
@@ -71,8 +71,8 @@ describe("AMM", function () {
       deployContract,
     );
 
-    const amountOwnerProvided0 = ethers.utils.parseEther("100");
-    const amountOwnerProvided1 = ethers.utils.parseEther("200");
+    const amountOwnerProvided0 = ethers.utils.parseEther('100');
+    const amountOwnerProvided1 = ethers.utils.parseEther('200');
 
     await token0.approve(amm.address, amountOwnerProvided0);
     await token1.approve(amm.address, amountOwnerProvided1);
@@ -83,8 +83,8 @@ describe("AMM", function () {
       amountOwnerProvided1,
     );
 
-    const amountOtherProvided0 = ethers.utils.parseEther("10");
-    const amountOtherProvided1 = ethers.utils.parseEther("20");
+    const amountOtherProvided0 = ethers.utils.parseEther('10');
+    const amountOtherProvided1 = ethers.utils.parseEther('20');
 
     await token0
       .connect(otherAccount)
@@ -115,8 +115,8 @@ describe("AMM", function () {
   }
 
   // deployContractWithLiquidity 後の初期値のチェックをします。
-  describe("Deploy with liquidity", function () {
-    it("Should set the right number of amm details", async function () {
+  describe('Deploy with liquidity', function () {
+    it('Should set the right number of amm details', async function () {
       const {
         amm,
         token0,
@@ -130,8 +130,8 @@ describe("AMM", function () {
       } = await loadFixture(deployContractWithLiquidity);
 
       const precision = await amm.PRECISION();
-      const BN100 = BigNumber.from("100");
-      const BN10 = BigNumber.from("10");
+      const BN100 = BigNumber.from('100');
+      const BN10 = BigNumber.from('10');
 
       expect(await amm.totalShare()).to.equal(BN100.add(BN10).mul(precision));
       expect(await amm.share(owner.address)).to.equal(BN100.mul(precision));
@@ -147,15 +147,15 @@ describe("AMM", function () {
     });
   });
 
-  describe("getEquivalentToken", function () {
-    it("Should get the right number of equivalent token", async function () {
+  describe('getEquivalentToken', function () {
+    it('Should get the right number of equivalent token', async function () {
       const { amm, token0, token1 } = await loadFixture(
         deployContractWithLiquidity,
       );
 
       const totalToken0 = await amm.totalAmount(token0.address);
       const totalToken1 = await amm.totalAmount(token1.address);
-      const amountProvide0 = ethers.utils.parseEther("10");
+      const amountProvide0 = ethers.utils.parseEther('10');
       // totalToken0 : totalToken1 = amountProvide0 : equivalentToken1
       const equivalentToken1 = amountProvide0.mul(totalToken1).div(totalToken0);
 
@@ -165,8 +165,8 @@ describe("AMM", function () {
     });
   });
 
-  describe("getWithdrawEstimate", function () {
-    it("Should get the right number of estimated amount", async function () {
+  describe('getWithdrawEstimate', function () {
+    it('Should get the right number of estimated amount', async function () {
       const {
         amm,
         token0,
@@ -188,8 +188,8 @@ describe("AMM", function () {
     });
   });
 
-  describe("withdraw", function () {
-    it("Token should be moved", async function () {
+  describe('withdraw', function () {
+    it('Token should be moved', async function () {
       const {
         amm,
         token0,
@@ -223,7 +223,7 @@ describe("AMM", function () {
       );
     });
 
-    it("Should set the right number of amm details", async function () {
+    it('Should set the right number of amm details', async function () {
       const {
         amm,
         token0,
@@ -239,7 +239,7 @@ describe("AMM", function () {
       await amm.connect(otherAccount).withdraw(share);
 
       const precision = await amm.PRECISION();
-      const BN100 = BigNumber.from("100");
+      const BN100 = BigNumber.from('100');
 
       expect(await amm.totalShare()).to.equal(BN100.mul(precision));
       expect(await amm.share(owner.address)).to.equal(BN100.mul(precision));
@@ -253,8 +253,8 @@ describe("AMM", function () {
     });
   });
 
-  describe("getSwapEstimateOut", function () {
-    it("Should get the right number of token", async function () {
+  describe('getSwapEstimateOut', function () {
+    it('Should get the right number of token', async function () {
       const { amm, token0, token1 } = await loadFixture(
         deployContractWithLiquidity,
       );
@@ -262,7 +262,7 @@ describe("AMM", function () {
       const totalToken0 = await amm.totalAmount(token0.address);
       const totalToken1 = await amm.totalAmount(token1.address);
 
-      const amountInToken0 = ethers.utils.parseEther("10");
+      const amountInToken0 = ethers.utils.parseEther('10');
       // basic formula: k = x * y
       // fee = 0.3%
       const amountInToken0WithFee = amountInToken0.mul(997);
@@ -276,8 +276,8 @@ describe("AMM", function () {
     });
   });
 
-  describe("getSwapEstimateIn", function () {
-    it("Should get the right number of token", async function () {
+  describe('getSwapEstimateIn', function () {
+    it('Should get the right number of token', async function () {
       const { amm, token0, token1 } = await loadFixture(
         deployContractWithLiquidity,
       );
@@ -285,7 +285,7 @@ describe("AMM", function () {
       const totalToken0 = await amm.totalAmount(token0.address);
       const totalToken1 = await amm.totalAmount(token1.address);
 
-      const amountOutToken1 = ethers.utils.parseEther("10");
+      const amountOutToken1 = ethers.utils.parseEther('10');
       // basic formula: k = x * y
       // fee = 0.3%
       const amountInToken0 = totalToken0
@@ -298,7 +298,7 @@ describe("AMM", function () {
       ).to.eql(amountInToken0);
     });
 
-    it("Should revert if the amount of out token exceed the total", async function () {
+    it('Should revert if the amount of out token exceed the total', async function () {
       const { amm, token1, amountOwnerProvided1, amountOtherProvided1 } =
         await loadFixture(deployContractWithLiquidity);
 
@@ -308,12 +308,12 @@ describe("AMM", function () {
 
       await expect(
         amm.getSwapEstimateIn(token1.address, amountSendToken1),
-      ).to.be.revertedWith("Insufficient pool balance");
+      ).to.be.revertedWith('Insufficient pool balance');
     });
   });
 
-  describe("swap", function () {
-    it("Should set the right number of amm details", async function () {
+  describe('swap', function () {
+    it('Should set the right number of amm details', async function () {
       const {
         amm,
         token0,
@@ -324,7 +324,7 @@ describe("AMM", function () {
         amountOtherProvided1,
       } = await loadFixture(deployContractWithLiquidity);
 
-      const amountSendToken0 = ethers.utils.parseEther("10");
+      const amountSendToken0 = ethers.utils.parseEther('10');
       const amountReceiveToken1 = await amm.getSwapEstimateOut(
         token0.address,
         amountSendToken0,
@@ -341,7 +341,7 @@ describe("AMM", function () {
       );
     });
 
-    it("Token should be moved", async function () {
+    it('Token should be moved', async function () {
       const { amm, token0, token1, owner } = await loadFixture(
         deployContractWithLiquidity,
       );
@@ -352,7 +352,7 @@ describe("AMM", function () {
       const ammBalance0Before = await token0.balanceOf(amm.address);
       const ammBalance1Before = await token1.balanceOf(amm.address);
 
-      const amountSendToken0 = ethers.utils.parseEther("10");
+      const amountSendToken0 = ethers.utils.parseEther('10');
       const amountReceiveToken1 = await amm.getSwapEstimateOut(
         token0.address,
         amountSendToken0,

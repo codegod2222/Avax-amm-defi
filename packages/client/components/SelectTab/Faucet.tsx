@@ -1,10 +1,10 @@
-import { ethers } from "ethers";
-import { useEffect, useState } from "react";
+import { ethers } from 'ethers';
+import { useEffect, useState } from 'react';
 
-import { TokenType } from "../../hooks/useContract";
-import { validAmount } from "../../utils/validAmount";
-import InputNumberBox from "../InputBox/InputNumberBox";
-import styles from "./SelectTab.module.css";
+import { TokenType } from '../../hooks/useContract';
+import { validAmount } from '../../utils/validAmount';
+import InputNumberBox from '../InputBox/InputNumberBox';
+import styles from './SelectTab.module.css';
 
 type Props = {
   token0: TokenType | undefined;
@@ -19,7 +19,7 @@ export default function Faucet({
   currentAccount,
   updateDetails,
 }: Props) {
-  const [amountOfFunds, setAmountOfFunds] = useState("");
+  const [amountOfFunds, setAmountOfFunds] = useState('');
   const [currentTokenIndex, setCurrentTokenIndex] = useState(0);
 
   const [tokens, setTokens] = useState<TokenType[]>([]);
@@ -40,12 +40,12 @@ export default function Faucet({
 
   async function onClickFund() {
     if (!currentAccount) {
-      alert("connect wallet");
+      alert('connect wallet');
       return;
     }
     if (tokens.length === 0) return;
     if (!validAmount(amountOfFunds)) {
-      alert("Amount should be a valid number");
+      alert('Amount should be a valid number');
       return;
     }
     try {
@@ -55,7 +55,7 @@ export default function Faucet({
       const txn = await contract.faucet(currentAccount, amountInWei);
       await txn.wait();
       updateDetails(); // ユーザとammの情報を更新
-      alert("Success");
+      alert('Success');
     } catch (error) {
       console.log(error);
     }
@@ -70,13 +70,13 @@ export default function Faucet({
       </div>
       <InputNumberBox
         leftHeader={
-          "Amount of " +
+          'Amount of ' +
           (tokens[currentTokenIndex]
             ? tokens[currentTokenIndex].symbol
-            : "some token")
+            : 'some token')
         }
         right={
-          tokens[currentTokenIndex] ? tokens[currentTokenIndex].symbol : ""
+          tokens[currentTokenIndex] ? tokens[currentTokenIndex].symbol : ''
         }
         value={amountOfFunds}
         onChange={(e) => onChangeAmountOfFunds(e.target.value)}

@@ -1,6 +1,6 @@
-import { ChangeEvent } from "react";
+import { ChangeEvent } from 'react';
 
-import styles from "./InputNumberBox.module.css";
+import styles from './InputNumberBox.module.css';
 
 type Props = {
   leftHeader: string;
@@ -25,7 +25,7 @@ export default function InputNumberBox({
             type="number"
             value={value}
             onChange={(e) => onChange(e)}
-            placeholder={"Enter amount"}
+            placeholder={'Enter amount'}
           />
         </div>
         <div className={styles.rightContent}>{right}</div>

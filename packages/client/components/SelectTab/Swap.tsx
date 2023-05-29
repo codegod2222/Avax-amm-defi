@@ -1,11 +1,11 @@
-import { ethers } from "ethers";
-import { useEffect, useState } from "react";
-import { MdSwapVert } from "react-icons/md";
+import { ethers } from 'ethers';
+import { useEffect, useState } from 'react';
+import { MdSwapVert } from 'react-icons/md';
 
-import { AmmType, TokenType } from "../../hooks/useContract";
-import { validAmount } from "../../utils/validAmount";
-import InputNumberBox from "../InputBox/InputNumberBox";
-import styles from "./SelectTab.module.css";
+import { AmmType, TokenType } from '../../hooks/useContract';
+import { validAmount } from '../../utils/validAmount';
+import InputNumberBox from '../InputBox/InputNumberBox';
+import styles from './SelectTab.module.css';
 
 type Props = {
   token0: TokenType | undefined;
@@ -26,8 +26,8 @@ export default function Swap({
   const [tokenIn, setTokenIn] = useState<TokenType>();
   const [tokenOut, setTokenOut] = useState<TokenType>();
 
-  const [amountIn, setAmountIn] = useState("");
-  const [amountOut, setAmountOut] = useState("");
+  const [amountIn, setAmountIn] = useState('');
+  const [amountOut, setAmountOut] = useState('');
 
   useEffect(() => {
     setTokenIn(token0);
@@ -92,12 +92,12 @@ export default function Swap({
 
   const onClickSwap = async () => {
     if (!currentAccount) {
-      alert("Connect to wallet");
+      alert('Connect to wallet');
       return;
     }
     if (!amm || !tokenIn || !tokenOut) return;
     if (!validAmount(amountIn)) {
-      alert("Amount should be a valid number");
+      alert('Amount should be a valid number');
       return;
     }
     try {
@@ -115,10 +115,10 @@ export default function Swap({
         amountInInWei,
       );
       await txn.wait();
-      setAmountIn("");
-      setAmountOut("");
+      setAmountIn('');
+      setAmountOut('');
       updateDetails(); // ユーザとammの情報を更新
-      alert("Success!");
+      alert('Success!');
     } catch (error) {
       alert(error);
     }
@@ -127,8 +127,8 @@ export default function Swap({
   return (
     <div className={styles.tabBody}>
       <InputNumberBox
-        leftHeader={"From"}
-        right={tokenIn ? tokenIn.symbol : ""}
+        leftHeader={'From'}
+        right={tokenIn ? tokenIn.symbol : ''}
         value={amountIn}
         onChange={(e) => onChangeIn(e.target.value)}
       />
@@ -136,8 +136,8 @@ export default function Swap({
         <MdSwapVert />
       </div>
       <InputNumberBox
-        leftHeader={"To"}
-        right={tokenOut ? tokenOut.symbol : ""}
+        leftHeader={'To'}
+        right={tokenOut ? tokenOut.symbol : ''}
         value={amountOut}
         onChange={(e) => onChangeOut(e.target.value)}
       />

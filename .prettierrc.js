@@ -1,12 +1,24 @@
 module.exports = {
-  trailingComma: "all",
+  trailingComma: 'all',
   tabWidth: 2,
-  singleQuote: false,
+  singleQuote: true,
   semi: true,
-  importOrder: ["^[./]", "^@/(.*)$"],
+  importOrder: ['^[./]', '^@/(.*)$'],
   importOrderSeparation: true,
   importOrderSortSpecifiers: true,
   importOrderGroupNamespaceSpecifiers: true,
   importOrderCaseInsensitive: true,
-  plugins: ["@trivago/prettier-plugin-sort-imports"],
+  plugins: [
+    '@trivago/prettier-plugin-sort-imports',
+    'prettier-plugin-solidity',
+  ],
+  overrides: [
+    {
+      files: '**/*.sol',
+      options: {
+        tabWidth: 4,
+        singleQuote: false,
+      },
+    },
+  ],
 };
