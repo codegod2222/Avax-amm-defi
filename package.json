@@ -39,13 +39,13 @@
     "pre-commit": "npx lint-staged"
   },
   "scripts": {
-    "contract": "npm run --workspace=contract",
-    "client": "npm run --workspace=client",
+    "contract": "yarn workspace contract",
+    "client": "yarn workspace client",
     "solhint": "solhint --max-warnings 0 \"packages/contract/contracts/*.sol\"",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "prettier": "prettier --write --ignore-unknown --no-error-on-unmatched-pattern --ignore-path .prettierignore .",
     "prettier:check": "prettier --check --ignore-unknown --no-error-on-unmatched-pattern --ignore-path .prettierignore .",
-    "test": "npm run contract test"
+    "test": "yarn contract test"
   }
 }
