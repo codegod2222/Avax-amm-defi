@@ -1,14 +1,14 @@
-import { BigNumber, ethers } from "ethers";
-import { useCallback, useEffect, useState } from "react";
+import { BigNumber, ethers } from 'ethers';
+import { useCallback, useEffect, useState } from 'react';
 
-import { AmmType, TokenType } from "../../hooks/useContract";
+import { AmmType, TokenType } from '../../hooks/useContract';
 import {
   formatWithoutPrecision,
   formatWithPrecision,
-} from "../../utils/format";
-import { validAmount } from "../../utils/validAmount";
-import InputNumberBox from "../InputBox/InputNumberBox";
-import styles from "./SelectTab.module.css";
+} from '../../utils/format';
+import { validAmount } from '../../utils/validAmount';
+import InputNumberBox from '../InputBox/InputNumberBox';
+import styles from './SelectTab.module.css';
 
 type Props = {
   token0: TokenType | undefined;
@@ -25,9 +25,9 @@ export default function Withdraw({
   currentAccount,
   updateDetails,
 }: Props) {
-  const [amountOfToken0, setAmountOfToken0] = useState("");
-  const [amountOfToken1, setAmountOfToken1] = useState("");
-  const [amountOfShare, setAmountOfShare] = useState("");
+  const [amountOfToken0, setAmountOfToken0] = useState('');
+  const [amountOfToken1, setAmountOfToken1] = useState('');
+  const [amountOfShare, setAmountOfShare] = useState('');
   const [amountOfMaxShare, setAmountOfMaxShare] = useState<string>();
 
   const getMaxShare = useCallback(async () => {
@@ -63,7 +63,7 @@ export default function Withdraw({
     if (!amm || !token || !amountOfMaxShare) return;
     if (!validAmount(amountOfShare)) return;
     if (leftLessThanRightAsBigNumber(amountOfMaxShare, amountOfShare)) {
-      alert("Amount should be less than your max share");
+      alert('Amount should be less than your max share');
       return;
     }
     try {
@@ -97,16 +97,16 @@ export default function Withdraw({
 
   const onClickWithdraw = async () => {
     if (!currentAccount) {
-      alert("connect wallet");
+      alert('connect wallet');
       return;
     }
     if (!amm || !amountOfMaxShare) return;
     if (!validAmount(amountOfShare)) {
-      alert("Amount should be a valid number");
+      alert('Amount should be a valid number');
       return;
     }
     if (leftLessThanRightAsBigNumber(amountOfMaxShare, amountOfShare)) {
-      alert("Amount should be less than your max share");
+      alert('Amount should be less than your max share');
       return;
     }
     try {
@@ -114,11 +114,11 @@ export default function Withdraw({
         formatWithPrecision(amountOfShare, amm.sharePrecision),
       );
       await txn.wait();
-      setAmountOfToken0("");
-      setAmountOfToken1("");
-      setAmountOfShare("");
+      setAmountOfToken0('');
+      setAmountOfToken1('');
+      setAmountOfShare('');
       updateDetails(); // ユーザとammの情報を更新
-      alert("Success!");
+      alert('Success!');
     } catch (error) {
       alert(error);
     }
@@ -132,7 +132,7 @@ export default function Withdraw({
         </div>
       </div>
       <InputNumberBox
-        leftHeader={"Amount of share:"}
+        leftHeader={'Amount of share:'}
         right=""
         value={amountOfShare}
         onChange={(e) => onChangeAmountOfShare(e.target.value)}

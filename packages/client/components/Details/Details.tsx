@@ -1,9 +1,9 @@
-import { ethers } from "ethers";
-import { useCallback, useEffect, useState } from "react";
+import { ethers } from 'ethers';
+import { useCallback, useEffect, useState } from 'react';
 
-import { AmmType, TokenType } from "../../hooks/useContract";
-import { formatWithoutPrecision } from "../../utils/format";
-import styles from "./Details.module.css";
+import { AmmType, TokenType } from '../../hooks/useContract';
+import { formatWithoutPrecision } from '../../utils/format';
+import styles from './Details.module.css';
 
 type Props = {
   token0: TokenType | undefined;
@@ -24,8 +24,8 @@ export default function Details({
   const [amountOfPoolTokens, setAmountOfPoolTokens] = useState<string[]>([]);
   const [tokens, setTokens] = useState<TokenType[]>([]);
 
-  const [userShare, setUserShare] = useState("");
-  const [totalShare, setTotalShare] = useState("");
+  const [userShare, setUserShare] = useState('');
+  const [totalShare, setTotalShare] = useState('');
 
   const DISPLAY_CHAR_LIMIT = 7;
 
@@ -105,7 +105,7 @@ export default function Details({
             <div key={index} className={styles.detailsRow}>
               <div className={styles.detailsAttribute}>
                 {tokens[index] === undefined
-                  ? "loading..."
+                  ? 'loading...'
                   : tokens[index].symbol}
                 :
               </div>
@@ -126,9 +126,9 @@ export default function Details({
           return (
             <div key={index} className={styles.detailsRow}>
               <div className={styles.detailsAttribute}>
-                Total{" "}
+                Total{' '}
                 {tokens[index] === undefined
-                  ? "loading..."
+                  ? 'loading...'
                   : tokens[index].symbol}
                 :
               </div>

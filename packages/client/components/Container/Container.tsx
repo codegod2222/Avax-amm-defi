@@ -1,19 +1,19 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-import { useContract } from "../../hooks/useContract";
-import Details from "../Details/Details";
-import Faucet from "../SelectTab/Faucet";
-import Provide from "../SelectTab/Provide";
-import Swap from "../SelectTab/Swap";
-import Withdraw from "../SelectTab/Withdraw";
-import styles from "./Container.module.css";
+import { useContract } from '../../hooks/useContract';
+import Details from '../Details/Details';
+import Faucet from '../SelectTab/Faucet';
+import Provide from '../SelectTab/Provide';
+import Swap from '../SelectTab/Swap';
+import Withdraw from '../SelectTab/Withdraw';
+import styles from './Container.module.css';
 
 type Props = {
   currentAccount: string | undefined;
 };
 
 export default function Container({ currentAccount }: Props) {
-  const [activeTab, setActiveTab] = useState("Swap");
+  const [activeTab, setActiveTab] = useState('Swap');
   const [updateDetailsFlag, setUpdateDetailsFlag] = useState(0);
   const { usdc: token0, joe: token1, amm } = useContract(currentAccount);
 
@@ -33,46 +33,46 @@ export default function Container({ currentAccount }: Props) {
           <div
             className={
               styles.tabStyle +
-              " " +
-              (activeTab === "Swap" ? styles.activeTab : "")
+              ' ' +
+              (activeTab === 'Swap' ? styles.activeTab : '')
             }
-            onClick={() => changeTab("Swap")}
+            onClick={() => changeTab('Swap')}
           >
             Swap
           </div>
           <div
             className={
               styles.tabStyle +
-              " " +
-              (activeTab === "Provide" ? styles.activeTab : "")
+              ' ' +
+              (activeTab === 'Provide' ? styles.activeTab : '')
             }
-            onClick={() => changeTab("Provide")}
+            onClick={() => changeTab('Provide')}
           >
             Provide
           </div>
           <div
             className={
               styles.tabStyle +
-              " " +
-              (activeTab === "Withdraw" ? styles.activeTab : "")
+              ' ' +
+              (activeTab === 'Withdraw' ? styles.activeTab : '')
             }
-            onClick={() => changeTab("Withdraw")}
+            onClick={() => changeTab('Withdraw')}
           >
             Withdraw
           </div>
           <div
             className={
               styles.tabStyle +
-              " " +
-              (activeTab === "Faucet" ? styles.activeTab : "")
+              ' ' +
+              (activeTab === 'Faucet' ? styles.activeTab : '')
             }
-            onClick={() => changeTab("Faucet")}
+            onClick={() => changeTab('Faucet')}
           >
             Faucet
           </div>
         </div>
 
-        {activeTab === "Swap" && (
+        {activeTab === 'Swap' && (
           <Swap
             token0={token0}
             token1={token1}
@@ -81,7 +81,7 @@ export default function Container({ currentAccount }: Props) {
             updateDetails={updateDetails}
           />
         )}
-        {activeTab === "Provide" && (
+        {activeTab === 'Provide' && (
           <Provide
             token0={token0}
             token1={token1}
@@ -90,7 +90,7 @@ export default function Container({ currentAccount }: Props) {
             updateDetails={updateDetails}
           />
         )}
-        {activeTab === "Withdraw" && (
+        {activeTab === 'Withdraw' && (
           <Withdraw
             token0={token0}
             token1={token1}
@@ -99,7 +99,7 @@ export default function Container({ currentAccount }: Props) {
             updateDetails={updateDetails}
           />
         )}
-        {activeTab === "Faucet" && (
+        {activeTab === 'Faucet' && (
           <Faucet
             token0={token0}
             token1={token1}

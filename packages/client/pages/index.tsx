@@ -1,9 +1,9 @@
-import type { NextPage } from "next";
-import Image from "next/image";
+import type { NextPage } from 'next';
+import Image from 'next/image';
 
-import Container from "../components/Container/Container";
-import { useWallet } from "../hooks/useWallet";
-import styles from "../styles/Home.module.css";
+import Container from '../components/Container/Container';
+import { useWallet } from '../hooks/useWallet';
+import styles from '../styles/Home.module.css';
 
 const Home: NextPage = () => {
   const { currentAccount, connectWallet } = useWallet();
@@ -17,13 +17,13 @@ const Home: NextPage = () => {
         </div>
         {currentAccount === undefined ? (
           <div className={styles.connectBtn} onClick={connectWallet}>
-            {" "}
-            Connect to wallet{" "}
+            {' '}
+            Connect to wallet{' '}
           </div>
         ) : (
           <div className={styles.connected}>
-            {" "}
-            {"Connected to " + currentAccount}{" "}
+            {' '}
+            {'Connected to ' + currentAccount}{' '}
           </div>
         )}
       </div>

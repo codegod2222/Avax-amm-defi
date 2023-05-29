@@ -1,4 +1,4 @@
-import { MetaMaskInpageProvider } from "@metamask/providers";
+import { MetaMaskInpageProvider } from '@metamask/providers';
 
 declare global {
   interface Window {
@@ -7,7 +7,7 @@ declare global {
 }
 
 export const getEthereum = (): MetaMaskInpageProvider | null => {
-  if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
+  if (typeof window !== 'undefined' && typeof window.ethereum !== 'undefined') {
     const { ethereum } = window;
     return ethereum;
   }

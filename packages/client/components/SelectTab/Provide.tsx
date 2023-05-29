@@ -1,11 +1,11 @@
-import { BigNumber, ethers } from "ethers";
-import { useCallback, useEffect, useState } from "react";
-import { MdAdd } from "react-icons/md";
+import { BigNumber, ethers } from 'ethers';
+import { useCallback, useEffect, useState } from 'react';
+import { MdAdd } from 'react-icons/md';
 
-import { AmmType, TokenType } from "../../hooks/useContract";
-import { validAmount } from "../../utils/validAmount";
-import InputNumberBox from "../InputBox/InputNumberBox";
-import styles from "./SelectTab.module.css";
+import { AmmType, TokenType } from '../../hooks/useContract';
+import { validAmount } from '../../utils/validAmount';
+import InputNumberBox from '../InputBox/InputNumberBox';
+import styles from './SelectTab.module.css';
 
 type Props = {
   token0: TokenType | undefined;
@@ -22,8 +22,8 @@ export default function Provide({
   currentAccount,
   updateDetails,
 }: Props) {
-  const [amountOfToken0, setAmountOfToken0] = useState("");
-  const [amountOfToken1, setAmountOfToken1] = useState("");
+  const [amountOfToken0, setAmountOfToken0] = useState('');
+  const [amountOfToken1, setAmountOfToken1] = useState('');
   const [activePool, setActivePool] = useState(true);
 
   const checkLiquidity = useCallback(async () => {
@@ -78,12 +78,12 @@ export default function Provide({
 
   const onClickProvide = async () => {
     if (!currentAccount) {
-      alert("connect wallet");
+      alert('connect wallet');
       return;
     }
     if (!amm || !token0 || !token1) return;
     if (!validAmount(amountOfToken0) || !validAmount(amountOfToken1)) {
-      alert("Amount should be a valid number");
+      alert('Amount should be a valid number');
       return;
     }
     try {
@@ -109,11 +109,11 @@ export default function Provide({
         amountToken1InWei,
       );
       await txn.wait();
-      setAmountOfToken0("");
-      setAmountOfToken1("");
+      setAmountOfToken0('');
+      setAmountOfToken1('');
       checkLiquidity(); // プールの状態を確認
       updateDetails(); // ユーザとammの情報を更新
-      alert("Success");
+      alert('Success');
     } catch (error) {
       alert(error);
     }
@@ -122,8 +122,8 @@ export default function Provide({
   return (
     <div className={styles.tabBody}>
       <InputNumberBox
-        leftHeader={"Amount of " + (token0 ? token0.symbol : "some token")}
-        right={token0 ? token0.symbol : ""}
+        leftHeader={'Amount of ' + (token0 ? token0.symbol : 'some token')}
+        right={token0 ? token0.symbol : ''}
         value={amountOfToken0}
         onChange={(e) =>
           onChangeAmount(
@@ -138,8 +138,8 @@ export default function Provide({
         <MdAdd />
       </div>
       <InputNumberBox
-        leftHeader={"Amount of " + (token1 ? token1.symbol : "some token")}
-        right={token1 ? token1.symbol : ""}
+        leftHeader={'Amount of ' + (token1 ? token1.symbol : 'some token')}
+        right={token1 ? token1.symbol : ''}
         value={amountOfToken1}
         onChange={(e) =>
           onChangeAmount(
